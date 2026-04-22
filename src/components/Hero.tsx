@@ -40,7 +40,7 @@ export const Hero = () => {
                 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.15 }}
                 className="display mt-8 text-5xl sm:text-6xl lg:text-7xl xl:text-[5.5rem]"
               >
-                Dein Preis.<br />Unsere Passion.
+                Dein Preis.<br />Dein Preis.<br />Unsere Passion.
               </motion.h1>
 
               <motion.p
