@@ -11,6 +11,7 @@ const navItems = [
 ];
 
 export const Hero = () => {
+  const { open } = useRegionModal();
   return (
     <section className="p-3 sm:p-5">
       <div className="relative overflow-hidden rounded-[2rem] bg-ink text-ink-foreground">
