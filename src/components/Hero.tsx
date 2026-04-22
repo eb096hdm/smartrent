@@ -40,14 +40,14 @@ export const Hero = () => {
                 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.15 }}
                 className="display mt-8 text-5xl sm:text-6xl lg:text-7xl xl:text-[5.5rem]"
               >
-                Ihr verlässlicher Partner für hochwertige Wohnraum­modernisierung
+                Verständlich.<br />Dein Preis.<br />Unsere Passion.
               </motion.h1>
 
               <motion.p
                 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }}
                 className="mt-8 max-w-md text-base text-white/70"
               >
-                SmartRent liefert erstklassige Renovierungen und schafft schöne, funktionale Räume mit sorgfältiger Handwerkskunst.
+                SmartRent liefert die erste erklärbare Pricing-KI für Vermieter:innen im DACH-Raum.
               </motion.p>
             </div>
 
