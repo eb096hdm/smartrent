@@ -40,7 +40,7 @@ export const Hero = () => {
                 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.15 }}
                 className="display mt-8 text-5xl sm:text-6xl lg:text-7xl xl:text-[5.5rem]"
               >
-                Verständlich.<br />Dein Preis.<br />Unsere Passion.
+                Dein Preis.<br />Unsere Passion.
               </motion.h1>
 
               <motion.p
@@ -56,7 +56,7 @@ export const Hero = () => {
               className="mt-10"
             >
               <a href="#contact" className="group inline-flex items-center gap-3 rounded-full bg-white text-ink pl-6 pr-2 py-2 text-sm font-medium transition-all duration-300 hover:gap-4">
-                Mit uns arbeiten
+                Jetzt Preis festlegen
                 <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white transition-transform duration-300 group-hover:rotate-45">
                   <ArrowUpRight className="h-4 w-4" />
                 </span>
