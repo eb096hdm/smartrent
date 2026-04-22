@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import { RegionModalProvider } from "@/components/region/RegionModalContext";
+import { RegionSelectorModal } from "@/components/region/RegionSelectorModal";
 
 const queryClient = new QueryClient();
 
@@ -14,11 +16,14 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <RegionModalProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <RegionSelectorModal />
+        </RegionModalProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
