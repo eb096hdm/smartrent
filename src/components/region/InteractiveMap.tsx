@@ -116,9 +116,6 @@ export const InteractiveMap = ({ country }: Props) => {
         zoomControl={false}
         attributionControl={false}
         style={{ width: "100%", height: "100%", background: "hsl(var(--card))" }}
-        whenCreated={(m) => {
-          mapRef.current = m;
-        }}
       >
         <MapRefBinder mapRef={mapRef} />
         <TileLayer
