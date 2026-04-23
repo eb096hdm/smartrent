@@ -1,34 +1,34 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
-import type { RegionCategoryId } from "./regionData";
+import type { CountryCode } from "./regionData";
 
 interface RegionModalContextValue {
   isOpen: boolean;
-  selectedCategory: RegionCategoryId | null;
-  open: (category?: RegionCategoryId) => void;
+  selectedCountry: CountryCode | null;
+  open: (country?: CountryCode) => void;
   close: () => void;
-  setCategory: (category: RegionCategoryId | null) => void;
+  setCountry: (country: CountryCode | null) => void;
 }
 
 const RegionModalContext = createContext<RegionModalContextValue | null>(null);
 
 export const RegionModalProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<RegionCategoryId | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<CountryCode | null>(null);
 
-  const open = useCallback((category?: RegionCategoryId) => {
-    if (category) setSelectedCategory(category);
+  const open = useCallback((country?: CountryCode) => {
+    if (country) setSelectedCountry(country);
     setIsOpen(true);
   }, []);
 
   const close = useCallback(() => {
     setIsOpen(false);
-    // Reset state slightly delayed so close animation can finish smoothly
-    setTimeout(() => setSelectedCategory(null), 250);
+    // Reset slightly delayed so the close animation can finish smoothly
+    setTimeout(() => setSelectedCountry(null), 250);
   }, []);
 
   const value = useMemo(
-    () => ({ isOpen, selectedCategory, open, close, setCategory: setSelectedCategory }),
-    [isOpen, selectedCategory, open, close],
+    () => ({ isOpen, selectedCountry, open, close, setCountry: setSelectedCountry }),
+    [isOpen, selectedCountry, open, close],
   );
 
   return <RegionModalContext.Provider value={value}>{children}</RegionModalContext.Provider>;

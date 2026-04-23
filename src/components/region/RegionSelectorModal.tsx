@@ -12,7 +12,7 @@ import { RegionSelector } from "./RegionSelector";
  * - Traps focus inside the dialog.
  */
 export const RegionSelectorModal = () => {
-  const { isOpen, close, selectedCategory, setCategory } = useRegionModal();
+  const { isOpen, close, selectedCountry, setCountry } = useRegionModal();
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -32,7 +32,6 @@ export const RegionSelectorModal = () => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") close();
       if (e.key === "Tab" && dialogRef.current) {
-        // Simple focus trap.
         const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
           'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
         );
@@ -49,7 +48,6 @@ export const RegionSelectorModal = () => {
       }
     };
     document.addEventListener("keydown", onKeyDown);
-    // Defer focus until after animation starts
     const t = window.setTimeout(() => closeBtnRef.current?.focus(), 50);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
@@ -99,8 +97,8 @@ export const RegionSelectorModal = () => {
               <X className="h-4 w-4" />
             </button>
             <RegionSelector
-              selectedCategory={selectedCategory}
-              onSelectCategory={setCategory}
+              selectedCountry={selectedCountry}
+              onSelectCountry={setCountry}
             />
           </motion.div>
         </motion.div>

@@ -1,69 +1,82 @@
-// Data definitions for the region selector modal.
-// Country codes use ISO 3166-1 alpha-3 to match the geo dataset used by react-simple-maps.
+// Country configuration for the region selector modal.
+// Each entry represents one selectable country card and the map it loads.
 
-export type RegionCategoryId = "marketing" | "business" | "innovation";
+export type CountryCode = "DE" | "AT" | "CH";
 
-export interface RegionInfo {
-  code: string; // ISO alpha-3
+export interface CountryConfig {
+  code: CountryCode;
   name: string;
-  language: string;
+  flag: string;
+  label: string;
+  description: string;
+  // Leaflet map setup
+  center: [number, number];
+  zoom: number;
+  bounds: [[number, number], [number, number]];
+  geoJsonUrl: string;
+  // Sub-region terminology
+  regionTermSingular: string;
+  regionTermPlural: string;
+  // Optional accent (HSL) used for region hover highlight
+  accentHsl: string;
   contact: string;
   href: string;
 }
 
-export interface RegionCategory {
-  id: RegionCategoryId;
-  label: string;
-  title: string;
-  description: string;
-  regions: RegionInfo[];
-}
+export const COUNTRIES: Record<CountryCode, CountryConfig> = {
+  DE: {
+    code: "DE",
+    name: "Deutschland",
+    flag: "🇩🇪",
+    label: "DACH-Region",
+    description: "Entdecke unsere Lösungen und Preise für den deutschen Markt.",
+    center: [51.1657, 10.4515],
+    zoom: 6,
+    bounds: [[47.27, 5.87], [55.06, 15.04]],
+    geoJsonUrl: "/maps/germany-states.geojson",
+    regionTermSingular: "Bundesland",
+    regionTermPlural: "Bundesländer",
+    accentHsl: "217 91% 60%",
+    contact: "kontakt.de@smartrent.com",
+    href: "/pricing/de",
+  },
+  AT: {
+    code: "AT",
+    name: "Österreich",
+    flag: "🇦🇹",
+    label: "DACH-Region",
+    description: "Maßgeschneiderte Angebote für österreichische Unternehmen.",
+    center: [47.5162, 14.5501],
+    zoom: 7,
+    bounds: [[46.37, 9.53], [49.02, 17.16]],
+    geoJsonUrl: "/maps/austria-states.geojson",
+    regionTermSingular: "Bundesland",
+    regionTermPlural: "Bundesländer",
+    accentHsl: "0 72% 55%",
+    contact: "kontakt.at@smartrent.com",
+    href: "/pricing/at",
+  },
+  CH: {
+    code: "CH",
+    name: "Schweiz",
+    flag: "🇨🇭",
+    label: "DACH-Region",
+    description: "Lokale Lösungen und Preise für den Schweizer Markt.",
+    center: [46.8182, 8.2275],
+    zoom: 8,
+    bounds: [[45.82, 5.96], [47.81, 10.49]],
+    geoJsonUrl: "/maps/switzerland-cantons.geojson",
+    regionTermSingular: "Kanton",
+    regionTermPlural: "Kantone",
+    accentHsl: "0 72% 50%",
+    contact: "kontakt.ch@smartrent.com",
+    href: "/pricing/ch",
+  },
+};
 
-export const REGION_CATEGORIES: RegionCategory[] = [
-  {
-    id: "marketing",
-    label: "Marketing",
-    title: "Innovative Marketing-Strategien für Vermieter:innen",
-    description:
-      "Datengetriebene Pricing-Insights, die deine Vermarktung verbessern und Leerstand minimieren.",
-    regions: [
-      { code: "DEU", name: "Deutschland", language: "Deutsch", contact: "marketing.de@smartrent.com", href: "/pricing/de" },
-      { code: "AUT", name: "Österreich", language: "Deutsch", contact: "marketing.at@smartrent.com", href: "/pricing/at" },
-      { code: "CHE", name: "Schweiz", language: "Deutsch / Französisch", contact: "marketing.ch@smartrent.com", href: "/pricing/ch" },
-      { code: "USA", name: "United States", language: "English", contact: "marketing.us@smartrent.com", href: "/pricing/us" },
-      { code: "GBR", name: "United Kingdom", language: "English", contact: "marketing.uk@smartrent.com", href: "/pricing/uk" },
-    ],
-  },
-  {
-    id: "business",
-    label: "Business",
-    title: "Skalierbare Business-Lösungen für Portfolios",
-    description:
-      "Von Einzelobjekt bis Großportfolio – transparente Pricing-KI für professionelle Vermieter:innen.",
-    regions: [
-      { code: "DEU", name: "Deutschland", language: "Deutsch", contact: "business.de@smartrent.com", href: "/pricing/de" },
-      { code: "AUT", name: "Österreich", language: "Deutsch", contact: "business.at@smartrent.com", href: "/pricing/at" },
-      { code: "CHE", name: "Schweiz", language: "Deutsch / Französisch", contact: "business.ch@smartrent.com", href: "/pricing/ch" },
-      { code: "FRA", name: "France", language: "Français", contact: "business.fr@smartrent.com", href: "/pricing/fr" },
-      { code: "ITA", name: "Italia", language: "Italiano", contact: "business.it@smartrent.com", href: "/pricing/it" },
-      { code: "ESP", name: "España", language: "Español", contact: "business.es@smartrent.com", href: "/pricing/es" },
-    ],
-  },
-  {
-    id: "innovation",
-    label: "Innovation",
-    title: "KI-Innovation für die Immobilienbranche",
-    description:
-      "Erklärbare KI-Modelle, die in den fortschrittlichsten Märkten weltweit eingesetzt werden.",
-    regions: [
-      { code: "USA", name: "United States", language: "English", contact: "innovation.us@smartrent.com", href: "/pricing/us" },
-      { code: "GBR", name: "United Kingdom", language: "English", contact: "innovation.uk@smartrent.com", href: "/pricing/uk" },
-      { code: "DEU", name: "Deutschland", language: "Deutsch", contact: "innovation.de@smartrent.com", href: "/pricing/de" },
-      { code: "JPN", name: "Japan", language: "日本語", contact: "innovation.jp@smartrent.com", href: "/pricing/jp" },
-      { code: "SGP", name: "Singapore", language: "English", contact: "innovation.sg@smartrent.com", href: "/pricing/sg" },
-    ],
-  },
-];
+export const COUNTRY_LIST: CountryConfig[] = [COUNTRIES.DE, COUNTRIES.AT, COUNTRIES.CH];
 
-export const getCategory = (id: RegionCategoryId | null) =>
-  REGION_CATEGORIES.find((c) => c.id === id) ?? null;
+export const isCountryCode = (v: string | null | undefined): v is CountryCode =>
+  v === "DE" || v === "AT" || v === "CH";
+
+export const getCountry = (code: CountryCode | null) => (code ? COUNTRIES[code] : null);

@@ -1,37 +1,38 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import type { RegionCategory } from "./regionData";
+import type { CountryConfig } from "./regionData";
 
 interface Props {
-  category: RegionCategory;
-  onSelect: (id: RegionCategory["id"]) => void;
+  country: CountryConfig;
+  onSelect: (code: CountryConfig["code"]) => void;
 }
 
-/** Single region category card shown in the initial grid view. */
-export const RegionCard = ({ category, onSelect }: Props) => {
+/** Single country card shown in the initial grid view. */
+export const RegionCard = ({ country, onSelect }: Props) => {
   return (
     <motion.button
-      layoutId={`region-card-${category.id}`}
-      onClick={() => onSelect(category.id)}
+      layoutId={`region-card-${country.code}`}
+      onClick={() => onSelect(country.code)}
       whileHover={{ y: -4 }}
       transition={{ type: "spring", stiffness: 300, damping: 24 }}
       className="group relative flex min-h-[320px] flex-col justify-between rounded-2xl bg-muted p-8 text-left shadow-sm transition-shadow duration-300 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
-      aria-label={`Region für ${category.label} auswählen`}
+      aria-label={`Region ${country.name} auswählen`}
     >
       <div>
         <motion.span
-          layoutId={`region-label-${category.id}`}
+          layoutId={`region-label-${country.code}`}
           className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
         >
-          {category.label}
+          {country.label}
         </motion.span>
         <motion.h3
-          layoutId={`region-title-${category.id}`}
-          className="mt-4 text-2xl font-medium tracking-tight text-foreground"
+          layoutId={`region-title-${country.code}`}
+          className="mt-4 flex items-center gap-3 text-2xl font-medium tracking-tight text-foreground"
         >
-          {category.title}
+          <span aria-hidden className="text-3xl leading-none">{country.flag}</span>
+          {country.name}
         </motion.h3>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{category.description}</p>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{country.description}</p>
       </div>
       <span className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-foreground">
         <span className="border-b border-foreground pb-0.5">Read more</span>
