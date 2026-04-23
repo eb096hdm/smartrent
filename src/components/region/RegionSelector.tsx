@@ -1,30 +1,25 @@
-import { Suspense, lazy, useState } from "react";
+import { Suspense, lazy } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { REGION_CATEGORIES, getCategory, type RegionCategoryId, type RegionInfo } from "./regionData";
+import { COUNTRY_LIST, getCountry, type CountryCode } from "./regionData";
 import { RegionCard } from "./RegionCard";
-import { RegionDetails } from "./RegionDetails";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Map is lazy-loaded — react-simple-maps + topojson is a sizeable bundle.
+// Map is lazy-loaded — leaflet + GeoJSON parsing is a sizeable bundle.
 const InteractiveMap = lazy(() =>
   import("./InteractiveMap").then((m) => ({ default: m.InteractiveMap })),
 );
 
 interface Props {
-  selectedCategory: RegionCategoryId | null;
-  onSelectCategory: (id: RegionCategoryId | null) => void;
+  selectedCountry: CountryCode | null;
+  onSelectCountry: (code: CountryCode | null) => void;
 }
 
-/** Main content of the modal: grid of cards or expanded category with map. */
-export const RegionSelector = ({ selectedCategory, onSelectCategory }: Props) => {
-  const [selectedRegion, setSelectedRegion] = useState<RegionInfo | null>(null);
-  const expanded = getCategory(selectedCategory);
+/** Main content of the modal: grid of country cards or expanded map. */
+export const RegionSelector = ({ selectedCountry, onSelectCountry }: Props) => {
+  const expanded = getCountry(selectedCountry);
 
-  const goBack = () => {
-    setSelectedRegion(null);
-    onSelectCategory(null);
-  };
+  const goBack = () => onSelectCountry(null);
 
   return (
     <div className="flex h-full flex-col">
@@ -70,85 +65,42 @@ export const RegionSelector = ({ selectedCategory, onSelectCategory }: Props) =>
               transition={{ duration: 0.25 }}
               className="grid gap-6 p-8 md:grid-cols-3"
             >
-              {REGION_CATEGORIES.map((cat) => (
-                <RegionCard key={cat.id} category={cat} onSelect={onSelectCategory} />
+              {COUNTRY_LIST.map((c) => (
+                <RegionCard key={c.code} country={c} onSelect={onSelectCountry} />
               ))}
             </motion.div>
           )}
 
           {expanded && (
             <motion.div
-              key={`expanded-${expanded.id}`}
-              layoutId={`region-card-${expanded.id}`}
+              key={`expanded-${expanded.code}`}
+              layoutId={`region-card-${expanded.code}`}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="m-8 overflow-hidden rounded-2xl bg-muted p-8"
             >
               <div className="flex flex-col gap-2">
                 <motion.span
-                  layoutId={`region-label-${expanded.id}`}
+                  layoutId={`region-label-${expanded.code}`}
                   className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
                 >
                   {expanded.label}
                 </motion.span>
                 <motion.h3
-                  layoutId={`region-title-${expanded.id}`}
-                  className="text-3xl font-medium tracking-tight text-foreground"
+                  layoutId={`region-title-${expanded.code}`}
+                  className="flex items-center gap-3 text-3xl font-medium tracking-tight text-foreground"
                 >
-                  {expanded.title}
+                  <span aria-hidden className="text-4xl leading-none">{expanded.flag}</span>
+                  {expanded.name}
                 </motion.h3>
-                <p className="max-w-2xl text-sm text-muted-foreground">{expanded.description}</p>
+                <p className="max-w-2xl text-sm text-muted-foreground">
+                  Wähle dein {expanded.regionTermSingular}, um lokale Pakete und Preise anzuzeigen.
+                </p>
               </div>
 
-              <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
-                <div className="h-[420px] overflow-hidden rounded-xl bg-card">
-                  <Suspense fallback={<Skeleton className="h-full w-full" />}>
-                    <InteractiveMap
-                      availableRegions={expanded.regions}
-                      selectedRegion={selectedRegion}
-                      onSelectRegion={setSelectedRegion}
-                    />
-                  </Suspense>
-                </div>
-
-                <div className="flex flex-col gap-4">
-                  <div className="rounded-xl border border-border bg-card p-6">
-                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Verfügbare Regionen
-                    </p>
-                    <ul className="mt-3 flex flex-wrap gap-2">
-                      {expanded.regions.map((r) => (
-                        <li key={r.code}>
-                          <button
-                            onClick={() => setSelectedRegion(r)}
-                            className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-                              selectedRegion?.code === r.code
-                                ? "border-foreground bg-foreground text-background"
-                                : "border-border text-foreground hover:bg-muted"
-                            }`}
-                          >
-                            {r.name}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <AnimatePresence mode="wait">
-                    {selectedRegion ? (
-                      <RegionDetails region={selectedRegion} />
-                    ) : (
-                      <motion.p
-                        key="hint"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="rounded-xl border border-dashed border-border p-6 text-sm text-muted-foreground"
-                      >
-                        Wähle eine Region auf der Karte, um Details zu sehen.
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
-                </div>
+              <div className="mt-6 h-[480px] overflow-hidden rounded-xl bg-card">
+                <Suspense fallback={<Skeleton className="h-full w-full" />}>
+                  <InteractiveMap country={expanded} />
+                </Suspense>
               </div>
             </motion.div>
           )}
