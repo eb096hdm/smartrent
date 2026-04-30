@@ -26,17 +26,16 @@ const PLZ_ZOOM = 11;
 
 const MAKE_WEBHOOK_URL = "";
 
-type MonthRecommendation = {
-  monat: string;
+type DayRecommendation = {
+  datum: string; // ISO yyyy-MM-dd
   empfohlener_preis: number;
-  auslastung: number;
-  event: string;
+  auslastung: number; // 0-100
+  status: "good" | "event" | "low";
+  event?: string;
+  reason?: string;
 };
 
-const MONTHS = [
-  "Januar", "Februar", "März", "April", "Mai", "Juni",
-  "Juli", "August", "September", "Oktober", "November", "Dezember",
-];
+type Ansicht = "woche" | "monat";
 
 const ART_OPTIONS = ["Wohnung", "Haus", "Zimmer"] as const;
 type ArtOption = (typeof ART_OPTIONS)[number];
@@ -53,24 +52,38 @@ const BESONDERHEITEN_OPTIONS = [
   "Waschmaschine", "Klimaanlage", "Kamin",
 ] as const;
 
-const buildMockResponse = (): MonthRecommendation[] => {
-  const events: Record<string, string> = {
-    Februar: "Karneval",
-    Mai: "Maifeiertage",
-    September: "Oktoberfest",
-    Oktober: "Oktoberfest",
-    Dezember: "Weihnachtsmärkte",
-  };
-  return MONTHS.map((m, i) => {
-    const base = 70 + ((i * 13) % 70);
-    const occ = 55 + ((i * 7 + 3) % 38);
-    return {
-      monat: m,
-      empfohlener_preis: base,
+const buildMockResponse = (ansicht: Ansicht, basePrice: number): DayRecommendation[] => {
+  const days = ansicht === "woche" ? 7 : 30;
+  const today = new Date();
+  const reasons = [
+    "Solide Nachfrage am Standort",
+    "Wochenende — höhere Buchungsrate",
+    "Lokales Event in der Nähe",
+    "Schwächere Nachfrage werktags",
+    "Hohe Auslastung erwartet",
+  ];
+  const out: DayRecommendation[] = [];
+  for (let i = 0; i < days; i++) {
+    const d = addDays(today, i);
+    const dow = d.getDay();
+    const isWeekend = dow === 5 || dow === 6;
+    const seed = (i * 17 + 3) % 100;
+    const isEvent = seed > 85;
+    const isLow = !isWeekend && seed < 18;
+    const factor = isEvent ? 1.25 : isWeekend ? 1.1 : isLow ? 0.85 : 1;
+    const price = Math.round((basePrice || 90) * factor);
+    const occ = isEvent ? 88 + (seed % 10) : isWeekend ? 75 + (seed % 15) : isLow ? 35 + (seed % 15) : 60 + (seed % 20);
+    const status: DayRecommendation["status"] = isEvent ? "event" : isLow ? "low" : "good";
+    out.push({
+      datum: format(d, "yyyy-MM-dd"),
+      empfohlener_preis: price,
       auslastung: occ,
-      event: events[m] ?? "Kein besonderes Event",
-    };
-  });
+      status,
+      event: isEvent ? "Lokales Event" : undefined,
+      reason: reasons[(i + (isEvent ? 2 : isLow ? 3 : isWeekend ? 1 : 0)) % reasons.length],
+    });
+  }
+  return out;
 };
 
 const StaticMapBinder = ({ onReady }: { onReady: (m: LeafletMap) => void }) => {
