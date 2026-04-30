@@ -91,6 +91,7 @@ const Preise = () => {
   const [detailsError, setDetailsError] = useState<string | null>(null);
 
   const [results, setResults] = useState<MonthRecommendation[] | null>(null);
+  const [plzBoundary, setPlzBoundary] = useState<FeatureCollection | null>(null);
   const detailsRef = useRef<HTMLDivElement | null>(null);
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
