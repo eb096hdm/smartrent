@@ -17,7 +17,8 @@ const navItems = [
 ];
 
 const DE_CENTER: [number, number] = [51.1657, 10.4515];
-const DE_ZOOM = 6;
+const DE_ZOOM = 7;
+const PLZ_ZOOM = 11;
 
 // Replace this with the real Make.com webhook URL when ready.
 const MAKE_WEBHOOK_URL = "";
@@ -90,6 +91,7 @@ const Preise = () => {
   const [detailsError, setDetailsError] = useState<string | null>(null);
 
   const [results, setResults] = useState<MonthRecommendation[] | null>(null);
+  const [plzBoundary, setPlzBoundary] = useState<FeatureCollection | null>(null);
   const detailsRef = useRef<HTMLDivElement | null>(null);
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
@@ -116,7 +118,10 @@ const Preise = () => {
     }
     setPlzError(null);
 
-    // Try to resolve PLZ → coordinates and fly the map to that city.
+    // Clear any previous boundary outline before fetching the new one.
+    setPlzBoundary(null);
+
+    // Try to resolve PLZ → coordinates and fly the map to that area.
     try {
       const r = await fetch(`https://api.zippopotam.us/de/${plz}`);
       if (r.ok) {
@@ -125,20 +130,30 @@ const Preise = () => {
         if (place && mapRef.current) {
           const lat = parseFloat(place.latitude);
           const lng = parseFloat(place.longitude);
-          const map = mapRef.current;
-          const targetZoom = 12;
-          // Project the target latlng at the desired zoom, then shift it
-          // horizontally so the city appears in the right-middle of the
-          // viewport (left ~30% is occupied by the PLZ panel).
-          const point = map.project([lat, lng], targetZoom);
-          const size = map.getSize();
-          const offsetX = size.x * 0.25; // shift map center left → city moves right
-          const shifted = map.unproject([point.x - offsetX, point.y], targetZoom);
-          map.flyTo(shifted, targetZoom, { duration: 0.8, easeLinearity: 0.25 });
+          mapRef.current.flyTo([lat, lng], PLZ_ZOOM, { duration: 0.8, easeLinearity: 0.25 });
         }
       }
     } catch {
       // Silent — map simply stays at the Germany overview.
+    }
+
+    // Fetch boundary polygon for the postal code from Nominatim (OpenStreetMap).
+    // polygon_geojson=1 returns the actual area outline as GeoJSON geometry.
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&country=Germany&postalcode=${plz}&polygon_geojson=1&limit=1`;
+      const r = await fetch(url, { headers: { "Accept-Language": "de" } });
+      if (r.ok) {
+        const arr = await r.json();
+        const hit = Array.isArray(arr) ? arr[0] : null;
+        if (hit?.geojson) {
+          setPlzBoundary({
+            type: "FeatureCollection",
+            features: [{ type: "Feature", properties: { plz }, geometry: hit.geojson }],
+          });
+        }
+      }
+    } catch {
+      // Silent — outline simply not shown.
     }
 
     setStep("details");
@@ -219,11 +234,25 @@ const Preise = () => {
               interactive={false}
             />
           )}
+          {plzBoundary && (
+            <GeoJSON
+              key={plz}
+              data={plzBoundary}
+              style={{
+                color: "#ffffff",
+                weight: 2,
+                opacity: 0.6,
+                fillColor: "#ffffff",
+                fillOpacity: 0.07,
+              }}
+              interactive={false}
+            />
+          )}
         </MapContainer>
       </div>
 
       {/* Fixed dark overlay above the map for readability. */}
-      <div className="fixed inset-0 z-[1] bg-black/45 pointer-events-none" aria-hidden="true" />
+      <div className="fixed inset-0 z-[1] bg-black/25 pointer-events-none" aria-hidden="true" />
 
       {/* Content layer — scrolls naturally above the fixed map. */}
       <div className="relative z-[2]">
@@ -237,15 +266,15 @@ const Preise = () => {
           </nav>
         </div>
 
-        <div className="flex flex-col items-start gap-8 px-6 sm:px-10 lg:pl-16 py-16 min-h-screen">
+        <div className="flex flex-col items-center gap-8 px-4 sm:px-10 py-16 min-h-screen">
           {/* PLZ panel */}
           <motion.div
             layout
             animate={{ y: step === "plz" ? 0 : -8 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className={`w-full max-w-md ${step === "plz" ? "min-h-[calc(100vh-12rem)] flex items-center" : ""}`}
+            className={`w-full min-w-0 sm:min-w-[520px] max-w-[640px] ${step === "plz" ? "min-h-[calc(100vh-12rem)] flex items-center" : ""}`}
           >
-            <div className="w-full rounded-2xl border border-white/10 bg-black/65 backdrop-blur-md p-8 shadow-2xl">
+            <div className="w-full rounded-2xl border border-white/10 bg-black/50 p-8 shadow-2xl [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
               <h1 className="display text-3xl sm:text-4xl text-white">
                 Wo befindet sich dein Objekt?
               </h1>
@@ -303,11 +332,11 @@ const Preise = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 12 }}
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="w-full max-w-md"
+                className="w-full min-w-0 sm:min-w-[520px] max-w-[640px]"
               >
                 <form
                   onSubmit={handleDetailsSubmit}
-                  className="rounded-2xl border border-white/10 bg-black/65 backdrop-blur-md p-8 shadow-2xl"
+                  className="rounded-2xl border border-white/10 bg-black/50 p-8 shadow-2xl [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]"
                 >
                   <h2 className="display text-2xl sm:text-3xl text-white">Dein Objekt im Detail</h2>
                   <p className="mt-2 text-sm text-white/70">Ein paar Eckdaten, dann berechnen wir deine Preisempfehlung.</p>
@@ -381,7 +410,7 @@ const Preise = () => {
             <div className="w-full max-w-6xl">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {Array.from({ length: 12 }).map((_, i) => (
-                  <div key={i} className="rounded-2xl border border-white/10 bg-black/55 backdrop-blur-md p-6 h-40 animate-pulse" />
+                  <div key={i} className="rounded-2xl border border-white/10 bg-black/50 p-6 h-40 animate-pulse [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]" />
                 ))}
               </div>
             </div>
@@ -409,7 +438,7 @@ const Preise = () => {
                   {results.map((r) => (
                     <article
                       key={r.monat}
-                      className="rounded-2xl border border-white/10 bg-black/65 backdrop-blur-md p-6 transition-all duration-300 hover:border-white/25 hover:-translate-y-0.5"
+                      className="rounded-2xl border border-white/10 bg-black/50 p-6 transition-all duration-300 hover:border-white/25 hover:-translate-y-0.5 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]"
                     >
                       <h3 className="text-xl font-medium text-white">{r.monat}</h3>
                       <p className="mt-3 text-2xl font-semibold text-white">
@@ -425,7 +454,7 @@ const Preise = () => {
                   ))}
                 </div>
 
-                <div className="mt-10 rounded-2xl border border-white/10 bg-black/65 backdrop-blur-md p-8">
+                <div className="mt-10 rounded-2xl border border-white/10 bg-black/50 p-8 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
                   <h3 className="text-xl font-medium text-white">Warum empfehlen wir diese Preise?</h3>
                   <p className="mt-3 text-sm text-white/70">
                     In Kürze erklärt dir unsere KI im Detail, wie Standortdaten, saisonale
