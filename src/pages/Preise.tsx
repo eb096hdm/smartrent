@@ -222,10 +222,17 @@ const Preise = () => {
           style={{ width: "100%", height: "100%", background: "hsl(var(--ink))" }}
         >
           <StaticMapBinder onReady={(m) => { mapRef.current = m; }} />
-          {/* Dark tiles WITH labels — districts/neighborhoods reveal as zoom increases. */}
+          {/* Base: dark map WITHOUT any labels — keeps the initial view calm. */}
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
+            url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
             subdomains="abcd"
+          />
+          {/* Label overlay: only kicks in once the user zooms past Bundesland clutter
+              (after PLZ flyTo to ~zoom 12). Below zoom 9 it stays hidden. */}
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png"
+            subdomains="abcd"
+            minZoom={9}
           />
           {geo && (
             <GeoJSON
@@ -239,6 +246,8 @@ const Preise = () => {
               interactive={false}
             />
           )}
+          {/* Custom capital labels — only visible at the initial zoomed-out view. */}
+          <CapitalLabels />
         </MapContainer>
       </div>
 
