@@ -504,37 +504,38 @@ const Preise = () => {
                           <p className="mt-2 text-sm text-white/70">Je mehr Details, desto genauer deine Preisempfehlung.</p>
 
                           <div className="mt-6 space-y-6">
-                            {/* Zeitrahmen */}
+                            {/* Ansicht */}
                             <div>
-                              <label className={labelCls}>Für welchen Zeitraum brauchst du Preise?</label>
-                              <div className="mt-2 flex flex-wrap gap-2">
-                                <PillButton active={zeitrahmen === "einzelne_tage"} onClick={() => setZeitrahmen("einzelne_tage")}>Einzelne Tage</PillButton>
-                                <PillButton active={zeitrahmen === "blockbuchung"} onClick={() => setZeitrahmen("blockbuchung")}>Blockbuchung (7+ Tage)</PillButton>
+                              <label className={labelCls}>Wie möchtest du deine Preisübersicht sehen?</label>
+                              <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {([
+                                  { value: "woche" as const, title: "Wochenübersicht", sub: "7 Tage im Detail" },
+                                  { value: "monat" as const, title: "Monatsübersicht", sub: "30 Tage auf einen Blick" },
+                                ]).map((opt) => {
+                                  const active = ansicht === opt.value;
+                                  return (
+                                    <button
+                                      type="button"
+                                      key={opt.value}
+                                      onClick={() => setAnsicht(opt.value)}
+                                      className={cn(
+                                        "rounded-2xl px-5 py-4 text-left transition-all",
+                                        active
+                                          ? "border border-white bg-white/[0.08]"
+                                          : "border border-white/20 hover:border-white/40",
+                                      )}
+                                    >
+                                      <div className="text-sm font-medium text-white">{opt.title}</div>
+                                      <div className="mt-1 text-xs text-white/60">{opt.sub}</div>
+                                    </button>
+                                  );
+                                })}
                               </div>
-
-                              {zeitrahmen === "einzelne_tage" && (
-                                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                  <DateField label="Check-in" value={datumVon} onChange={setDatumVon} />
-                                  <DateField label="Check-out" value={datumBis} onChange={setDatumBis} disabled={(d) => !!datumVon && d < datumVon} />
-                                </div>
-                              )}
-                              {zeitrahmen === "blockbuchung" && (
-                                <div className="mt-4">
-                                  <label htmlFor="mindest" className={labelCls}>Mindestaufenthalt (Nächte)</label>
-                                  <input
-                                    id="mindest"
-                                    inputMode="numeric"
-                                    min={1}
-                                    value={mindestaufenthalt}
-                                    onChange={(e) => {
-                                      const v = e.target.value.replace(/\D/g, "");
-                                      setMindestaufenthalt(v === "" ? "" : Number(v));
-                                    }}
-                                    placeholder="z.B. 7"
-                                    className={inputCls}
-                                  />
-                                </div>
-                              )}
+                              <p className="mt-3 text-xs text-white/60">
+                                {ansicht === "woche"
+                                  ? "→ Du siehst 7 einzelne Tage mit Tagespreisen"
+                                  : "→ Du siehst alle 30 Tage als Kalender-Grid mit Farbkodierung"}
+                              </p>
                             </div>
 
                             {/* Plattformen */}
