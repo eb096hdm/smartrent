@@ -9,8 +9,6 @@ import type { Map as LeafletMap } from "leaflet";
 type FeatureCollection = any;
 import "leaflet/dist/leaflet.css";
 import { Footer } from "@/components/Footer";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
