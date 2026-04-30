@@ -128,6 +128,8 @@ const CapitalLabels = () => {
   );
 };
 
+type Step = "plz" | "details" | "loading" | "results" | "error";
+
 const Preise = () => {
   const [geo, setGeo] = useState<FeatureCollection | null>(null);
   const [step, setStep] = useState<Step>("plz");
