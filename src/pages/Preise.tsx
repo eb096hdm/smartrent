@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUpRight, Loader2, CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { ArrowUpRight, Loader2 } from "lucide-react";
+import { format, addDays } from "date-fns";
 import { de } from "date-fns/locale";
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import type { Map as LeafletMap } from "leaflet";
@@ -9,8 +9,6 @@ import type { Map as LeafletMap } from "leaflet";
 type FeatureCollection = any;
 import "leaflet/dist/leaflet.css";
 import { Footer } from "@/components/Footer";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
@@ -28,17 +26,16 @@ const PLZ_ZOOM = 11;
 
 const MAKE_WEBHOOK_URL = "";
 
-type MonthRecommendation = {
-  monat: string;
+type DayRecommendation = {
+  datum: string; // ISO yyyy-MM-dd
   empfohlener_preis: number;
-  auslastung: number;
-  event: string;
+  auslastung: number; // 0-100
+  status: "good" | "event" | "low";
+  event?: string;
+  reason?: string;
 };
 
-const MONTHS = [
-  "Januar", "Februar", "März", "April", "Mai", "Juni",
-  "Juli", "August", "September", "Oktober", "November", "Dezember",
-];
+type Ansicht = "woche" | "monat";
 
 const ART_OPTIONS = ["Wohnung", "Haus", "Zimmer"] as const;
 type ArtOption = (typeof ART_OPTIONS)[number];
@@ -55,24 +52,38 @@ const BESONDERHEITEN_OPTIONS = [
   "Waschmaschine", "Klimaanlage", "Kamin",
 ] as const;
 
-const buildMockResponse = (): MonthRecommendation[] => {
-  const events: Record<string, string> = {
-    Februar: "Karneval",
-    Mai: "Maifeiertage",
-    September: "Oktoberfest",
-    Oktober: "Oktoberfest",
-    Dezember: "Weihnachtsmärkte",
-  };
-  return MONTHS.map((m, i) => {
-    const base = 70 + ((i * 13) % 70);
-    const occ = 55 + ((i * 7 + 3) % 38);
-    return {
-      monat: m,
-      empfohlener_preis: base,
+const buildMockResponse = (ansicht: Ansicht, basePrice: number): DayRecommendation[] => {
+  const days = ansicht === "woche" ? 7 : 30;
+  const today = new Date();
+  const reasons = [
+    "Solide Nachfrage am Standort",
+    "Wochenende — höhere Buchungsrate",
+    "Lokales Event in der Nähe",
+    "Schwächere Nachfrage werktags",
+    "Hohe Auslastung erwartet",
+  ];
+  const out: DayRecommendation[] = [];
+  for (let i = 0; i < days; i++) {
+    const d = addDays(today, i);
+    const dow = d.getDay();
+    const isWeekend = dow === 5 || dow === 6;
+    const seed = (i * 17 + 3) % 100;
+    const isEvent = seed > 85;
+    const isLow = !isWeekend && seed < 18;
+    const factor = isEvent ? 1.25 : isWeekend ? 1.1 : isLow ? 0.85 : 1;
+    const price = Math.round((basePrice || 90) * factor);
+    const occ = isEvent ? 88 + (seed % 10) : isWeekend ? 75 + (seed % 15) : isLow ? 35 + (seed % 15) : 60 + (seed % 20);
+    const status: DayRecommendation["status"] = isEvent ? "event" : isLow ? "low" : "good";
+    out.push({
+      datum: format(d, "yyyy-MM-dd"),
+      empfohlener_preis: price,
       auslastung: occ,
-      event: events[m] ?? "Kein besonderes Event",
-    };
-  });
+      status,
+      event: isEvent ? "Lokales Event" : undefined,
+      reason: reasons[(i + (isEvent ? 2 : isLow ? 3 : isWeekend ? 1 : 0)) % reasons.length],
+    });
+  }
+  return out;
 };
 
 const StaticMapBinder = ({ onReady }: { onReady: (m: LeafletMap) => void }) => {
@@ -114,10 +125,7 @@ const Preise = () => {
   const [aktuellerPreis, setAktuellerPreis] = useState<number | "">("");
 
   // Step 2 fields
-  const [zeitrahmen, setZeitrahmen] = useState<"einzelne_tage" | "blockbuchung" | null>(null);
-  const [datumVon, setDatumVon] = useState<Date | undefined>();
-  const [datumBis, setDatumBis] = useState<Date | undefined>();
-  const [mindestaufenthalt, setMindestaufenthalt] = useState<number | "">("");
+  const [ansicht, setAnsicht] = useState<Ansicht>("monat");
   const [plattformen, setPlattformen] = useState<string[]>([]);
   const [aktualitaetspruefung, setAktualitaetspruefung] = useState(true);
   const [besonderheiten, setBesonderheiten] = useState<string[]>([]);
@@ -125,7 +133,9 @@ const Preise = () => {
   const [step1Error, setStep1Error] = useState<string | null>(null);
   const [step2Error, setStep2Error] = useState<string | null>(null);
 
-  const [results, setResults] = useState<MonthRecommendation[] | null>(null);
+  const [results, setResults] = useState<DayRecommendation[] | null>(null);
+  const [resultsAnsicht, setResultsAnsicht] = useState<Ansicht>("monat");
+  const [expandedDay, setExpandedDay] = useState<string | null>(null);
   const [plzBoundary, setPlzBoundary] = useState<FeatureCollection | null>(null);
   const detailsRef = useRef<HTMLDivElement | null>(null);
   const resultsRef = useRef<HTMLDivElement | null>(null);
@@ -207,13 +217,6 @@ const Preise = () => {
   const handleFinalSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setStep2Error(null);
-    if (!zeitrahmen) return setStep2Error("Bitte wähle einen Zeitrahmen.");
-    if (zeitrahmen === "einzelne_tage" && (!datumVon || !datumBis)) {
-      return setStep2Error("Bitte wähle Check-in und Check-out Daten.");
-    }
-    if (zeitrahmen === "blockbuchung" && (!mindestaufenthalt || Number(mindestaufenthalt) < 1)) {
-      return setStep2Error("Bitte gib einen Mindestaufenthalt an.");
-    }
     if (plattformen.length === 0) return setStep2Error("Bitte wähle mindestens eine Plattform.");
 
     setStep("loading");
@@ -226,17 +229,14 @@ const Preise = () => {
       max_gaeste: maxGaeste,
       komfort,
       aktueller_preis: Number(aktuellerPreis),
-      zeitrahmen,
-      datum_von: datumVon ? format(datumVon, "yyyy-MM-dd") : null,
-      datum_bis: datumBis ? format(datumBis, "yyyy-MM-dd") : null,
-      mindestaufenthalt: zeitrahmen === "blockbuchung" ? Number(mindestaufenthalt) : null,
+      ansicht,
       plattformen,
       aktualitaetspruefung,
       besonderheiten,
     };
 
     try {
-      let data: MonthRecommendation[];
+      let data: DayRecommendation[];
       if (MAKE_WEBHOOK_URL) {
         const r = await fetch(MAKE_WEBHOOK_URL, {
           method: "POST",
@@ -244,12 +244,14 @@ const Preise = () => {
           body: JSON.stringify(payload),
         });
         if (!r.ok) throw new Error("Webhook error");
-        data = (await r.json()) as MonthRecommendation[];
+        data = (await r.json()) as DayRecommendation[];
       } else {
         await new Promise((res) => setTimeout(res, 900));
-        data = buildMockResponse();
+        data = buildMockResponse(ansicht, Number(aktuellerPreis) || 90);
       }
       setResults(data);
+      setResultsAnsicht(ansicht);
+      setExpandedDay(null);
       setStep("results");
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 200);
     } catch {
@@ -502,37 +504,38 @@ const Preise = () => {
                           <p className="mt-2 text-sm text-white/70">Je mehr Details, desto genauer deine Preisempfehlung.</p>
 
                           <div className="mt-6 space-y-6">
-                            {/* Zeitrahmen */}
+                            {/* Ansicht */}
                             <div>
-                              <label className={labelCls}>Für welchen Zeitraum brauchst du Preise?</label>
-                              <div className="mt-2 flex flex-wrap gap-2">
-                                <PillButton active={zeitrahmen === "einzelne_tage"} onClick={() => setZeitrahmen("einzelne_tage")}>Einzelne Tage</PillButton>
-                                <PillButton active={zeitrahmen === "blockbuchung"} onClick={() => setZeitrahmen("blockbuchung")}>Blockbuchung (7+ Tage)</PillButton>
+                              <label className={labelCls}>Wie möchtest du deine Preisübersicht sehen?</label>
+                              <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {([
+                                  { value: "woche" as const, title: "Wochenübersicht", sub: "7 Tage im Detail" },
+                                  { value: "monat" as const, title: "Monatsübersicht", sub: "30 Tage auf einen Blick" },
+                                ]).map((opt) => {
+                                  const active = ansicht === opt.value;
+                                  return (
+                                    <button
+                                      type="button"
+                                      key={opt.value}
+                                      onClick={() => setAnsicht(opt.value)}
+                                      className={cn(
+                                        "rounded-2xl px-5 py-4 text-left transition-all",
+                                        active
+                                          ? "border border-white bg-white/[0.08]"
+                                          : "border border-white/20 hover:border-white/40",
+                                      )}
+                                    >
+                                      <div className="text-sm font-medium text-white">{opt.title}</div>
+                                      <div className="mt-1 text-xs text-white/60">{opt.sub}</div>
+                                    </button>
+                                  );
+                                })}
                               </div>
-
-                              {zeitrahmen === "einzelne_tage" && (
-                                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                  <DateField label="Check-in" value={datumVon} onChange={setDatumVon} />
-                                  <DateField label="Check-out" value={datumBis} onChange={setDatumBis} disabled={(d) => !!datumVon && d < datumVon} />
-                                </div>
-                              )}
-                              {zeitrahmen === "blockbuchung" && (
-                                <div className="mt-4">
-                                  <label htmlFor="mindest" className={labelCls}>Mindestaufenthalt (Nächte)</label>
-                                  <input
-                                    id="mindest"
-                                    inputMode="numeric"
-                                    min={1}
-                                    value={mindestaufenthalt}
-                                    onChange={(e) => {
-                                      const v = e.target.value.replace(/\D/g, "");
-                                      setMindestaufenthalt(v === "" ? "" : Number(v));
-                                    }}
-                                    placeholder="z.B. 7"
-                                    className={inputCls}
-                                  />
-                                </div>
-                              )}
+                              <p className="mt-3 text-xs text-white/60">
+                                {ansicht === "woche"
+                                  ? "→ Du siehst 7 einzelne Tage mit Tagespreisen"
+                                  : "→ Du siehst alle 30 Tage als Kalender-Grid mit Farbkodierung"}
+                              </p>
                             </div>
 
                             {/* Plattformen */}
@@ -622,28 +625,27 @@ const Preise = () => {
                   Deine Preisempfehlung für {plz}
                 </h2>
                 <p className="mt-2 text-sm text-white/70">
-                  Monatliche Empfehlungen basierend auf Standort, Auslastung und lokalen Events.
+                  {resultsAnsicht === "monat"
+                    ? "30 Tage als Kalender-Grid mit Farbkodierung."
+                    : "7 Tage im Detail mit Empfehlung pro Tag."}
                 </p>
 
-                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {results.map((r) => (
-                    <article
-                      key={r.monat}
-                      className="rounded-2xl border border-white/10 bg-black/50 p-6 transition-all duration-300 hover:border-white/25 hover:-translate-y-0.5 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]"
-                    >
-                      <h3 className="text-xl font-medium text-white">{r.monat}</h3>
-                      <p className="mt-3 text-2xl font-semibold text-white">
-                        {r.empfohlener_preis} €<span className="text-sm font-normal text-white/60">/Nacht</span>
-                      </p>
-                      <p className="mt-1 text-xs text-white/60">Auslastung: {r.auslastung}%</p>
-                      {r.event && r.event !== "Kein besonderes Event" && (
-                        <span className="mt-4 inline-flex items-center rounded-full bg-gold/20 text-[hsl(var(--gold))] px-3 py-1 text-xs font-medium">
-                          {r.event}
-                        </span>
-                      )}
-                    </article>
-                  ))}
+                {/* Legend */}
+                <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-white/70">
+                  <LegendDot className="bg-emerald-400/80" label="Gute Auslastung" />
+                  <LegendDot className="bg-amber-400/80" label="Event in der Nähe" />
+                  <LegendDot className="bg-red-400/80" label="Schwache Nachfrage" />
                 </div>
+
+                {resultsAnsicht === "monat" ? (
+                  <MonthGrid
+                    days={results}
+                    expandedDay={expandedDay}
+                    onToggle={(d) => setExpandedDay((prev) => (prev === d ? null : d))}
+                  />
+                ) : (
+                  <WeekRow days={results} />
+                )}
 
                 <div className="mt-10 rounded-2xl border border-white/10 bg-black/50 p-8 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
                   <h3 className="text-xl font-medium text-white">Warum empfehlen wir diese Preise?</h3>
@@ -707,42 +709,6 @@ const PillButton = ({
   </button>
 );
 
-const DateField = ({
-  label, value, onChange, disabled,
-}: {
-  label: string;
-  value: Date | undefined;
-  onChange: (d: Date | undefined) => void;
-  disabled?: (d: Date) => boolean;
-}) => (
-  <div>
-    <label className="block text-xs font-medium text-white/80">{label}</label>
-    <Popover>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="mt-2 w-full inline-flex items-center justify-between rounded-full bg-white/10 border border-white/15 px-5 py-3 text-sm text-white hover:border-white/30 transition-colors"
-        >
-          <span className={cn(!value && "text-white/40")}>
-            {value ? format(value, "dd. MMM yyyy", { locale: de }) : "Datum wählen"}
-          </span>
-          <CalendarIcon className="h-4 w-4 text-white/60" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={value}
-          onSelect={onChange}
-          disabled={disabled}
-          initialFocus
-          className={cn("p-3 pointer-events-auto")}
-        />
-      </PopoverContent>
-    </Popover>
-  </div>
-);
-
 const NumberStepper = ({
   label, value, min, max, onChange, disabled,
 }: {
@@ -793,5 +759,139 @@ const NumberStepper = ({
     </div>
   );
 };
+
+const STATUS_BG: Record<DayRecommendation["status"], string> = {
+  good: "bg-emerald-400/15 border-emerald-400/40 hover:border-emerald-300/70",
+  event: "bg-amber-400/15 border-amber-400/40 hover:border-amber-300/70",
+  low: "bg-red-400/15 border-red-400/40 hover:border-red-300/70",
+};
+const STATUS_DOT: Record<DayRecommendation["status"], string> = {
+  good: "bg-emerald-400",
+  event: "bg-amber-400",
+  low: "bg-red-400",
+};
+const STATUS_LABEL: Record<DayRecommendation["status"], string> = {
+  good: "Gute Auslastung — Preis halten",
+  event: "Event in der Nähe — Preis erhöhen",
+  low: "Schwache Nachfrage — Preis senken",
+};
+
+const LegendDot = ({ className, label }: { className: string; label: string }) => (
+  <span className="inline-flex items-center gap-2">
+    <span className={cn("h-2.5 w-2.5 rounded-full", className)} />
+    {label}
+  </span>
+);
+
+const MonthGrid = ({
+  days, expandedDay, onToggle,
+}: {
+  days: DayRecommendation[];
+  expandedDay: string | null;
+  onToggle: (d: string) => void;
+}) => {
+  const expanded = useMemo(() => days.find((d) => d.datum === expandedDay) ?? null, [days, expandedDay]);
+  return (
+    <div className="mt-8">
+      <div className="rounded-2xl border border-white/10 bg-black/50 p-5 sm:p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
+        <div className="grid grid-cols-5 sm:grid-cols-7 lg:grid-cols-10 gap-2">
+          {days.map((d) => {
+            const date = new Date(d.datum);
+            const active = expandedDay === d.datum;
+            return (
+              <button
+                key={d.datum}
+                type="button"
+                onClick={() => onToggle(d.datum)}
+                className={cn(
+                  "rounded-lg border px-2 py-2 text-left transition-all",
+                  STATUS_BG[d.status],
+                  active && "ring-2 ring-white/70",
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-wide text-white/70">
+                    {format(date, "EE", { locale: de })}
+                  </span>
+                  <span className={cn("h-1.5 w-1.5 rounded-full", STATUS_DOT[d.status])} />
+                </div>
+                <div className="mt-0.5 text-sm font-medium text-white">{format(date, "dd.MM.")}</div>
+                <div className="mt-1 text-sm font-semibold text-white">{d.empfohlener_preis} €</div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            key={expanded.datum}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="mt-4 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]"
+          >
+            <div className="flex items-center gap-3">
+              <span className={cn("h-2.5 w-2.5 rounded-full", STATUS_DOT[expanded.status])} />
+              <h4 className="text-base font-medium text-white">
+                {format(new Date(expanded.datum), "EEEE, dd. MMMM yyyy", { locale: de })}
+              </h4>
+            </div>
+            <p className="mt-2 text-sm text-white/70">{STATUS_LABEL[expanded.status]}</p>
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+              <div>
+                <div className="text-xs text-white/60">Empfohlener Preis</div>
+                <div className="mt-1 text-lg font-semibold text-white">{expanded.empfohlener_preis} €</div>
+              </div>
+              <div>
+                <div className="text-xs text-white/60">Auslastung</div>
+                <div className="mt-1 text-lg font-semibold text-white">{expanded.auslastung}%</div>
+              </div>
+              <div>
+                <div className="text-xs text-white/60">Event</div>
+                <div className="mt-1 text-sm text-white/80">{expanded.event ?? "—"}</div>
+              </div>
+            </div>
+            <p className="mt-4 text-xs text-white/50">
+              Konkurrenzpreise und detaillierte Event-Daten folgen in Kürze.
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const WeekRow = ({ days }: { days: DayRecommendation[] }) => (
+  <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
+    {days.map((d) => {
+      const date = new Date(d.datum);
+      return (
+        <article
+          key={d.datum}
+          className={cn(
+            "rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-0.5 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)] bg-black/50",
+            STATUS_BG[d.status],
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase tracking-wide text-white/70">
+              {format(date, "EEEE", { locale: de })}
+            </span>
+            <span className={cn("h-2 w-2 rounded-full", STATUS_DOT[d.status])} />
+          </div>
+          <div className="mt-1 text-sm text-white/80">{format(date, "dd. MMM", { locale: de })}</div>
+          <p className="mt-3 text-2xl font-semibold text-white">
+            {d.empfohlener_preis} €<span className="text-sm font-normal text-white/60">/Nacht</span>
+          </p>
+          <p className="mt-1 text-xs text-white/60">Auslastung: {d.auslastung}%</p>
+          <p className="mt-3 text-xs text-white/70 line-clamp-2">{d.reason}</p>
+        </article>
+      );
+    })}
+  </div>
+);
 
 export default Preise;
