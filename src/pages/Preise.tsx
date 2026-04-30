@@ -125,10 +125,7 @@ const Preise = () => {
   const [aktuellerPreis, setAktuellerPreis] = useState<number | "">("");
 
   // Step 2 fields
-  const [zeitrahmen, setZeitrahmen] = useState<"einzelne_tage" | "blockbuchung" | null>(null);
-  const [datumVon, setDatumVon] = useState<Date | undefined>();
-  const [datumBis, setDatumBis] = useState<Date | undefined>();
-  const [mindestaufenthalt, setMindestaufenthalt] = useState<number | "">("");
+  const [ansicht, setAnsicht] = useState<Ansicht>("monat");
   const [plattformen, setPlattformen] = useState<string[]>([]);
   const [aktualitaetspruefung, setAktualitaetspruefung] = useState(true);
   const [besonderheiten, setBesonderheiten] = useState<string[]>([]);
@@ -136,7 +133,9 @@ const Preise = () => {
   const [step1Error, setStep1Error] = useState<string | null>(null);
   const [step2Error, setStep2Error] = useState<string | null>(null);
 
-  const [results, setResults] = useState<MonthRecommendation[] | null>(null);
+  const [results, setResults] = useState<DayRecommendation[] | null>(null);
+  const [resultsAnsicht, setResultsAnsicht] = useState<Ansicht>("monat");
+  const [expandedDay, setExpandedDay] = useState<string | null>(null);
   const [plzBoundary, setPlzBoundary] = useState<FeatureCollection | null>(null);
   const detailsRef = useRef<HTMLDivElement | null>(null);
   const resultsRef = useRef<HTMLDivElement | null>(null);
