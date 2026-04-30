@@ -194,8 +194,9 @@ const Preise = () => {
           style={{ width: "100%", height: "100%", background: "hsl(var(--ink))" }}
         >
           <StaticMapBinder onReady={(m) => { mapRef.current = m; }} />
+          {/* Dark tiles WITH labels — districts/neighborhoods reveal as zoom increases. */}
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png"
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
             subdomains="abcd"
           />
           {geo && (
@@ -214,7 +215,7 @@ const Preise = () => {
       </div>
 
       {/* Fixed dark overlay above the map for readability. */}
-      <div className="fixed inset-0 z-[1] bg-black/45 pointer-events-none" aria-hidden="true" />
+      <div className="fixed inset-0 z-[1] bg-black/25 pointer-events-none" aria-hidden="true" />
 
       {/* Content layer — scrolls naturally above the fixed map. */}
       <div className="relative z-[2]">

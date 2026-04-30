@@ -122,3 +122,8 @@
   from { transform: translateX(-50%); }
   to { transform: translateX(0); }
 }
+
+/* Leaflet map label readability boost on /preise */
+.leaflet-tile-pane {
+  filter: contrast(1.05) brightness(1.1);
+}
