@@ -44,7 +44,7 @@ const navItems = [
   { label: "Kontakt", href: "/#contact" },
 ];
 
-const DE_CENTER: [number, number] = [51.1657, 10.4515];
+const DE_CENTER: [number, number] = [51.3, 11.5];
 const DE_ZOOM = 6;
 
 // Replace this with the real Make.com webhook URL when ready.
@@ -291,7 +291,7 @@ const Preise = () => {
           </nav>
         </div>
 
-        <div className="flex flex-col items-center gap-8 p-6 sm:p-10 py-16 min-h-screen">
+        <div className="flex flex-col items-start gap-8 px-6 sm:px-10 lg:pl-16 py-16 min-h-screen">
           {/* PLZ panel */}
           <motion.div
             layout
