@@ -418,7 +418,7 @@ const Preise = () => {
             <div className="w-full max-w-6xl">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {Array.from({ length: 12 }).map((_, i) => (
-                  <div key={i} className="rounded-2xl border border-white/10 bg-black/55 backdrop-blur-md p-6 h-40 animate-pulse" />
+                  <div key={i} className="rounded-2xl border border-white/10 bg-black/50 p-6 h-40 animate-pulse [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]" />
                 ))}
               </div>
             </div>
