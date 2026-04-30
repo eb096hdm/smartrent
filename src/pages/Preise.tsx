@@ -760,4 +760,138 @@ const NumberStepper = ({
   );
 };
 
+const STATUS_BG: Record<DayRecommendation["status"], string> = {
+  good: "bg-emerald-400/15 border-emerald-400/40 hover:border-emerald-300/70",
+  event: "bg-amber-400/15 border-amber-400/40 hover:border-amber-300/70",
+  low: "bg-red-400/15 border-red-400/40 hover:border-red-300/70",
+};
+const STATUS_DOT: Record<DayRecommendation["status"], string> = {
+  good: "bg-emerald-400",
+  event: "bg-amber-400",
+  low: "bg-red-400",
+};
+const STATUS_LABEL: Record<DayRecommendation["status"], string> = {
+  good: "Gute Auslastung — Preis halten",
+  event: "Event in der Nähe — Preis erhöhen",
+  low: "Schwache Nachfrage — Preis senken",
+};
+
+const LegendDot = ({ className, label }: { className: string; label: string }) => (
+  <span className="inline-flex items-center gap-2">
+    <span className={cn("h-2.5 w-2.5 rounded-full", className)} />
+    {label}
+  </span>
+);
+
+const MonthGrid = ({
+  days, expandedDay, onToggle,
+}: {
+  days: DayRecommendation[];
+  expandedDay: string | null;
+  onToggle: (d: string) => void;
+}) => {
+  const expanded = useMemo(() => days.find((d) => d.datum === expandedDay) ?? null, [days, expandedDay]);
+  return (
+    <div className="mt-8">
+      <div className="rounded-2xl border border-white/10 bg-black/50 p-5 sm:p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
+        <div className="grid grid-cols-5 sm:grid-cols-7 lg:grid-cols-10 gap-2">
+          {days.map((d) => {
+            const date = new Date(d.datum);
+            const active = expandedDay === d.datum;
+            return (
+              <button
+                key={d.datum}
+                type="button"
+                onClick={() => onToggle(d.datum)}
+                className={cn(
+                  "rounded-lg border px-2 py-2 text-left transition-all",
+                  STATUS_BG[d.status],
+                  active && "ring-2 ring-white/70",
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-wide text-white/70">
+                    {format(date, "EE", { locale: de })}
+                  </span>
+                  <span className={cn("h-1.5 w-1.5 rounded-full", STATUS_DOT[d.status])} />
+                </div>
+                <div className="mt-0.5 text-sm font-medium text-white">{format(date, "dd.MM.")}</div>
+                <div className="mt-1 text-sm font-semibold text-white">{d.empfohlener_preis} €</div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            key={expanded.datum}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="mt-4 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]"
+          >
+            <div className="flex items-center gap-3">
+              <span className={cn("h-2.5 w-2.5 rounded-full", STATUS_DOT[expanded.status])} />
+              <h4 className="text-base font-medium text-white">
+                {format(new Date(expanded.datum), "EEEE, dd. MMMM yyyy", { locale: de })}
+              </h4>
+            </div>
+            <p className="mt-2 text-sm text-white/70">{STATUS_LABEL[expanded.status]}</p>
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+              <div>
+                <div className="text-xs text-white/60">Empfohlener Preis</div>
+                <div className="mt-1 text-lg font-semibold text-white">{expanded.empfohlener_preis} €</div>
+              </div>
+              <div>
+                <div className="text-xs text-white/60">Auslastung</div>
+                <div className="mt-1 text-lg font-semibold text-white">{expanded.auslastung}%</div>
+              </div>
+              <div>
+                <div className="text-xs text-white/60">Event</div>
+                <div className="mt-1 text-sm text-white/80">{expanded.event ?? "—"}</div>
+              </div>
+            </div>
+            <p className="mt-4 text-xs text-white/50">
+              Konkurrenzpreise und detaillierte Event-Daten folgen in Kürze.
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const WeekRow = ({ days }: { days: DayRecommendation[] }) => (
+  <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
+    {days.map((d) => {
+      const date = new Date(d.datum);
+      return (
+        <article
+          key={d.datum}
+          className={cn(
+            "rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-0.5 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)] bg-black/50",
+            STATUS_BG[d.status],
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase tracking-wide text-white/70">
+              {format(date, "EEEE", { locale: de })}
+            </span>
+            <span className={cn("h-2 w-2 rounded-full", STATUS_DOT[d.status])} />
+          </div>
+          <div className="mt-1 text-sm text-white/80">{format(date, "dd. MMM", { locale: de })}</div>
+          <p className="mt-3 text-2xl font-semibold text-white">
+            {d.empfohlener_preis} €<span className="text-sm font-normal text-white/60">/Nacht</span>
+          </p>
+          <p className="mt-1 text-xs text-white/60">Auslastung: {d.auslastung}%</p>
+          <p className="mt-3 text-xs text-white/70 line-clamp-2">{d.reason}</p>
+        </article>
+      );
+    })}
+  </div>
+);
+
 export default Preise;
