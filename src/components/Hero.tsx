@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
-import { useRegionModal } from "@/components/region/RegionModalContext";
+import { Link } from "react-router-dom";
 
 const navItems = [
   { label: "Über uns", href: "#about" },
@@ -11,7 +11,6 @@ const navItems = [
 ];
 
 export const Hero = () => {
-  const { open } = useRegionModal();
   return (
     <section className="p-3 sm:p-5">
       <div className="relative overflow-hidden rounded-[2rem] bg-ink text-ink-foreground">
@@ -57,16 +56,15 @@ export const Hero = () => {
               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.6 }}
               className="mt-10"
             >
-              <button
-                type="button"
-                onClick={() => open()}
+              <Link
+                to="/preise"
                 className="group inline-flex items-center gap-3 rounded-full bg-white text-ink pl-6 pr-2 py-2 text-sm font-medium transition-all duration-300 hover:gap-4 hover:bg-white/90"
               >
                 Jetzt Preise festlegen
                 <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white transition-transform duration-300 group-hover:rotate-45">
                   <ArrowUpRight className="h-4 w-4" />
                 </span>
-              </button>
+              </Link>
             </motion.div>
           </div>
 
