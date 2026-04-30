@@ -243,7 +243,7 @@ const Preise = () => {
             layout
             animate={{ y: step === "plz" ? 0 : -8 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="w-full max-w-md"
+            className={`w-full max-w-md ${step === "plz" ? "min-h-[calc(100vh-12rem)] flex items-center" : ""}`}
           >
             <div className="rounded-2xl border border-white/10 bg-black/65 backdrop-blur-md p-8 shadow-2xl">
               <h1 className="display text-3xl sm:text-4xl text-white">
