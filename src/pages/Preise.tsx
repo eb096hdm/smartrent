@@ -138,13 +138,12 @@ const CapitalLabels = () => {
   return (
     <>
       {STATE_CAPITALS.map((c) => (
-        <Marker
-          key={c.name}
-          position={[c.lat, c.lng]}
-          icon={makeCapitalIcon(c.name)}
-          interactive={false}
-          keyboard={false}
-        />
+        <Fragment key={c.name}>
+          {/* Tiny dot at the true city location */}
+          <Marker position={[c.lat, c.lng]} icon={CITY_DOT} interactive={false} keyboard={false} />
+          {/* Offset text label */}
+          <Marker position={[c.lat, c.lng]} icon={makeCapitalLabel(c)} interactive={false} keyboard={false} />
+        </Fragment>
       ))}
     </>
   );
