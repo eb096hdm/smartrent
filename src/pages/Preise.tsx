@@ -710,42 +710,6 @@ const PillButton = ({
   </button>
 );
 
-const DateField = ({
-  label, value, onChange, disabled,
-}: {
-  label: string;
-  value: Date | undefined;
-  onChange: (d: Date | undefined) => void;
-  disabled?: (d: Date) => boolean;
-}) => (
-  <div>
-    <label className="block text-xs font-medium text-white/80">{label}</label>
-    <Popover>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="mt-2 w-full inline-flex items-center justify-between rounded-full bg-white/10 border border-white/15 px-5 py-3 text-sm text-white hover:border-white/30 transition-colors"
-        >
-          <span className={cn(!value && "text-white/40")}>
-            {value ? format(value, "dd. MMM yyyy", { locale: de }) : "Datum wählen"}
-          </span>
-          <CalendarIcon className="h-4 w-4 text-white/60" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={value}
-          onSelect={onChange}
-          disabled={disabled}
-          initialFocus
-          className={cn("p-3 pointer-events-auto")}
-        />
-      </PopoverContent>
-    </Popover>
-  </div>
-);
-
 const NumberStepper = ({
   label, value, min, max, onChange, disabled,
 }: {
