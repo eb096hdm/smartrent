@@ -118,7 +118,10 @@ const Preise = () => {
     }
     setPlzError(null);
 
-    // Try to resolve PLZ → coordinates and fly the map to that city.
+    // Clear any previous boundary outline before fetching the new one.
+    setPlzBoundary(null);
+
+    // Try to resolve PLZ → coordinates and fly the map to that area.
     try {
       const r = await fetch(`https://api.zippopotam.us/de/${plz}`);
       if (r.ok) {
@@ -128,19 +131,37 @@ const Preise = () => {
           const lat = parseFloat(place.latitude);
           const lng = parseFloat(place.longitude);
           const map = mapRef.current;
-          const targetZoom = 12;
           // Project the target latlng at the desired zoom, then shift it
           // horizontally so the city appears in the right-middle of the
           // viewport (left ~30% is occupied by the PLZ panel).
-          const point = map.project([lat, lng], targetZoom);
+          const point = map.project([lat, lng], PLZ_ZOOM);
           const size = map.getSize();
-          const offsetX = size.x * 0.25; // shift map center left → city moves right
-          const shifted = map.unproject([point.x - offsetX, point.y], targetZoom);
-          map.flyTo(shifted, targetZoom, { duration: 0.8, easeLinearity: 0.25 });
+          const offsetX = size.x * 0.25;
+          const shifted = map.unproject([point.x - offsetX, point.y], PLZ_ZOOM);
+          map.flyTo(shifted, PLZ_ZOOM, { duration: 0.8, easeLinearity: 0.25 });
         }
       }
     } catch {
       // Silent — map simply stays at the Germany overview.
+    }
+
+    // Fetch boundary polygon for the postal code from Nominatim (OpenStreetMap).
+    // polygon_geojson=1 returns the actual area outline as GeoJSON geometry.
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&country=Germany&postalcode=${plz}&polygon_geojson=1&limit=1`;
+      const r = await fetch(url, { headers: { "Accept-Language": "de" } });
+      if (r.ok) {
+        const arr = await r.json();
+        const hit = Array.isArray(arr) ? arr[0] : null;
+        if (hit?.geojson) {
+          setPlzBoundary({
+            type: "FeatureCollection",
+            features: [{ type: "Feature", properties: { plz }, geometry: hit.geojson }],
+          });
+        }
+      }
+    } catch {
+      // Silent — outline simply not shown.
     }
 
     setStep("details");
