@@ -194,8 +194,9 @@ const Preise = () => {
           style={{ width: "100%", height: "100%", background: "hsl(var(--ink))" }}
         >
           <StaticMapBinder onReady={(m) => { mapRef.current = m; }} />
+          {/* Dark tiles WITH labels — districts/neighborhoods reveal as zoom increases. */}
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png"
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
             subdomains="abcd"
           />
           {geo && (
