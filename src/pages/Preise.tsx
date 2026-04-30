@@ -125,7 +125,16 @@ const Preise = () => {
         if (place && mapRef.current) {
           const lat = parseFloat(place.latitude);
           const lng = parseFloat(place.longitude);
-          mapRef.current.flyTo([lat, lng], 12, { duration: 0.8, easeLinearity: 0.25 });
+          const map = mapRef.current;
+          const targetZoom = 12;
+          // Project the target latlng at the desired zoom, then shift it
+          // horizontally so the city appears in the right-middle of the
+          // viewport (left ~30% is occupied by the PLZ panel).
+          const point = map.project([lat, lng], targetZoom);
+          const size = map.getSize();
+          const offsetX = size.x * 0.25; // shift map center left → city moves right
+          const shifted = map.unproject([point.x - offsetX, point.y], targetZoom);
+          map.flyTo(shifted, targetZoom, { duration: 0.8, easeLinearity: 0.25 });
         }
       }
     } catch {
@@ -228,15 +237,15 @@ const Preise = () => {
           </nav>
         </div>
 
-        <div className="flex flex-col items-center gap-8 p-6 sm:p-10 py-16 min-h-screen">
+        <div className="flex flex-col items-start gap-8 px-6 sm:px-10 lg:pl-16 py-16 min-h-screen">
           {/* PLZ panel */}
           <motion.div
             layout
             animate={{ y: step === "plz" ? 0 : -8 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="w-full max-w-md"
+            className={`w-full max-w-md ${step === "plz" ? "min-h-[calc(100vh-12rem)] flex items-center" : ""}`}
           >
-            <div className="rounded-2xl border border-white/10 bg-black/65 backdrop-blur-md p-8 shadow-2xl">
+            <div className="w-full rounded-2xl border border-white/10 bg-black/65 backdrop-blur-md p-8 shadow-2xl">
               <h1 className="display text-3xl sm:text-4xl text-white">
                 Wo befindet sich dein Objekt?
               </h1>
