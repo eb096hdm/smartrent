@@ -1,12 +1,40 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpRight, Loader2 } from "lucide-react";
-import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
-import type { Map as LeafletMap } from "leaflet";
+import { MapContainer, TileLayer, GeoJSON, Marker, useMap } from "react-leaflet";
+import L, { type Map as LeafletMap } from "leaflet";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type FeatureCollection = any;
 import "leaflet/dist/leaflet.css";
 import { Footer } from "@/components/Footer";
+
+/** German state capitals — only labels shown in the initial zoomed-out view. */
+const STATE_CAPITALS: { name: string; lat: number; lng: number }[] = [
+  { name: "Berlin", lat: 52.5200, lng: 13.4050 },
+  { name: "München", lat: 48.1351, lng: 11.5820 },
+  { name: "Stuttgart", lat: 48.7758, lng: 9.1829 },
+  { name: "Düsseldorf", lat: 51.2277, lng: 6.7735 },
+  { name: "Hamburg", lat: 53.5511, lng: 9.9937 },
+  { name: "Bremen", lat: 53.0793, lng: 8.8017 },
+  { name: "Hannover", lat: 52.3759, lng: 9.7320 },
+  { name: "Wiesbaden", lat: 50.0782, lng: 8.2398 },
+  { name: "Mainz", lat: 49.9929, lng: 8.2473 },
+  { name: "Saarbrücken", lat: 49.2402, lng: 6.9969 },
+  { name: "Erfurt", lat: 50.9848, lng: 11.0299 },
+  { name: "Dresden", lat: 51.0504, lng: 13.7373 },
+  { name: "Magdeburg", lat: 52.1205, lng: 11.6276 },
+  { name: "Schwerin", lat: 53.6355, lng: 11.4012 },
+  { name: "Kiel", lat: 54.3233, lng: 10.1228 },
+  { name: "Potsdam", lat: 52.3906, lng: 13.0645 },
+];
+
+const makeCapitalIcon = (name: string) =>
+  L.divIcon({
+    className: "capital-label",
+    html: `<span>${name}</span>`,
+    iconSize: [120, 20],
+    iconAnchor: [60, 10],
+  });
 
 const navItems = [
   { label: "Über uns", href: "/#about" },
