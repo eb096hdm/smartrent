@@ -446,7 +446,7 @@ const Preise = () => {
                   {results.map((r) => (
                     <article
                       key={r.monat}
-                      className="rounded-2xl border border-white/10 bg-black/65 backdrop-blur-md p-6 transition-all duration-300 hover:border-white/25 hover:-translate-y-0.5"
+                      className="rounded-2xl border border-white/10 bg-black/50 p-6 transition-all duration-300 hover:border-white/25 hover:-translate-y-0.5 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]"
                     >
                       <h3 className="text-xl font-medium text-white">{r.monat}</h3>
                       <p className="mt-3 text-2xl font-semibold text-white">
