@@ -340,11 +340,11 @@ const Preise = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 12 }}
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="w-full max-w-md"
+                className="w-full min-w-0 sm:min-w-[520px] max-w-[640px]"
               >
                 <form
                   onSubmit={handleDetailsSubmit}
-                  className="rounded-2xl border border-white/10 bg-black/65 backdrop-blur-md p-8 shadow-2xl"
+                  className="rounded-2xl border border-white/10 bg-black/50 p-8 shadow-2xl [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]"
                 >
                   <h2 className="display text-2xl sm:text-3xl text-white">Dein Objekt im Detail</h2>
                   <p className="mt-2 text-sm text-white/70">Ein paar Eckdaten, dann berechnen wir deine Preisempfehlung.</p>
