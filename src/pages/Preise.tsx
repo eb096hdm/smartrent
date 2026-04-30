@@ -274,15 +274,15 @@ const Preise = () => {
           </nav>
         </div>
 
-        <div className="flex flex-col items-start gap-8 px-6 sm:px-10 lg:pl-16 py-16 min-h-screen">
+        <div className="flex flex-col items-center gap-8 px-4 sm:px-10 py-16 min-h-screen">
           {/* PLZ panel */}
           <motion.div
             layout
             animate={{ y: step === "plz" ? 0 : -8 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className={`w-full max-w-md ${step === "plz" ? "min-h-[calc(100vh-12rem)] flex items-center" : ""}`}
+            className={`w-full min-w-0 sm:min-w-[520px] max-w-[640px] ${step === "plz" ? "min-h-[calc(100vh-12rem)] flex items-center" : ""}`}
           >
-            <div className="w-full rounded-2xl border border-white/10 bg-black/65 backdrop-blur-md p-8 shadow-2xl">
+            <div className="w-full rounded-2xl border border-white/10 bg-black/50 p-8 shadow-2xl [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
               <h1 className="display text-3xl sm:text-4xl text-white">
                 Wo befindet sich dein Objekt?
               </h1>
