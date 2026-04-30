@@ -143,3 +143,20 @@
   letter-spacing: 0.01em;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
+
+/* City dots for the state-capital markers */
+.capital-dot {
+  background: transparent !important;
+  border: none !important;
+  pointer-events: none;
+}
+.capital-dot i {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.55);
+}
+.capital-label--left span { text-align: left; }
+.capital-label--right span { text-align: right; width: 100%; }
