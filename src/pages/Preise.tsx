@@ -1,12 +1,40 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpRight, Loader2 } from "lucide-react";
-import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
-import type { Map as LeafletMap } from "leaflet";
+import { MapContainer, TileLayer, GeoJSON, Marker, useMap } from "react-leaflet";
+import L, { type Map as LeafletMap } from "leaflet";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type FeatureCollection = any;
 import "leaflet/dist/leaflet.css";
 import { Footer } from "@/components/Footer";
+
+/** German state capitals — only labels shown in the initial zoomed-out view. */
+const STATE_CAPITALS: { name: string; lat: number; lng: number }[] = [
+  { name: "Berlin", lat: 52.5200, lng: 13.4050 },
+  { name: "München", lat: 48.1351, lng: 11.5820 },
+  { name: "Stuttgart", lat: 48.7758, lng: 9.1829 },
+  { name: "Düsseldorf", lat: 51.2277, lng: 6.7735 },
+  { name: "Hamburg", lat: 53.5511, lng: 9.9937 },
+  { name: "Bremen", lat: 53.0793, lng: 8.8017 },
+  { name: "Hannover", lat: 52.3759, lng: 9.7320 },
+  { name: "Wiesbaden", lat: 50.0782, lng: 8.2398 },
+  { name: "Mainz", lat: 49.9929, lng: 8.2473 },
+  { name: "Saarbrücken", lat: 49.2402, lng: 6.9969 },
+  { name: "Erfurt", lat: 50.9848, lng: 11.0299 },
+  { name: "Dresden", lat: 51.0504, lng: 13.7373 },
+  { name: "Magdeburg", lat: 52.1205, lng: 11.6276 },
+  { name: "Schwerin", lat: 53.6355, lng: 11.4012 },
+  { name: "Kiel", lat: 54.3233, lng: 10.1228 },
+  { name: "Potsdam", lat: 52.3906, lng: 13.0645 },
+];
+
+const makeCapitalIcon = (name: string) =>
+  L.divIcon({
+    className: "capital-label",
+    html: `<span>${name}</span>`,
+    iconSize: [120, 20],
+    iconAnchor: [60, 10],
+  });
 
 const navItems = [
   { label: "Über uns", href: "/#about" },
@@ -73,6 +101,31 @@ const StaticMapBinder = ({ onReady }: { onReady: (m: LeafletMap) => void }) => {
     onReady(map);
   }, [map, onReady]);
   return null;
+};
+
+/** Renders the 16 state-capital labels only at the initial zoomed-out view. */
+const CapitalLabels = () => {
+  const map = useMap();
+  const [zoom, setZoom] = useState<number>(map.getZoom());
+  useEffect(() => {
+    const onZoom = () => setZoom(map.getZoom());
+    map.on("zoomend", onZoom);
+    return () => { map.off("zoomend", onZoom); };
+  }, [map]);
+  if (zoom > 8) return null;
+  return (
+    <>
+      {STATE_CAPITALS.map((c) => (
+        <Marker
+          key={c.name}
+          position={[c.lat, c.lng]}
+          icon={makeCapitalIcon(c.name)}
+          interactive={false}
+          keyboard={false}
+        />
+      ))}
+    </>
+  );
 };
 
 type Step = "plz" | "details" | "loading" | "results" | "error";
@@ -194,10 +247,17 @@ const Preise = () => {
           style={{ width: "100%", height: "100%", background: "hsl(var(--ink))" }}
         >
           <StaticMapBinder onReady={(m) => { mapRef.current = m; }} />
-          {/* Dark tiles WITH labels — districts/neighborhoods reveal as zoom increases. */}
+          {/* Base: dark map WITHOUT any labels — keeps the initial view calm. */}
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
+            url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
             subdomains="abcd"
+          />
+          {/* Label overlay: only kicks in once the user zooms past Bundesland clutter
+              (after PLZ flyTo to ~zoom 12). Below zoom 9 it stays hidden. */}
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png"
+            subdomains="abcd"
+            minZoom={9}
           />
           {geo && (
             <GeoJSON
@@ -211,6 +271,8 @@ const Preise = () => {
               interactive={false}
             />
           )}
+          {/* Custom capital labels — only visible at the initial zoomed-out view. */}
+          <CapitalLabels />
         </MapContainer>
       </div>
 
