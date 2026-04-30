@@ -462,7 +462,7 @@ const Preise = () => {
                   ))}
                 </div>
 
-                <div className="mt-10 rounded-2xl border border-white/10 bg-black/65 backdrop-blur-md p-8">
+                <div className="mt-10 rounded-2xl border border-white/10 bg-black/50 p-8 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
                   <h3 className="text-xl font-medium text-white">Warum empfehlen wir diese Preise?</h3>
                   <p className="mt-3 text-sm text-white/70">
                     In Kürze erklärt dir unsere KI im Detail, wie Standortdaten, saisonale
