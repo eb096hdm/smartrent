@@ -44,7 +44,7 @@ const navItems = [
   { label: "Kontakt", href: "/#contact" },
 ];
 
-const DE_CENTER: [number, number] = [51.1657, 10.4515];
+const DE_CENTER: [number, number] = [51.3, 11.5];
 const DE_ZOOM = 6;
 
 // Replace this with the real Make.com webhook URL when ready.
