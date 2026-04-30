@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import L from "leaflet";
-import type { FeatureCollection } from "geojson";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type FeatureCollection = any;
 import "leaflet/dist/leaflet.css";
 import { Footer } from "@/components/Footer";
 
@@ -31,7 +32,9 @@ const MapRefBinder = ({ onReady }: { onReady: (map: L.Map) => void }) => {
     map.touchZoom.disable();
     map.boxZoom.disable();
     map.keyboard.disable();
-    if (map.tap) map.tap.disable();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const tap = (map as any).tap;
+    if (tap) tap.disable();
   }, [map, onReady]);
   return null;
 };
