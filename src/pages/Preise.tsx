@@ -625,28 +625,27 @@ const Preise = () => {
                   Deine Preisempfehlung für {plz}
                 </h2>
                 <p className="mt-2 text-sm text-white/70">
-                  Monatliche Empfehlungen basierend auf Standort, Auslastung und lokalen Events.
+                  {resultsAnsicht === "monat"
+                    ? "30 Tage als Kalender-Grid mit Farbkodierung."
+                    : "7 Tage im Detail mit Empfehlung pro Tag."}
                 </p>
 
-                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {results.map((r) => (
-                    <article
-                      key={r.monat}
-                      className="rounded-2xl border border-white/10 bg-black/50 p-6 transition-all duration-300 hover:border-white/25 hover:-translate-y-0.5 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]"
-                    >
-                      <h3 className="text-xl font-medium text-white">{r.monat}</h3>
-                      <p className="mt-3 text-2xl font-semibold text-white">
-                        {r.empfohlener_preis} €<span className="text-sm font-normal text-white/60">/Nacht</span>
-                      </p>
-                      <p className="mt-1 text-xs text-white/60">Auslastung: {r.auslastung}%</p>
-                      {r.event && r.event !== "Kein besonderes Event" && (
-                        <span className="mt-4 inline-flex items-center rounded-full bg-gold/20 text-[hsl(var(--gold))] px-3 py-1 text-xs font-medium">
-                          {r.event}
-                        </span>
-                      )}
-                    </article>
-                  ))}
+                {/* Legend */}
+                <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-white/70">
+                  <LegendDot className="bg-emerald-400/80" label="Gute Auslastung" />
+                  <LegendDot className="bg-amber-400/80" label="Event in der Nähe" />
+                  <LegendDot className="bg-red-400/80" label="Schwache Nachfrage" />
                 </div>
+
+                {resultsAnsicht === "monat" ? (
+                  <MonthGrid
+                    days={results}
+                    expandedDay={expandedDay}
+                    onToggle={(d) => setExpandedDay((prev) => (prev === d ? null : d))}
+                  />
+                ) : (
+                  <WeekRow days={results} />
+                )}
 
                 <div className="mt-10 rounded-2xl border border-white/10 bg-black/50 p-8 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
                   <h3 className="text-xl font-medium text-white">Warum empfehlen wir diese Preise?</h3>
