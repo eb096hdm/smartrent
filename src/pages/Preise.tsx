@@ -217,13 +217,6 @@ const Preise = () => {
   const handleFinalSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setStep2Error(null);
-    if (!zeitrahmen) return setStep2Error("Bitte wähle einen Zeitrahmen.");
-    if (zeitrahmen === "einzelne_tage" && (!datumVon || !datumBis)) {
-      return setStep2Error("Bitte wähle Check-in und Check-out Daten.");
-    }
-    if (zeitrahmen === "blockbuchung" && (!mindestaufenthalt || Number(mindestaufenthalt) < 1)) {
-      return setStep2Error("Bitte gib einen Mindestaufenthalt an.");
-    }
     if (plattformen.length === 0) return setStep2Error("Bitte wähle mindestens eine Plattform.");
 
     setStep("loading");
@@ -236,17 +229,14 @@ const Preise = () => {
       max_gaeste: maxGaeste,
       komfort,
       aktueller_preis: Number(aktuellerPreis),
-      zeitrahmen,
-      datum_von: datumVon ? format(datumVon, "yyyy-MM-dd") : null,
-      datum_bis: datumBis ? format(datumBis, "yyyy-MM-dd") : null,
-      mindestaufenthalt: zeitrahmen === "blockbuchung" ? Number(mindestaufenthalt) : null,
+      ansicht,
       plattformen,
       aktualitaetspruefung,
       besonderheiten,
     };
 
     try {
-      let data: MonthRecommendation[];
+      let data: DayRecommendation[];
       if (MAKE_WEBHOOK_URL) {
         const r = await fetch(MAKE_WEBHOOK_URL, {
           method: "POST",
@@ -254,12 +244,14 @@ const Preise = () => {
           body: JSON.stringify(payload),
         });
         if (!r.ok) throw new Error("Webhook error");
-        data = (await r.json()) as MonthRecommendation[];
+        data = (await r.json()) as DayRecommendation[];
       } else {
         await new Promise((res) => setTimeout(res, 900));
-        data = buildMockResponse();
+        data = buildMockResponse(ansicht, Number(aktuellerPreis) || 90);
       }
       setResults(data);
+      setResultsAnsicht(ansicht);
+      setExpandedDay(null);
       setStep("results");
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 200);
     } catch {
