@@ -17,7 +17,8 @@ const navItems = [
 ];
 
 const DE_CENTER: [number, number] = [51.1657, 10.4515];
-const DE_ZOOM = 6;
+const DE_ZOOM = 7;
+const PLZ_ZOOM = 11;
 
 // Replace this with the real Make.com webhook URL when ready.
 const MAKE_WEBHOOK_URL = "";
