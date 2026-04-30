@@ -125,7 +125,16 @@ const Preise = () => {
         if (place && mapRef.current) {
           const lat = parseFloat(place.latitude);
           const lng = parseFloat(place.longitude);
-          mapRef.current.flyTo([lat, lng], 12, { duration: 0.8, easeLinearity: 0.25 });
+          const map = mapRef.current;
+          const targetZoom = 12;
+          // Project the target latlng at the desired zoom, then shift it
+          // horizontally so the city appears in the right-middle of the
+          // viewport (left ~30% is occupied by the PLZ panel).
+          const point = map.project([lat, lng], targetZoom);
+          const size = map.getSize();
+          const offsetX = size.x * 0.25; // shift map center left → city moves right
+          const shifted = map.unproject([point.x - offsetX, point.y], targetZoom);
+          map.flyTo(shifted, targetZoom, { duration: 0.8, easeLinearity: 0.25 });
         }
       }
     } catch {
