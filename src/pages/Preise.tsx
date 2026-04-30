@@ -103,7 +103,30 @@ const StaticMapBinder = ({ onReady }: { onReady: (m: LeafletMap) => void }) => {
   return null;
 };
 
-type Step = "plz" | "details" | "loading" | "results" | "error";
+/** Renders the 16 state-capital labels only at the initial zoomed-out view. */
+const CapitalLabels = () => {
+  const map = useMap();
+  const [zoom, setZoom] = useState<number>(map.getZoom());
+  useEffect(() => {
+    const onZoom = () => setZoom(map.getZoom());
+    map.on("zoomend", onZoom);
+    return () => { map.off("zoomend", onZoom); };
+  }, [map]);
+  if (zoom > 8) return null;
+  return (
+    <>
+      {STATE_CAPITALS.map((c) => (
+        <Marker
+          key={c.name}
+          position={[c.lat, c.lng]}
+          icon={makeCapitalIcon(c.name)}
+          interactive={false}
+          keyboard={false}
+        />
+      ))}
+    </>
+  );
+};
 
 const Preise = () => {
   const [geo, setGeo] = useState<FeatureCollection | null>(null);
