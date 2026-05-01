@@ -26,17 +26,6 @@ export const Hero = () => {
         <div className="grid lg:grid-cols-2 gap-10 px-6 sm:px-10 pt-16 pb-10">
           <div className="flex flex-col justify-between min-h-[480px]">
             <div>
-              <motion.div
-                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-                className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-4 py-1.5 text-xs font-medium"
-              >
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-available opacity-75 animate-ping" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-available" />
-                </span>
-                Verfügbar für Aufträge
-              </motion.div>
-
               <motion.h1
                 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.15 }}
                 className="display mt-8 text-5xl sm:text-6xl lg:text-7xl xl:text-[5.5rem]"
