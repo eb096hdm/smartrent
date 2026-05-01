@@ -19,8 +19,8 @@ export const Services = () => {
       <div className="section-card max-w-7xl mx-auto p-6 sm:p-12 lg:p-16">
         <Reveal className="text-center flex flex-col items-center">
           <span className="pill">Leistungen</span>
-          <h2 className="display mt-6 text-4xl sm:text-5xl lg:text-6xl max-w-3xl">Wer steckt hinter SmartRent?</h2>
-          <p className="mt-5 text-muted-foreground max-w-xl">Finden Sie heraus, welche unserer Leistungen am besten zu Ihrem Projekt passt.</p>
+          <h2 className="display mt-6 text-4xl sm:text-5xl lg:text-6xl max-w-3xl">Du bist noch nicht schlau aus uns geworden? Kein Problem!</h2>
+          <p className="mt-5 text-muted-foreground max-w-xl">Hier findest du alle Informationen zu unseren Leistungen.</p>
         </Reveal>
 
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 mt-14">
