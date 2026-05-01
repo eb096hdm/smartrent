@@ -5,7 +5,7 @@ import { Reveal } from "./Reveal";
 
 const services = [
   { icon: ChefHat, title: "Küchen", body: "Wir entwerfen und bauen beeindruckende Küchen, die genau zu Ihrem Stil und Ihren Bedürfnissen passen. Ob schlicht modern oder zeitlos klassisch – unser Team liefert hochwertige Handwerkskunst, Funktionalität und Liebe zum Detail für das Herz Ihres Zuhauses." },
-  { icon: Home, title: "Woher stammen unsere Daten?", body: "Verwandeln Sie ungenutzten Dachraum in lichtdurchflutete Schlafzimmer, Büros oder Spielzimmer – komplett geplant, gebaut und abgenommen." },
+  
   { icon: Bath, title: "Bäder", body: "Vom Spa-Refugium bis zum kompakten Familienbad – wir gestalten Bäder, die Ästhetik und Funktion vereinen." },
   { icon: Maximize2, title: "Anbauten", body: "Mehr Raum zum Leben – maßgeschneiderte Anbauten, die Ihr Zuhause harmonisch erweitern." },
   { icon: Hammer, title: "Restaurierungen", body: "Wir bewahren den Charakter historischer Räume und bringen sie behutsam in die Moderne." },
