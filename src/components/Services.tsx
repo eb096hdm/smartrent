@@ -23,17 +23,8 @@ export const Services = () => {
           <p className="mt-5 text-muted-foreground max-w-xl">Du bist dir noch unsicher wie du einen passenden Preis festlegen kannst? Kein Thema! Hier sind die wichtigsten Infos zusammengefasst.</p>
         </Reveal>
 
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 mt-14">
-          <Reveal className="rounded-[1.5rem] overflow-hidden min-h-[420px] lg:min-h-[560px] relative">
-            <img
-              src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
-              alt="Modernes Interieur einer renovierten Küche"
-              className="absolute inset-0 h-full w-full object-cover"
-              loading="lazy"
-            />
-          </Reveal>
-
-          <Reveal delay={0.15} className="flex flex-col">
+        <div className="mt-14">
+          <Reveal delay={0.15} className="flex flex-col max-w-3xl mx-auto">
             {services.map((s, i) => {
               const isOpen = open === i;
               const Icon = s.icon;
