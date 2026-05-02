@@ -20,7 +20,7 @@ export const Faqs = () => {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 grid lg:grid-cols-[1fr_1.4fr] gap-12 lg:gap-20">
         <Reveal>
           <span className="pill">FAQs</span>
-          <h2 className="display mt-6 text-5xl sm:text-6xl">Antworten auf Ihre Fragen</h2>
+          <h2 className="display mt-6 text-5xl sm:text-6xl">Noch Fragen?</h2>
           <p className="mt-5 text-muted-foreground">Noch Fragen offen? Senden Sie uns Ihre Anfrage.</p>
           <a href="#contact" className="group ghost-pill mt-8">
             Kontakt aufnehmen
