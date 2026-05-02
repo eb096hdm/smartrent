@@ -8,13 +8,12 @@ export const About = () => (
         <Reveal>
           <span className="pill">Über uns</span>
           <h2 className="display mt-6 text-5xl sm:text-6xl lg:text-7xl">
-            Wer steckt hinter SmartRent?
+            Unsere Preisentscheidungen
           </h2>
         </Reveal>
         <Reveal delay={0.1}>
           <p className="text-lg text-foreground/80 leading-relaxed lg:pt-12">
-            Wir sind Levin, Alex, Elias und Kerstin – vier Studierenden der Digital- und Medienwirtschaft. Und wir stecken hinter SmartRent. Alles fing mit einem kleinen Brainstorming an. Und jetzt? 
-            Jetzt machen wir Dynamic Pricing für private Vermieter:innen in Deutschland einfach zugänglich: plattformübergreifend und verständlich. Unsere KI erklärt euch unsere Preisgestaltung.
+            
           </p>
         </Reveal>
       </div>
