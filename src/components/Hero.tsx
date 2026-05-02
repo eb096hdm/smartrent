@@ -24,20 +24,20 @@ export const Hero = () => {
         </div>
 
         <div className="px-6 sm:px-10 pt-16 pb-10">
-          <div className="flex flex-col justify-between min-h-[480px]">
-            <div>
+          <div className="flex flex-col items-center justify-center min-h-[480px]">
+            <div className="text-center">
               <motion.h1
                 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.15 }}
-                className="display mt-8 text-5xl sm:text-6xl lg:text-7xl xl:text-[5.5rem]"
+                className="display mt-8 sm:text-6xl lg:text-7xl xl:text-[5.5rem] text-center text-8xl"
               >
                 Dein Objekt.<br />Dein Preis.<br />Unsere Passion.
               </motion.h1>
 
               <motion.p
                 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }}
-                className="mt-8 max-w-md text-base text-white/70"
+                className="mt-8 max-w-md text-base text-white/70 text-center"
               >
-                SmartRent liefert die erste erklärbare Pricing-KI für Vermieter:innen im DACH-Raum.
+                {"\n"}
               </motion.p>
             </div>
 
