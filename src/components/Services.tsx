@@ -19,7 +19,7 @@ export const Services = () => {
       <div className="section-card max-w-7xl mx-auto p-6 sm:p-12 lg:p-16">
         <Reveal className="text-center flex flex-col items-center">
           <span className="pill">Leistungen</span>
-          <h2 className="display mt-6 text-4xl sm:text-5xl lg:text-6xl max-w-3xl">Unsere Preisempfehlungen </h2>
+          <h2 className="display mt-6 text-4xl sm:text-5xl lg:text-6xl max-w-3xl">Wer steckt hinter SmartRent?</h2>
           <p className="mt-5 text-muted-foreground max-w-xl">BLOCKER</p>
         </Reveal>
 
