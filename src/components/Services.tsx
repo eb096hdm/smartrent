@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Plus, X, Home, TreePine } from "lucide-react";
+import { Plus, X, Home } from "lucide-react";
 import { Reveal } from "./Reveal";
 
 const services = [
@@ -8,8 +8,6 @@ const services = [
   
   { icon: null, title: "Bäder", body: "BLOCKER" },
   { icon: null, title: "Vision", body: "BLOCKER" },
-  
-  { icon: TreePine, title: "Außenarbeiten", body: "Terrassen, Wege und Außenanlagen – langlebig gebaut und stilvoll gestaltet." },
 ];
 
 export const Services = () => {
