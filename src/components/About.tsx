@@ -27,7 +27,7 @@ export const About = () => (
       <div className="mt-14 sm:mt-20">
         <Reveal>
           <h3 className="display text-3xl sm:text-4xl lg:text-5xl max-w-2xl">
-            Interaktive Preisempfehlungs-Karte
+            {" "}
           </h3>
           <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-2xl">
             Erhalte mit wenigen Klicks eine fundierte Preisempfehlung – basierend
