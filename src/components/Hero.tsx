@@ -14,6 +14,17 @@ const navItems = [
 ];
 
 export const Hero = () => {
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (isRegistered()) {
+      navigate("/preise");
+    } else {
+      setOpen(true);
+    }
+  };
+
   return (
     <section className="p-3 sm:p-5">
       <div className="relative overflow-hidden rounded-[2rem] bg-ink text-ink-foreground">
