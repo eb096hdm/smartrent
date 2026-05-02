@@ -34,7 +34,7 @@ export const Services = () => {
                     onClick={() => setOpen(isOpen ? -1 : i)}
                     className="w-full flex items-center gap-4 py-5 text-left group"
                   >
-                    <Icon className="h-6 w-6 text-foreground/70 shrink-0" strokeWidth={1.4} />
+                    {Icon && <Icon className="h-6 w-6 text-foreground/70 shrink-0" strokeWidth={1.4} />}
                     <span className="flex-1 text-lg font-medium">{s.title}</span>
                     {isOpen ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
                   </button>
