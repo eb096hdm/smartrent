@@ -21,7 +21,7 @@ export const Faqs = () => {
         <Reveal>
           <span className="pill">FAQs</span>
           <h2 className="display mt-6 text-5xl sm:text-6xl">Noch Fragen?</h2>
-          <p className="mt-5 text-muted-foreground">Noch Fragen offen? Senden Sie uns Ihre Anfrage.</p>
+          <p className="mt-5 text-muted-foreground">Hier sind die häufigsten Fragen und Antworten zusammengestellt!&nbsp;</p>
           <a href="#contact" className="group ghost-pill mt-8">
             Kontakt aufnehmen
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink text-ink-foreground transition-transform duration-300 group-hover:rotate-45">
