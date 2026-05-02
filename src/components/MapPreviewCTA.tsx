@@ -23,7 +23,7 @@ export const MapPreviewCTA = () => {
   };
 
   return (
-    <Reveal delay={0.2} className="mt-16">
+    <Reveal delay={0.2} className="mt-8">
       <button
         type="button"
         onClick={handleClick}
