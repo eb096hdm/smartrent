@@ -6,7 +6,7 @@ export const About = () => (
     <div className="max-w-7xl mx-auto px-3 sm:px-6">
       <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
         <Reveal>
-          <span className="pill">Über uns</span>
+          <span className="pill">Über Uns</span>
           <h2 className="display mt-6 text-5xl sm:text-6xl lg:text-7xl">
             Wer steckt hinter SmartRent?&nbsp;
           </h2>
