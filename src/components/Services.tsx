@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Plus, X, ChefHat, Home, Bath, Maximize2, Hammer, TreePine } from "lucide-react";
+import { Plus, X, Home, Bath, Maximize2, Hammer, TreePine } from "lucide-react";
 import { Reveal } from "./Reveal";
 
 const services = [
-  { icon: ChefHat, title: "Team", body: "Wir sind Levin, Alex, Elias und Kerstin – vier Studierenden der Digital- und Medienwirtschaft. Und wir stecken hinter SmartRent. Alles fing mit einem kleinen Brainstorming an. Und jetzt? Jetzt machen wir Dynamic Pricing für private Vermieter:innen in Deutschland einfach zugänglich: plattformübergreifend und verständlich. Unsere KI erklärt euch unsere Preisgestaltung." },
+  { icon: null, title: "Team", body: "Wir sind Levin, Alex, Elias und Kerstin – vier Studierenden der Digital- und Medienwirtschaft. Und wir stecken hinter SmartRent. Alles fing mit einem kleinen Brainstorming an. Und jetzt? Jetzt machen wir Dynamic Pricing für private Vermieter:innen in Deutschland einfach zugänglich: plattformübergreifend und verständlich. Unsere KI erklärt euch unsere Preisgestaltung." },
   
   { icon: Bath, title: "Bäder", body: "Vom Spa-Refugium bis zum kompakten Familienbad – wir gestalten Bäder, die Ästhetik und Funktion vereinen." },
   { icon: Maximize2, title: "Anbauten", body: "Mehr Raum zum Leben – maßgeschneiderte Anbauten, die Ihr Zuhause harmonisch erweitern." },
