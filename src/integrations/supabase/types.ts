@@ -14,7 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      registrations: {
+        Row: {
+          created_at: string
+          datenschutz_akzeptiert: boolean
+          email: string
+          geburtsdatum: string
+          id: string
+          nachname: string
+          telefon: string
+          vorname: string
+        }
+        Insert: {
+          created_at?: string
+          datenschutz_akzeptiert?: boolean
+          email: string
+          geburtsdatum: string
+          id?: string
+          nachname: string
+          telefon: string
+          vorname: string
+        }
+        Update: {
+          created_at?: string
+          datenschutz_akzeptiert?: boolean
+          email?: string
+          geburtsdatum?: string
+          id?: string
+          nachname?: string
+          telefon?: string
+          vorname?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
