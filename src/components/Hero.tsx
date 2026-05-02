@@ -74,6 +74,7 @@ export const Hero = () => {
 
         </div>
       </div>
+      <RegistrationModal open={open} onOpenChange={setOpen} />
     </section>
   );
 };
