@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus, X, Home } from "lucide-react";
 import { Reveal } from "./Reveal";
+import { MapPreviewCTA } from "./MapPreviewCTA";
 
 const services = [
   { icon: null, title: "Team", body: "Wir sind Levin, Alex, Elias und Kerstin – vier Studierenden der Digital- und Medienwirtschaft. Und wir stecken hinter SmartRent. Alles fing mit einem kleinen Brainstorming an. Und jetzt? Jetzt machen wir Dynamic Pricing für private Vermieter:innen in Deutschland einfach zugänglich: plattformübergreifend und verständlich. Unsere KI erklärt euch unsere Preisgestaltung." },
@@ -54,6 +55,8 @@ export const Services = () => {
             })}
           </Reveal>
         </div>
+
+        <MapPreviewCTA />
       </div>
     </section>
   );
