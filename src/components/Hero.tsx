@@ -59,15 +59,16 @@ export const Hero = () => {
               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.6 }}
               className="mt-10"
             >
-              <Link
-                to="/preise"
+              <button
+                type="button"
+                onClick={handleClick}
                 className="group inline-flex items-center gap-3 rounded-full bg-white text-ink pl-6 pr-2 py-2 text-sm font-medium transition-all duration-300 hover:gap-4 hover:bg-white/90"
               >
                 Jetzt Preise festlegen
                 <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white transition-transform duration-300 group-hover:rotate-45">
                   <ArrowUpRight className="h-4 w-4" />
                 </span>
-              </Link>
+              </button>
             </motion.div>
           </div>
 
