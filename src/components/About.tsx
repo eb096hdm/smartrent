@@ -8,12 +8,12 @@ export const About = () => (
         <Reveal>
           <span className="pill">Über uns</span>
           <h2 className="display mt-6 text-5xl sm:text-6xl lg:text-7xl">
-            Unsere Preisentscheidungen
+            Wer steckt hinter SmartRent?&nbsp;
           </h2>
         </Reveal>
         <Reveal delay={0.1}>
           <p className="text-lg text-foreground/80 leading-relaxed lg:pt-12">
-            
+            BLOCKER
           </p>
         </Reveal>
       </div>
