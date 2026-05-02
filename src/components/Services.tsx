@@ -4,7 +4,7 @@ import { Plus, X, ChefHat, Home, Bath, Maximize2, Hammer, TreePine } from "lucid
 import { Reveal } from "./Reveal";
 
 const services = [
-  { icon: ChefHat, title: "Küchen", body: "Wir entwerfen und bauen beeindruckende Küchen, die genau zu Ihrem Stil und Ihren Bedürfnissen passen. Ob schlicht modern oder zeitlos klassisch – unser Team liefert hochwertige Handwerkskunst, Funktionalität und Liebe zum Detail für das Herz Ihres Zuhauses." },
+  { icon: ChefHat, title: "Team", body: "Wir sind Levin, Alex, Elias und Kerstin – vier Studierenden der Digital- und Medienwirtschaft. Und wir stecken hinter SmartRent. Alles fing mit einem kleinen Brainstorming an. Und jetzt? Jetzt machen wir Dynamic Pricing für private Vermieter:innen in Deutschland einfach zugänglich: plattformübergreifend und verständlich. Unsere KI erklärt euch unsere Preisgestaltung." },
   
   { icon: Bath, title: "Bäder", body: "Vom Spa-Refugium bis zum kompakten Familienbad – wir gestalten Bäder, die Ästhetik und Funktion vereinen." },
   { icon: Maximize2, title: "Anbauten", body: "Mehr Raum zum Leben – maßgeschneiderte Anbauten, die Ihr Zuhause harmonisch erweitern." },
@@ -19,8 +19,8 @@ export const Services = () => {
       <div className="section-card max-w-7xl mx-auto p-6 sm:p-12 lg:p-16">
         <Reveal className="text-center flex flex-col items-center">
           <span className="pill">Leistungen</span>
-          <h2 className="display mt-6 text-4xl sm:text-5xl lg:text-6xl max-w-3xl">Den passenden Preis finden</h2>
-          <p className="mt-5 text-muted-foreground max-w-xl">Du bist dir noch unsicher wie du einen passenden Preis festlegen kannst? Kein Thema! Hier sind die wichtigsten Infos zusammengefasst.</p>
+          <h2 className="display mt-6 text-4xl sm:text-5xl lg:text-6xl max-w-3xl">Unsere Preisempfehlungen </h2>
+          <p className="mt-5 text-muted-foreground max-w-xl">BLOCKER</p>
         </Reveal>
 
         <div className="mt-14">
@@ -47,7 +47,7 @@ export const Services = () => {
                         transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                         className="overflow-hidden"
                       >
-                        <p className="pl-10 pr-4 pb-6 text-muted-foreground leading-relaxed">{s.body}</p>
+                        <p className="pl-10 pr-4 pb-6 text-muted-foreground leading-relaxed text-xs">{s.body}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
