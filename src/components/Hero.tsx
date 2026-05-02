@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { RegistrationModal } from "./RegistrationModal";
+import { isRegistered } from "@/lib/registration";
 
 const navItems = [
   { label: "Über uns", href: "#about" },
