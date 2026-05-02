@@ -2,18 +2,19 @@ import { Reveal } from "./Reveal";
 import { CountUpStat } from "./CountUpStat";
 
 export const About = () => (
-  <section id="about" className="px-3 sm:px-5 py-16 sm:py-24">
+  <section id="about" className="px-3 sm:px-5 py-16 sm:py-24 text-left">
     <div className="max-w-7xl mx-auto px-3 sm:px-6">
       <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
         <Reveal>
           <span className="pill">Über uns</span>
           <h2 className="display mt-6 text-5xl sm:text-6xl lg:text-7xl">
-            Wir sind SmartRent!
+            Wer steckt hinter SmartRent?
           </h2>
         </Reveal>
         <Reveal delay={0.1}>
           <p className="text-lg text-foreground/80 leading-relaxed lg:pt-12">
-            Willkommen bei SmartRent, Ihren vertrauten Expert:innen für Wohnraum­modernisierung. Mit jahrelanger Erfahrung im Bau von Küchen, Bädern, Anbauten und mehr legen wir Wert auf erstklassige Handwerkskunst und ein nahtloses Kund:innen­erlebnis. Unsere Mission ist es, Ihre Vision zum Leben zu erwecken – mit klarer Kommunikation und kompetenter Beratung in jedem Schritt. Lassen Sie uns gemeinsam ein Zuhause schaffen, das Sie lieben werden.
+            Wir sind Levin, Alex, Elias und Kerstin – vier Studierenden der Digital- und Medienwirtschaft. Und wir stecken hinter SmartRent. Alles fing mit einem kleinen Brainstorming an. Und jetzt? 
+            Jetzt machen wir Dynamic Pricing für private Vermieter:innen in Deutschland einfach zugänglich: plattformübergreifend und verständlich. Unsere KI erklärt euch unsere Preisgestaltung.
           </p>
         </Reveal>
       </div>
