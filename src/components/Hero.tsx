@@ -23,7 +23,7 @@ export const Hero = () => {
           </nav>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-10 px-6 sm:px-10 pt-16 pb-10">
+        <div className="px-6 sm:px-10 pt-16 pb-10">
           <div className="flex flex-col justify-between min-h-[480px]">
             <div>
               <motion.h1
@@ -57,17 +57,6 @@ export const Hero = () => {
             </motion.div>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="relative rounded-[1.5rem] overflow-hidden min-h-[420px] lg:min-h-[560px]"
-          >
-            <img
-              src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=1400&q=80"
-              alt="Moderne Luxusküche von SmartRent"
-              className="absolute inset-0 h-full w-full object-cover"
-              loading="eager"
-            />
-          </motion.div>
         </div>
       </div>
     </section>
