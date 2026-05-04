@@ -823,34 +823,83 @@ const MonthGrid = ({
   );
 };
 
-const WeekRow = ({ days }: { days: DayRecommendation[] }) => (
-  <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
-    {days.map((d) => {
-      const date = new Date(d.datum);
-      return (
-        <article
-          key={d.datum}
-          className={cn(
-            "rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-0.5 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)] bg-black/50",
-            STATUS_BG[d.status],
-          )}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-wide text-white/70">
-              {format(date, "EEEE", { locale: de })}
-            </span>
-            <span className={cn("h-2 w-2 rounded-full", STATUS_DOT[d.status])} />
-          </div>
-          <div className="mt-1 text-sm text-white/80">{format(date, "dd. MMM", { locale: de })}</div>
-          <p className="mt-3 text-2xl font-semibold text-white">
-            {d.empfohlener_preis} €<span className="text-sm font-normal text-white/60">/Nacht</span>
-          </p>
-          <p className="mt-1 text-xs text-white/60">Auslastung: {d.auslastung}%</p>
-          <p className="mt-3 text-xs text-white/70 line-clamp-2">{d.reason}</p>
-        </article>
-      );
-    })}
-  </div>
-);
+// Wochenansicht: Karten sind klickbar – beim Klick erscheint inline die
+// Begründung („Warum dieser Preis?") für den jeweiligen Tag.
+const WeekRow = ({
+  days,
+  expandedDay,
+  onToggle,
+}: {
+  days: DayRecommendation[];
+  expandedDay: string | null;
+  onToggle: (datum: string) => void;
+}) => {
+  const reasons: Record<DayRecommendation["status"], string> = {
+    good: "Solide Marktnachfrage und stabile Buchungslage – wir empfehlen einen marktüblichen Preis.",
+    event: "In der Nähe findet ein Event statt – die Nachfrage steigt, ein höherer Preis ist gerechtfertigt.",
+    low: "Schwächere Nachfrage zu diesem Tag – ein leicht reduzierter Preis erhöht die Buchungswahrscheinlichkeit.",
+  };
+
+  return (
+    <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
+      {days.map((d) => {
+        const date = new Date(d.datum);
+        const isOpen = expandedDay === d.datum;
+        return (
+          <button
+            type="button"
+            key={d.datum}
+            onClick={() => onToggle(d.datum)}
+            aria-expanded={isOpen}
+            className={cn(
+              "text-left rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-0.5 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)] bg-black/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+              STATUS_BG[d.status],
+              isOpen && "ring-2 ring-white/70 -translate-y-1",
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs uppercase tracking-wide text-white/70">
+                {format(date, "EEEE", { locale: de })}
+              </span>
+              <span className={cn("h-2 w-2 rounded-full", STATUS_DOT[d.status])} />
+            </div>
+            <div className="mt-1 text-sm text-white/80">{format(date, "dd. MMM", { locale: de })}</div>
+            <p className="mt-3 text-2xl font-semibold text-white">
+              {d.empfohlener_preis} €<span className="text-sm font-normal text-white/60">/Nacht</span>
+            </p>
+            <p className="mt-1 text-xs text-white/60">Auslastung: {d.auslastung}%</p>
+            <p className="mt-3 text-xs text-white/70 line-clamp-2">{d.reason}</p>
+
+            <AnimatePresence initial={false}>
+              {isOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                  animate={{ height: "auto", opacity: 1, marginTop: 12 }}
+                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  className="overflow-hidden"
+                >
+                  <div className="border-t border-white/15 pt-3">
+                    <p className="text-[11px] uppercase tracking-wide text-white/50">Warum dieser Preis?</p>
+                    <p className="mt-1.5 text-xs leading-relaxed text-white/85">
+                      {reasons[d.status]}
+                    </p>
+                    {d.event && (
+                      <p className="mt-2 text-xs text-amber-200/90">📍 {d.event}</p>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <p className="mt-3 text-[10px] uppercase tracking-wider text-white/40">
+              {isOpen ? "Schließen" : "Details ansehen"}
+            </p>
+          </button>
+        );
+      })}
+    </div>
+  );
+};
 
 export default Preise;
