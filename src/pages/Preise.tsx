@@ -593,9 +593,7 @@ const Preise = () => {
                   Deine Preisempfehlung für {plz}
                 </h2>
                 <p className="mt-2 text-sm text-white/70">
-                  {resultsAnsicht === "monat"
-                    ? "30 Tage als Kalender-Grid mit Farbkodierung."
-                    : "7 Tage im Detail mit Empfehlung pro Tag."}
+                  7 Tage im Detail mit Empfehlung pro Tag.
                 </p>
 
                 {/* Legend */}
@@ -605,15 +603,8 @@ const Preise = () => {
                   <LegendDot className="bg-red-400/80" label="Schwache Nachfrage" />
                 </div>
 
-                {resultsAnsicht === "monat" ? (
-                  <MonthGrid
-                    days={results}
-                    expandedDay={expandedDay}
-                    onToggle={(d) => setExpandedDay((prev) => (prev === d ? null : d))}
-                  />
-                ) : (
-                  <WeekRow days={results} />
-                )}
+                {/* Nur noch Wochenansicht – Monatsübersicht entfernt */}
+                <WeekRow days={results} />
 
                 <div className="mt-10 rounded-2xl border border-white/10 bg-black/50 p-8 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
                   <h3 className="text-xl font-medium text-white">Warum empfehlen wir diese Preise?</h3>
