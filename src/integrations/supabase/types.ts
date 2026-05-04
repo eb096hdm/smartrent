@@ -14,36 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
-      registrations: {
+      profiles: {
         Row: {
           created_at: string
-          datenschutz_akzeptiert: boolean
-          email: string
-          geburtsdatum: string
+          geburtsdatum: string | null
           id: string
-          nachname: string
-          telefon: string
-          vorname: string
+          nachname: string | null
+          telefon: string | null
+          updated_at: string
+          user_id: string
+          vorname: string | null
         }
         Insert: {
           created_at?: string
-          datenschutz_akzeptiert?: boolean
-          email: string
-          geburtsdatum: string
+          geburtsdatum?: string | null
           id?: string
-          nachname: string
-          telefon: string
-          vorname: string
+          nachname?: string | null
+          telefon?: string | null
+          updated_at?: string
+          user_id: string
+          vorname?: string | null
         }
         Update: {
           created_at?: string
-          datenschutz_akzeptiert?: boolean
-          email?: string
-          geburtsdatum?: string
+          geburtsdatum?: string | null
           id?: string
-          nachname?: string
-          telefon?: string
-          vorname?: string
+          nachname?: string | null
+          telefon?: string | null
+          updated_at?: string
+          user_id?: string
+          vorname?: string | null
         }
         Relationships: []
       }

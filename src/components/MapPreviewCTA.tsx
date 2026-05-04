@@ -1,32 +1,20 @@
 // Karten-Vorschau-CTA: zeigt einen abgedunkelten/unscharfen Kartenausschnitt
-// mit Overlay und CTA-Button. Klick öffnet das Registrierungs-Modal — oder
-// leitet bereits registrierte Nutzer:innen direkt zur Karte weiter.
+// mit Overlay und CTA-Button. Klick führt direkt zur interaktiven Preise-Karte.
 
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapPin, ArrowRight } from "lucide-react";
-import { RegistrationModal } from "./RegistrationModal";
 import { Button } from "@/components/ui/button";
-import { isRegistered } from "@/lib/registration";
 import { Reveal } from "./Reveal";
 
 export const MapPreviewCTA = () => {
-  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-
-  const handleClick = () => {
-    if (isRegistered()) {
-      navigate("/preise");
-    } else {
-      setOpen(true);
-    }
-  };
+  const goToMap = () => navigate("/preise");
 
   return (
     <Reveal delay={0.2} className="mt-8">
       <button
         type="button"
-        onClick={handleClick}
+        onClick={goToMap}
         className="group relative block w-full overflow-hidden rounded-2xl border border-border bg-card transition-transform duration-500 hover:scale-[1.015] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         aria-label="Jetzt Preisempfehlung erhalten"
       >
@@ -40,7 +28,6 @@ export const MapPreviewCTA = () => {
           }}
           aria-hidden
         />
-        {/* Fallback-Pattern, falls externes Bild blockiert ist */}
         <div
           className="absolute inset-0 opacity-40"
           style={{
@@ -49,10 +36,8 @@ export const MapPreviewCTA = () => {
           }}
           aria-hidden
         />
-        {/* Dunkler Verlauf für Lesbarkeit */}
         <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/60 to-background/30" />
 
-        {/* Overlay-Inhalt */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 sm:p-10">
           <span className="pill mb-4 inline-flex items-center gap-1">
             <MapPin className="h-3.5 w-3.5" /> Interaktive Karte
@@ -68,7 +53,7 @@ export const MapPreviewCTA = () => {
             className="mt-6 group-hover:translate-y-[-2px] transition-transform"
             onClick={(e) => {
               e.stopPropagation();
-              handleClick();
+              goToMap();
             }}
           >
             Jetzt Preisempfehlung erhalten
@@ -76,8 +61,6 @@ export const MapPreviewCTA = () => {
           </Button>
         </div>
       </button>
-
-      <RegistrationModal open={open} onOpenChange={setOpen} />
     </Reveal>
   );
 };

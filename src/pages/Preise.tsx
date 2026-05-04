@@ -125,7 +125,7 @@ const Preise = () => {
   const [aktuellerPreis, setAktuellerPreis] = useState<number | "">("");
 
   // Step 2 fields
-  const [ansicht, setAnsicht] = useState<Ansicht>("monat");
+  const [ansicht] = useState<Ansicht>("woche");
   const [plattformen, setPlattformen] = useState<string[]>([]);
   const [aktualitaetspruefung, setAktualitaetspruefung] = useState(true);
   const [besonderheiten, setBesonderheiten] = useState<string[]>([]);
@@ -134,7 +134,7 @@ const Preise = () => {
   const [step2Error, setStep2Error] = useState<string | null>(null);
 
   const [results, setResults] = useState<DayRecommendation[] | null>(null);
-  const [resultsAnsicht, setResultsAnsicht] = useState<Ansicht>("monat");
+  const [resultsAnsicht, setResultsAnsicht] = useState<Ansicht>("woche");
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
   const [plzBoundary, setPlzBoundary] = useState<FeatureCollection | null>(null);
   const detailsRef = useRef<HTMLDivElement | null>(null);
@@ -504,39 +504,7 @@ const Preise = () => {
                           <p className="mt-2 text-sm text-white/70">Je mehr Details, desto genauer deine Preisempfehlung.</p>
 
                           <div className="mt-6 space-y-6">
-                            {/* Ansicht */}
-                            <div>
-                              <label className={labelCls}>Wie möchtest du deine Preisübersicht sehen?</label>
-                              <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                {([
-                                  { value: "woche" as const, title: "Wochenübersicht", sub: "7 Tage im Detail" },
-                                  { value: "monat" as const, title: "Monatsübersicht", sub: "30 Tage auf einen Blick" },
-                                ]).map((opt) => {
-                                  const active = ansicht === opt.value;
-                                  return (
-                                    <button
-                                      type="button"
-                                      key={opt.value}
-                                      onClick={() => setAnsicht(opt.value)}
-                                      className={cn(
-                                        "rounded-2xl px-5 py-4 text-left transition-all",
-                                        active
-                                          ? "border border-white bg-white/[0.08]"
-                                          : "border border-white/20 hover:border-white/40",
-                                      )}
-                                    >
-                                      <div className="text-sm font-medium text-white">{opt.title}</div>
-                                      <div className="mt-1 text-xs text-white/60">{opt.sub}</div>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                              <p className="mt-3 text-xs text-white/60">
-                                {ansicht === "woche"
-                                  ? "→ Du siehst 7 einzelne Tage mit Tagespreisen"
-                                  : "→ Du siehst alle 30 Tage als Kalender-Grid mit Farbkodierung"}
-                              </p>
-                            </div>
+                            {/* Ansicht ist fest auf Wochenübersicht (7 Tage) gesetzt – Monatsansicht wurde entfernt */}
 
                             {/* Plattformen */}
                             <div>
@@ -625,9 +593,7 @@ const Preise = () => {
                   Deine Preisempfehlung für {plz}
                 </h2>
                 <p className="mt-2 text-sm text-white/70">
-                  {resultsAnsicht === "monat"
-                    ? "30 Tage als Kalender-Grid mit Farbkodierung."
-                    : "7 Tage im Detail mit Empfehlung pro Tag."}
+                  7 Tage im Detail mit Empfehlung pro Tag.
                 </p>
 
                 {/* Legend */}
@@ -637,15 +603,8 @@ const Preise = () => {
                   <LegendDot className="bg-red-400/80" label="Schwache Nachfrage" />
                 </div>
 
-                {resultsAnsicht === "monat" ? (
-                  <MonthGrid
-                    days={results}
-                    expandedDay={expandedDay}
-                    onToggle={(d) => setExpandedDay((prev) => (prev === d ? null : d))}
-                  />
-                ) : (
-                  <WeekRow days={results} />
-                )}
+                {/* Nur noch Wochenansicht – Monatsübersicht entfernt */}
+                <WeekRow days={results} />
 
                 <div className="mt-10 rounded-2xl border border-white/10 bg-black/50 p-8 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
                   <h3 className="text-xl font-medium text-white">Warum empfehlen wir diese Preise?</h3>
