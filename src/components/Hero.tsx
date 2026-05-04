@@ -1,9 +1,8 @@
 import { motion } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { RegistrationModal } from "./RegistrationModal";
-import { isRegistered } from "@/lib/registration";
+import { ArrowUpRight, User } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
   { label: "Über uns", href: "#about" },
@@ -14,16 +13,17 @@ const navItems = [
 ];
 
 export const Hero = () => {
-  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const [isAuthed, setIsAuthed] = useState(false);
 
-  const handleClick = () => {
-    if (isRegistered()) {
-      navigate("/preise");
-    } else {
-      setOpen(true);
-    }
-  };
+  useEffect(() => {
+    // Auth-Status verfolgen, um Login/Profil-Buttons anzuzeigen
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsAuthed(!!session);
+    });
+    supabase.auth.getSession().then(({ data }) => setIsAuthed(!!data.session));
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   return (
     <section className="p-3 sm:p-5">
@@ -35,6 +35,13 @@ export const Hero = () => {
               <a key={n.href} href={n.href} className="nav-link">{n.label}</a>
             ))}
           </nav>
+          <Link
+            to={isAuthed ? "/profil" : "/auth"}
+            className="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white/90 hover:bg-white/10 transition-colors"
+          >
+            <User className="h-4 w-4" />
+            {isAuthed ? "Profil" : "Anmelden"}
+          </Link>
         </div>
 
         <div className="px-6 sm:px-10 pt-16 pb-10">
@@ -59,9 +66,10 @@ export const Hero = () => {
               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.6 }}
               className="mt-10"
             >
+              {/* Direkter Zugang zur Preise-Karte ohne Registrierungs-Gate */}
               <button
                 type="button"
-                onClick={handleClick}
+                onClick={() => navigate("/preise")}
                 className="group inline-flex items-center gap-3 rounded-full bg-white text-ink pl-6 pr-2 py-2 text-sm font-medium transition-all duration-300 hover:gap-4 hover:bg-white/90"
               >
                 Jetzt Preise festlegen
@@ -74,7 +82,6 @@ export const Hero = () => {
 
         </div>
       </div>
-      <RegistrationModal open={open} onOpenChange={setOpen} />
     </section>
   );
 };

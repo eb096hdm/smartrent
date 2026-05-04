@@ -7,6 +7,8 @@ import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Preise from "./pages/Preise.tsx";
 import Datenschutz from "./pages/Datenschutz.tsx";
+import Auth from "./pages/Auth.tsx";
+import Profil from "./pages/Profil.tsx";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +22,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/preise" element={<Preise />} />
           <Route path="/datenschutz" element={<Datenschutz />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/profil" element={<Profil />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
