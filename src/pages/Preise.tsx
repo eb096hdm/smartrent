@@ -603,15 +603,14 @@ const Preise = () => {
                   <LegendDot className="bg-red-400/80" label="Schwache Nachfrage" />
                 </div>
 
-                {/* Nur noch Wochenansicht – Monatsübersicht entfernt */}
-                <WeekRow days={results} />
+                {/* Klickbare Wochenansicht – Details (Begründung) erscheinen inline beim Klick */}
+                <WeekRow
+                  days={results}
+                  expandedDay={expandedDay}
+                  onToggle={(d) => setExpandedDay((prev) => (prev === d ? null : d))}
+                />
 
-                <div className="mt-10 rounded-2xl border border-white/10 bg-black/50 p-8 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
-                  <h3 className="text-xl font-medium text-white">Warum empfehlen wir diese Preise?</h3>
-                  <p className="mt-3 text-sm text-white/70">
-                    In Kürze erklärt dir unsere KI im Detail, wie Standortdaten, saisonale
-                    Nachfrage und lokale Events deine Preisempfehlung beeinflussen.
-                  </p>
+                <div className="mt-8 flex justify-center">
                   <PrimaryButton type="button" onClick={resetToDetails}>Preise anpassen</PrimaryButton>
                 </div>
               </motion.div>
