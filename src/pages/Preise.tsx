@@ -802,10 +802,12 @@ const WeekResults = ({
 
   const highlight = (text: string) => {
     if (!text) return text;
-    const parts = text.split(new RegExp(`(${data.best_day}|${data.worst_day})`, "g"));
+    const tokens = [data.best_day, data.worst_day].filter(Boolean) as string[];
+    if (tokens.length === 0) return <span>{text}</span>;
+    const parts = text.split(new RegExp(`(${tokens.join("|")})`, "g"));
     return parts.map((p, i) =>
-      p === data.best_day ? <span key={i} className="text-emerald-300 font-medium">{p}</span> :
-      p === data.worst_day ? <span key={i} className="text-red-300 font-medium">{p}</span> :
+      p && p === data.best_day ? <span key={i} className="text-emerald-300 font-medium">{p}</span> :
+      p && p === data.worst_day ? <span key={i} className="text-red-300 font-medium">{p}</span> :
       <span key={i}>{p}</span>
     );
   };
