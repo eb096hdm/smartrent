@@ -126,27 +126,16 @@ const Preise = () => {
 
   // Step 2 fields
   const [ansicht] = useState<Ansicht>("woche");
-  const weekOptions = useMemo(() => {
+  const initialMonday = useMemo(() => {
     const today = new Date();
-    const dow = today.getDay(); // 0=Sun..6=Sat
-    const offsetToMonday = (dow + 6) % 7;
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - offsetToMonday);
-    monday.setHours(0, 0, 0, 0);
-    return Array.from({ length: 6 }).map((_, i) => {
-      const start = addDays(monday, i * 7);
-      const end = addDays(start, 6);
-      const value = format(start, "yyyy-MM-dd");
-      const label =
-        i === 0
-          ? `Diese Woche (${format(start, "d. MMM", { locale: de })} – ${format(end, "d. MMM", { locale: de })})`
-          : i === 1
-            ? `Nächste Woche (${format(start, "d. MMM", { locale: de })} – ${format(end, "d. MMM", { locale: de })})`
-            : `${format(start, "d. MMM", { locale: de })} – ${format(end, "d. MMM yyyy", { locale: de })}`;
-      return { value, label };
-    });
+    const dow = today.getDay();
+    const offset = (dow + 6) % 7;
+    const m = new Date(today);
+    m.setDate(today.getDate() - offset);
+    m.setHours(0, 0, 0, 0);
+    return m;
   }, []);
-  const [woche, setWoche] = useState<string>(weekOptions[0].value);
+  const [wocheDate, setWocheDate] = useState<Date>(initialMonday);
   const [plattformen, setPlattformen] = useState<string[]>([]);
   const [aktualitaetspruefung, setAktualitaetspruefung] = useState(true);
   const [besonderheiten, setBesonderheiten] = useState<string[]>([]);
