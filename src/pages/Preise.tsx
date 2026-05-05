@@ -526,7 +526,22 @@ const Preise = () => {
                           <p className="mt-2 text-sm text-white/70">Je mehr Details, desto genauer deine Preisempfehlung.</p>
 
                           <div className="mt-6 space-y-6">
-                            {/* Ansicht ist fest auf Wochenübersicht (7 Tage) gesetzt – Monatsansicht wurde entfernt */}
+                            {/* Woche auswählen */}
+                            <div>
+                              <label htmlFor="woche" className={labelCls}>Welche Woche möchtest du analysieren?</label>
+                              <select
+                                id="woche"
+                                value={woche}
+                                onChange={(e) => setWoche(e.target.value)}
+                                className={cn(inputCls, "appearance-none pr-10 bg-[hsl(var(--ink))]")}
+                              >
+                                {weekOptions.map((opt) => (
+                                  <option key={opt.value} value={opt.value} className="bg-[hsl(var(--ink))] text-white">
+                                    {opt.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
 
                             {/* Plattformen */}
                             <div>
