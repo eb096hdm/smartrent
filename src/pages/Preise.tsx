@@ -10,6 +10,7 @@ type FeatureCollection = any;
 import "leaflet/dist/leaflet.css";
 import { Footer } from "@/components/Footer";
 import { Switch } from "@/components/ui/switch";
+import { WeekPicker } from "@/components/WeekPicker";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -126,27 +127,16 @@ const Preise = () => {
 
   // Step 2 fields
   const [ansicht] = useState<Ansicht>("woche");
-  const weekOptions = useMemo(() => {
+  const initialMonday = useMemo(() => {
     const today = new Date();
-    const dow = today.getDay(); // 0=Sun..6=Sat
-    const offsetToMonday = (dow + 6) % 7;
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - offsetToMonday);
-    monday.setHours(0, 0, 0, 0);
-    return Array.from({ length: 6 }).map((_, i) => {
-      const start = addDays(monday, i * 7);
-      const end = addDays(start, 6);
-      const value = format(start, "yyyy-MM-dd");
-      const label =
-        i === 0
-          ? `Diese Woche (${format(start, "d. MMM", { locale: de })} – ${format(end, "d. MMM", { locale: de })})`
-          : i === 1
-            ? `Nächste Woche (${format(start, "d. MMM", { locale: de })} – ${format(end, "d. MMM", { locale: de })})`
-            : `${format(start, "d. MMM", { locale: de })} – ${format(end, "d. MMM yyyy", { locale: de })}`;
-      return { value, label };
-    });
+    const dow = today.getDay();
+    const offset = (dow + 6) % 7;
+    const m = new Date(today);
+    m.setDate(today.getDate() - offset);
+    m.setHours(0, 0, 0, 0);
+    return m;
   }, []);
-  const [woche, setWoche] = useState<string>(weekOptions[0].value);
+  const [wocheDate, setWocheDate] = useState<Date>(initialMonday);
   const [plattformen, setPlattformen] = useState<string[]>([]);
   const [aktualitaetspruefung, setAktualitaetspruefung] = useState(true);
   const [besonderheiten, setBesonderheiten] = useState<string[]>([]);
@@ -251,7 +241,7 @@ const Preise = () => {
       komfort,
       aktueller_preis: Number(aktuellerPreis),
       ansicht,
-      woche_start: woche,
+      woche_start: format(wocheDate, "yyyy-MM-dd"),
       plattformen,
       aktualitaetspruefung,
       besonderheiten,
@@ -528,19 +518,8 @@ const Preise = () => {
                           <div className="mt-6 space-y-6">
                             {/* Woche auswählen */}
                             <div>
-                              <label htmlFor="woche" className={labelCls}>Welche Woche möchtest du analysieren?</label>
-                              <select
-                                id="woche"
-                                value={woche}
-                                onChange={(e) => setWoche(e.target.value)}
-                                className={cn(inputCls, "appearance-none pr-10 bg-[hsl(var(--ink))]")}
-                              >
-                                {weekOptions.map((opt) => (
-                                  <option key={opt.value} value={opt.value} className="bg-[hsl(var(--ink))] text-white">
-                                    {opt.label}
-                                  </option>
-                                ))}
-                              </select>
+                              <label className={labelCls}>Welche Woche möchtest du analysieren?</label>
+                              <WeekPicker value={wocheDate} onChange={setWocheDate} minDate={initialMonday} />
                             </div>
 
                             {/* Plattformen */}
