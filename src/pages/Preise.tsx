@@ -945,12 +945,14 @@ const WeekResults = ({
                   <p className="mt-1 text-sm text-amber-100">{open.active_events.join(", ")}</p>
                 </div>
               )}
-              <p className={cn(
-                "mt-4 text-sm font-medium",
-                open.change_pct > 0 ? "text-emerald-300" : open.change_pct < 0 ? "text-red-300" : "text-white/70"
-              )}>
-                {open.change_pct > 0 ? "+" : ""}{open.change_pct}% {open.change_pct >= 0 ? "über" : "unter"} deinem aktuellen Preis
-              </p>
+              {typeof open.change_pct === "number" && (
+                <p className={cn(
+                  "mt-4 text-sm font-medium",
+                  open.change_pct > 0 ? "text-emerald-300" : open.change_pct < 0 ? "text-red-300" : "text-white/70"
+                )}>
+                  {open.change_pct > 0 ? "+" : ""}{open.change_pct}% {open.change_pct >= 0 ? "über" : "unter"} deinem aktuellen Preis
+                </p>
+              )}
             </>
           )}
         </DialogContent>
