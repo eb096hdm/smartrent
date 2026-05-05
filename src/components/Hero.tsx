@@ -3,6 +3,7 @@ import { ArrowUpRight, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import heroBg from "@/assets/hero-apartment.jpg";
 
 const navItems = [
   { label: "Leistungen", href: "#services" },
@@ -27,7 +28,15 @@ export const Hero = () => {
   return (
     <section className="p-3 sm:p-5">
       <div className="relative overflow-hidden rounded-[2rem] bg-ink text-ink-foreground">
-        <div className="flex items-center justify-between px-6 sm:px-10 pt-8">
+        <img
+          src={heroBg}
+          alt="Gemütliche, sonnendurchflutete Wohnung mit Laptop und Preisdaten"
+          width={1920}
+          height={1080}
+          className="absolute inset-0 h-full w-full object-cover opacity-60"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/50 to-ink/80" />
+        <div className="relative flex items-center justify-between px-6 sm:px-10 pt-8">
           <a href="#" className="text-2xl font-semibold tracking-tight">SmartRent</a>
           <nav className="hidden md:flex items-center gap-8">
             {navItems.map((n) => (
@@ -43,7 +52,7 @@ export const Hero = () => {
           </Link>
         </div>
 
-        <div className="px-6 sm:px-10 pt-16 pb-10">
+        <div className="relative px-6 sm:px-10 pt-16 pb-10">
           <div className="flex flex-col items-center justify-center min-h-[480px]">
             <div className="text-center">
               <motion.h1
