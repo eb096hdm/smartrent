@@ -304,7 +304,7 @@ const Preise = () => {
     };
 
     try {
-      let data: WeekResponse;
+      let data: WeekResponse | null = null;
       if (MAKE_WEBHOOK_URL) {
         const r = await fetch(MAKE_WEBHOOK_URL, {
           method: "POST",
@@ -312,9 +312,20 @@ const Preise = () => {
           body: JSON.stringify(payload),
         });
         if (!r.ok) throw new Error("Webhook error");
-        data = (await r.json()) as WeekResponse;
-      } else {
-        await new Promise((res) => setTimeout(res, 900));
+        const text = await r.text();
+        try {
+          const parsed = JSON.parse(text) as WeekResponse;
+          if (parsed && Array.isArray(parsed.days) && parsed.days.length > 0) {
+            data = parsed;
+          } else {
+            console.warn("Webhook returned empty/invalid data, using mock fallback", text);
+          }
+        } catch (err) {
+          console.warn("Webhook returned non-JSON, using mock fallback", text, err);
+        }
+      }
+      if (!data) {
+        await new Promise((res) => setTimeout(res, 400));
         data = buildMockResponse(Number(aktuellerPreis) || 90, wocheDate);
       }
       setResults(data);
