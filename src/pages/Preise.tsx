@@ -432,16 +432,18 @@ const Preise = () => {
       <div className="fixed inset-0 z-[1] bg-black/25 pointer-events-none" aria-hidden="true" />
 
       <div className="relative z-[2]">
-        <div className="flex items-center justify-between px-6 sm:px-10 pt-8">
-          <a href="/" className="text-2xl font-semibold tracking-tight">SmartRent</a>
-          <nav className="hidden md:flex items-center gap-8">
-            {navItems.map((n) => (
-              <a key={n.href} href={n.href} className="nav-link">{n.label}</a>
-            ))}
-          </nav>
-        </div>
+        <header className="fixed top-0 inset-x-0 z-50 bg-black/40 [backdrop-filter:blur(10px)] [-webkit-backdrop-filter:blur(10px)] border-b border-white/10 shadow-[0_2px_20px_rgba(0,0,0,0.25)]">
+          <div className="flex items-center justify-between px-6 sm:px-10 py-4">
+            <a href="/" className="text-2xl font-semibold tracking-tight">SmartRent</a>
+            <nav className="hidden md:flex items-center gap-8">
+              {navItems.map((n) => (
+                <a key={n.href} href={n.href} className="nav-link">{n.label}</a>
+              ))}
+            </nav>
+          </div>
+        </header>
 
-        <div className="flex flex-col items-center gap-8 px-4 sm:px-10 py-16 min-h-screen">
+        <div className="flex flex-col items-center gap-8 px-4 sm:px-10 pt-28 pb-16 min-h-screen">
           {/* PLZ panel */}
           <motion.div
             layout
