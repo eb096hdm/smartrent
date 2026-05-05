@@ -331,7 +331,7 @@ const Preise = () => {
       setResults(data);
       setOpenDayIdx(null);
       setStep("results");
-      setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 200);
+      setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
     } catch {
       setStep("error");
     }
