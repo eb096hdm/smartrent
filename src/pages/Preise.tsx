@@ -28,13 +28,51 @@ const PLZ_ZOOM = 11;
 
 const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/i1mew6hs760cdj6jhllf9ww6677v1yea";
 
-type DayRecommendation = {
-  datum: string; // ISO yyyy-MM-dd
-  empfohlener_preis: number;
-  auslastung: number; // 0-100
-  status: "good" | "event" | "low";
-  event?: string;
-  reason?: string;
+type DotColor = "green" | "yellow" | "red";
+type CardColor = "red" | "orange" | "green" | "blue";
+
+type DayCard = {
+  weekday: string;
+  label: string;
+  price: string;
+  change_pct: number;
+  dot: DotColor;
+  dot_label: string;
+  card_color: CardColor;
+  occupancy: number;
+  card_text: string;
+  detail_text: string;
+  active_events?: string[];
+};
+
+type Competitor = {
+  type: string;
+  size: number;
+  price: number;
+  quality: string;
+  platform: string;
+  distance: number;
+};
+
+type EventItem = {
+  name?: string;
+  date?: string;
+  description?: string;
+  [k: string]: unknown;
+};
+
+type WeekResponse = {
+  days: DayCard[];
+  summary: string;
+  top_event: string | null;
+  week_avg: number;
+  best_day: string;
+  worst_day: string;
+  market_avg: number;
+  market_min: number;
+  market_max: number;
+  competitors: Competitor[];
+  events: EventItem[];
 };
 
 type Ansicht = "woche" | "monat";
