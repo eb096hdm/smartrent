@@ -775,187 +775,191 @@ const NumberStepper = ({
   );
 };
 
-const STATUS_BG: Record<DayRecommendation["status"], string> = {
-  good: "bg-emerald-400/15 border-emerald-400/40 hover:border-emerald-300/70",
-  event: "bg-amber-400/15 border-amber-400/40 hover:border-amber-300/70",
-  low: "bg-red-400/15 border-red-400/40 hover:border-red-300/70",
+const CARD_BORDER: Record<CardColor, string> = {
+  red: "#7F1D1D",
+  orange: "#78350F",
+  green: "#14532D",
+  blue: "#1E3A5F",
 };
-const STATUS_DOT: Record<DayRecommendation["status"], string> = {
-  good: "bg-emerald-400",
-  event: "bg-amber-400",
-  low: "bg-red-400",
-};
-const STATUS_LABEL: Record<DayRecommendation["status"], string> = {
-  good: "Gute Auslastung — Preis halten",
-  event: "Event in der Nähe — Preis erhöhen",
-  low: "Schwache Nachfrage — Preis senken",
+const DOT_BG: Record<DotColor, string> = {
+  green: "#22C55E",
+  yellow: "#EAB308",
+  red: "#EF4444",
 };
 
-const LegendDot = ({ className, label }: { className: string; label: string }) => (
-  <span className="inline-flex items-center gap-2">
-    <span className={cn("h-2.5 w-2.5 rounded-full", className)} />
-    {label}
-  </span>
-);
-
-const MonthGrid = ({
-  days, expandedDay, onToggle,
+const WeekResults = ({
+  data,
+  plz,
+  openDayIdx,
+  setOpenDayIdx,
 }: {
-  days: DayRecommendation[];
-  expandedDay: string | null;
-  onToggle: (d: string) => void;
+  data: WeekResponse;
+  plz: string;
+  openDayIdx: number | null;
+  setOpenDayIdx: (i: number | null) => void;
 }) => {
-  const expanded = useMemo(() => days.find((d) => d.datum === expandedDay) ?? null, [days, expandedDay]);
-  return (
-    <div className="mt-8">
-      <div className="rounded-2xl border border-white/10 bg-black/50 p-5 sm:p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
-        <div className="grid grid-cols-5 sm:grid-cols-7 lg:grid-cols-10 gap-2">
-          {days.map((d) => {
-            const date = new Date(d.datum);
-            const active = expandedDay === d.datum;
-            return (
-              <button
-                key={d.datum}
-                type="button"
-                onClick={() => onToggle(d.datum)}
-                className={cn(
-                  "rounded-lg border px-2 py-2 text-left transition-all",
-                  STATUS_BG[d.status],
-                  active && "ring-2 ring-white/70",
-                )}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase tracking-wide text-white/70">
-                    {format(date, "EE", { locale: de })}
-                  </span>
-                  <span className={cn("h-1.5 w-1.5 rounded-full", STATUS_DOT[d.status])} />
-                </div>
-                <div className="mt-0.5 text-sm font-medium text-white">{format(date, "dd.MM.")}</div>
-                <div className="mt-1 text-sm font-semibold text-white">{d.empfohlener_preis} €</div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+  const open = openDayIdx !== null ? data.days[openDayIdx] : null;
 
-      <AnimatePresence initial={false}>
-        {expanded && (
-          <motion.div
-            key={expanded.datum}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 6 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="mt-4 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]"
-          >
-            <div className="flex items-center gap-3">
-              <span className={cn("h-2.5 w-2.5 rounded-full", STATUS_DOT[expanded.status])} />
-              <h4 className="text-base font-medium text-white">
-                {format(new Date(expanded.datum), "EEEE, dd. MMMM yyyy", { locale: de })}
-              </h4>
-            </div>
-            <p className="mt-2 text-sm text-white/70">{STATUS_LABEL[expanded.status]}</p>
-            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-              <div>
-                <div className="text-xs text-white/60">Empfohlener Preis</div>
-                <div className="mt-1 text-lg font-semibold text-white">{expanded.empfohlener_preis} €</div>
-              </div>
-              <div>
-                <div className="text-xs text-white/60">Auslastung</div>
-                <div className="mt-1 text-lg font-semibold text-white">{expanded.auslastung}%</div>
-              </div>
-              <div>
-                <div className="text-xs text-white/60">Event</div>
-                <div className="mt-1 text-sm text-white/80">{expanded.event ?? "—"}</div>
-              </div>
-            </div>
-            <p className="mt-4 text-xs text-white/50">
-              Konkurrenzpreise und detaillierte Event-Daten folgen in Kürze.
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
-// Wochenansicht: Karten sind klickbar – beim Klick erscheint inline die
-// Begründung („Warum dieser Preis?") für den jeweiligen Tag.
-const WeekRow = ({
-  days,
-  expandedDay,
-  onToggle,
-}: {
-  days: DayRecommendation[];
-  expandedDay: string | null;
-  onToggle: (datum: string) => void;
-}) => {
-  const reasons: Record<DayRecommendation["status"], string> = {
-    good: "Solide Marktnachfrage und stabile Buchungslage – wir empfehlen einen marktüblichen Preis.",
-    event: "In der Nähe findet ein Event statt – die Nachfrage steigt, ein höherer Preis ist gerechtfertigt.",
-    low: "Schwächere Nachfrage zu diesem Tag – ein leicht reduzierter Preis erhöht die Buchungswahrscheinlichkeit.",
+  const highlight = (text: string) => {
+    if (!text) return text;
+    const parts = text.split(new RegExp(`(${data.best_day}|${data.worst_day})`, "g"));
+    return parts.map((p, i) =>
+      p === data.best_day ? <span key={i} className="text-emerald-300 font-medium">{p}</span> :
+      p === data.worst_day ? <span key={i} className="text-red-300 font-medium">{p}</span> :
+      <span key={i}>{p}</span>
+    );
   };
 
   return (
-    <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
-      {days.map((d) => {
-        const date = new Date(d.datum);
-        const isOpen = expandedDay === d.datum;
-        return (
+    <>
+      <h2 className="display text-3xl sm:text-4xl text-white">
+        Deine Preisempfehlung für {plz}
+      </h2>
+      <p className="mt-2 text-sm text-white/70">
+        7 Tage im Detail – klicke auf eine Karte für die Begründung.
+      </p>
+
+      {/* 7 Day cards */}
+      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
+        {data.days.map((d, i) => (
           <button
             type="button"
-            key={d.datum}
-            onClick={() => onToggle(d.datum)}
-            aria-expanded={isOpen}
-            className={cn(
-              "text-left rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-0.5 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)] bg-black/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
-              STATUS_BG[d.status],
-              isOpen && "ring-2 ring-white/70 -translate-y-1",
-            )}
+            key={i}
+            onClick={() => setOpenDayIdx(i)}
+            className="text-left rounded-2xl border-2 p-5 transition-all duration-300 hover:-translate-y-0.5 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)] bg-black/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            style={{ borderColor: CARD_BORDER[d.card_color] }}
           >
-            <div className="flex items-center justify-between">
-              <span className="text-xs uppercase tracking-wide text-white/70">
-                {format(date, "EEEE", { locale: de })}
-              </span>
-              <span className={cn("h-2 w-2 rounded-full", STATUS_DOT[d.status])} />
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-xs uppercase tracking-wide text-white/70">{d.weekday}</span>
+              <span
+                className="h-2.5 w-2.5 rounded-full mt-1 shrink-0"
+                style={{ backgroundColor: DOT_BG[d.dot] }}
+                title={d.dot_label}
+              />
             </div>
-            <div className="mt-1 text-sm text-white/80">{format(date, "dd. MMM", { locale: de })}</div>
-            <p className="mt-3 text-2xl font-semibold text-white">
-              {d.empfohlener_preis} €<span className="text-sm font-normal text-white/60">/Nacht</span>
-            </p>
-            <p className="mt-1 text-xs text-white/60">Auslastung: {d.auslastung}%</p>
-            <p className="mt-3 text-xs text-white/70 line-clamp-2">{d.reason}</p>
-
-            <AnimatePresence initial={false}>
-              {isOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0, marginTop: 0 }}
-                  animate={{ height: "auto", opacity: 1, marginTop: 12 }}
-                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
-                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                  className="overflow-hidden"
-                >
-                  <div className="border-t border-white/15 pt-3">
-                    <p className="text-[11px] uppercase tracking-wide text-white/50">Warum dieser Preis?</p>
-                    <p className="mt-1.5 text-xs leading-relaxed text-white/85">
-                      {reasons[d.status]}
-                    </p>
-                    {d.event && (
-                      <p className="mt-2 text-xs text-amber-200/90">📍 {d.event}</p>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <p className="mt-3 text-[10px] uppercase tracking-wider text-white/40">
-              {isOpen ? "Schließen" : "Details ansehen"}
-            </p>
+            <div className="mt-1 text-sm text-white/80">{d.label}</div>
+            <p className="mt-3 text-2xl font-semibold text-white leading-tight">{d.price}</p>
+            <p className="mt-1 text-xs text-white/60">Auslastung: {d.occupancy}%</p>
+            <p className="mt-3 text-xs text-white/70 line-clamp-2">{d.card_text}</p>
+            <p className="mt-3 text-[10px] uppercase tracking-wider text-white/40">Details ansehen</p>
           </button>
-        );
-      })}
-    </div>
+        ))}
+      </div>
+
+      {/* Summary */}
+      <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
+        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+          <div>
+            <div className="text-xs text-white/60">Wochen-Durchschnitt</div>
+            <div className="text-2xl font-semibold text-white">{data.week_avg} €</div>
+          </div>
+          {data.top_event && (
+            <div className="rounded-full bg-amber-400/15 border border-amber-400/40 px-4 py-1.5 text-xs text-amber-200">
+              📍 {data.top_event}
+            </div>
+          )}
+        </div>
+        <p className="mt-4 text-sm text-white/80 leading-relaxed">{highlight(data.summary)}</p>
+      </div>
+
+      {/* Market section */}
+      <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
+        <h3 className="text-lg font-medium text-white">Konkurrenz im Markt</h3>
+        <div className="mt-4 grid grid-cols-3 gap-4">
+          <Stat label="Ø Markt" value={`${data.market_avg} €`} />
+          <Stat label="Min" value={`${data.market_min} €`} />
+          <Stat label="Max" value={`${data.market_max} €`} />
+        </div>
+        {data.competitors?.length > 0 && (
+          <div className="mt-5 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs text-white/50 border-b border-white/10">
+                  <th className="py-2 pr-3 font-normal">Typ</th>
+                  <th className="py-2 pr-3 font-normal">Größe</th>
+                  <th className="py-2 pr-3 font-normal">Preis</th>
+                  <th className="py-2 pr-3 font-normal">Qualität</th>
+                  <th className="py-2 pr-3 font-normal">Plattform</th>
+                  <th className="py-2 pr-3 font-normal">Distanz</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.competitors.map((c, i) => (
+                  <tr key={i} className="border-b border-white/5 text-white/85">
+                    <td className="py-2 pr-3">{c.type}</td>
+                    <td className="py-2 pr-3">{c.size} m²</td>
+                    <td className="py-2 pr-3">{c.price} €</td>
+                    <td className="py-2 pr-3">{c.quality}</td>
+                    <td className="py-2 pr-3">{c.platform}</td>
+                    <td className="py-2 pr-3">{c.distance} km</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Events */}
+      {data.events?.length > 0 && (
+        <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
+          <h3 className="text-lg font-medium text-white">Events diese Woche</h3>
+          <ul className="mt-3 space-y-2">
+            {data.events.map((e, i) => (
+              <li key={i} className="text-sm text-white/80">
+                <span className="text-white font-medium">{e.name ?? "Event"}</span>
+                {e.date && <span className="text-white/50"> · {e.date}</span>}
+                {e.description && <span className="text-white/60"> – {e.description}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Day modal */}
+      <Dialog open={open !== null} onOpenChange={(o) => !o && setOpenDayIdx(null)}>
+        <DialogContent className="bg-black/90 border-white/10 text-white max-w-lg [backdrop-filter:blur(12px)] [-webkit-backdrop-filter:blur(12px)]">
+          {open && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-3 text-white">
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: DOT_BG[open.dot] }}
+                  />
+                  {open.weekday} · {open.label}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="mt-2">
+                <p className="text-3xl font-semibold text-white">{open.price}</p>
+                <p className="mt-1 text-xs text-white/60">{open.dot_label} · Auslastung {open.occupancy}%</p>
+              </div>
+              <p className="mt-3 text-sm text-white/85 leading-relaxed">{open.detail_text}</p>
+              {open.active_events && open.active_events.length > 0 && (
+                <div className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/10 p-3">
+                  <p className="text-xs uppercase tracking-wide text-amber-200/80">Aktive Events</p>
+                  <p className="mt-1 text-sm text-amber-100">{open.active_events.join(", ")}</p>
+                </div>
+              )}
+              <p className={cn(
+                "mt-4 text-sm font-medium",
+                open.change_pct > 0 ? "text-emerald-300" : open.change_pct < 0 ? "text-red-300" : "text-white/70"
+              )}>
+                {open.change_pct > 0 ? "+" : ""}{open.change_pct}% {open.change_pct >= 0 ? "über" : "unter"} deinem aktuellen Preis
+              </p>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
+
+const Stat = ({ label, value }: { label: string; value: string }) => (
+  <div>
+    <div className="text-xs text-white/60">{label}</div>
+    <div className="mt-1 text-lg font-semibold text-white">{value}</div>
+  </div>
+);
 
 export default Preise;
