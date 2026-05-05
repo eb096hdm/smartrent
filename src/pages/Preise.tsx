@@ -304,7 +304,7 @@ const Preise = () => {
     };
 
     try {
-      let data: DayRecommendation[];
+      let data: WeekResponse;
       if (MAKE_WEBHOOK_URL) {
         const r = await fetch(MAKE_WEBHOOK_URL, {
           method: "POST",
@@ -312,14 +312,13 @@ const Preise = () => {
           body: JSON.stringify(payload),
         });
         if (!r.ok) throw new Error("Webhook error");
-        data = (await r.json()) as DayRecommendation[];
+        data = (await r.json()) as WeekResponse;
       } else {
         await new Promise((res) => setTimeout(res, 900));
-        data = buildMockResponse(ansicht, Number(aktuellerPreis) || 90);
+        data = buildMockResponse(Number(aktuellerPreis) || 90, wocheDate);
       }
       setResults(data);
-      setResultsAnsicht(ansicht);
-      setExpandedDay(null);
+      setOpenDayIdx(null);
       setStep("results");
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 200);
     } catch {
