@@ -240,7 +240,7 @@ const Preise = () => {
       komfort,
       aktueller_preis: Number(aktuellerPreis),
       ansicht,
-      woche_start: woche,
+      woche_start: format(wocheDate, "yyyy-MM-dd"),
       plattformen,
       aktualitaetspruefung,
       besonderheiten,
