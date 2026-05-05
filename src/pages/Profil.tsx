@@ -41,7 +41,7 @@ const Profil = () => {
 
       const { data: p, error } = await supabase
         .from("profiles")
-        .select("vorname,nachname,telefon,geburtsdatum")
+        .select("vorname,nachname")
         .eq("user_id", session.user.id)
         .maybeSingle();
       if (error) {
@@ -50,8 +50,6 @@ const Profil = () => {
         setProfile({
           vorname: p.vorname ?? "",
           nachname: p.nachname ?? "",
-          telefon: p.telefon ?? "",
-          geburtsdatum: p.geburtsdatum ?? "",
         });
       }
       setLoading(false);
