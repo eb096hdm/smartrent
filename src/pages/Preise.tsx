@@ -64,15 +64,15 @@ type EventItem = {
 type WeekResponse = {
   days: DayCard[];
   summary: string;
-  top_event: string | null;
-  week_avg: number;
-  best_day: string;
-  worst_day: string;
   market_avg: number;
-  market_min: number;
-  market_max: number;
   competitors: Competitor[];
   events: EventItem[];
+  top_event?: string | null;
+  week_avg?: number;
+  best_day?: string;
+  worst_day?: string;
+  market_min?: number;
+  market_max?: number;
 };
 
 type Ansicht = "woche" | "monat";
