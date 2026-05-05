@@ -5,7 +5,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
-  { label: "Über uns", href: "#about" },
   { label: "Leistungen", href: "#services" },
   { label: "Referenzen", href: "#testimonials" },
   { label: "FAQs", href: "#faqs" },
