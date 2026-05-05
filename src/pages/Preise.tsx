@@ -31,6 +31,13 @@ const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/i1mew6hs760cdj6jhllf9ww6677v
 type DotColor = "green" | "yellow" | "red";
 type CardColor = "red" | "orange" | "green" | "blue";
 
+type Factors = {
+  saison?: number | string;
+  event?: number | string;
+  konkurrenz?: number | string;
+  komfort?: number | string;
+};
+
 type DayCard = {
   weekday: string;
   label: string;
@@ -38,41 +45,53 @@ type DayCard = {
   dot: DotColor;
   dot_label: string;
   card_color: CardColor;
-  occupancy: number;
+  occupancy: string;
   card_text: string;
   detail_text: string;
   active_events?: string[];
-  change_pct?: number;
+  change_label?: string;
+  factors?: Factors;
 };
 
 type Competitor = {
   type: string;
-  size: number;
-  price: number;
+  size_sqm: string | number;
+  price: string | number;
   quality: string;
   platform: string;
-  distance: number;
+  distance_km: string | number;
 };
 
 type EventItem = {
   name?: string;
   date?: string;
   description?: string;
+  impact?: string;
   [k: string]: unknown;
+};
+
+type SummaryBlock = {
+  week_avg?: string | number;
+  top_event?: string | null;
+  top_event_day?: string | null;
+  text?: string;
+  best_day?: string;
+  worst_day?: string;
+};
+
+type MarketBlock = {
+  avg?: string | number;
+  min?: string | number;
+  max?: string | number;
+  level?: string;
+  competitors?: Competitor[];
 };
 
 type WeekResponse = {
   days: DayCard[];
-  summary: string;
-  market_avg: number;
-  competitors: Competitor[];
+  summary: SummaryBlock;
+  market: MarketBlock;
   events: EventItem[];
-  top_event?: string | null;
-  week_avg?: number;
-  best_day?: string;
-  worst_day?: string;
-  market_min?: number;
-  market_max?: number;
 };
 
 type Ansicht = "woche" | "monat";
