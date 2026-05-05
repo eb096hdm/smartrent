@@ -201,9 +201,8 @@ const Preise = () => {
   const [step1Error, setStep1Error] = useState<string | null>(null);
   const [step2Error, setStep2Error] = useState<string | null>(null);
 
-  const [results, setResults] = useState<DayRecommendation[] | null>(null);
-  const [resultsAnsicht, setResultsAnsicht] = useState<Ansicht>("woche");
-  const [expandedDay, setExpandedDay] = useState<string | null>(null);
+  const [results, setResults] = useState<WeekResponse | null>(null);
+  const [openDayIdx, setOpenDayIdx] = useState<number | null>(null);
   const [plzBoundary, setPlzBoundary] = useState<FeatureCollection | null>(null);
   const detailsRef = useRef<HTMLDivElement | null>(null);
   const resultsRef = useRef<HTMLDivElement | null>(null);
