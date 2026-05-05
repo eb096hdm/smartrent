@@ -92,38 +92,56 @@ const BESONDERHEITEN_OPTIONS = [
   "Waschmaschine", "Klimaanlage", "Kamin",
 ] as const;
 
-const buildMockResponse = (ansicht: Ansicht, basePrice: number): DayRecommendation[] => {
-  const days = ansicht === "woche" ? 7 : 30;
-  const today = new Date();
-  const reasons = [
-    "Solide Nachfrage am Standort",
-    "Wochenende — höhere Buchungsrate",
-    "Lokales Event in der Nähe",
-    "Schwächere Nachfrage werktags",
-    "Hohe Auslastung erwartet",
+const buildMockResponse = (basePrice: number, startDate: Date): WeekResponse => {
+  const weekdays = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
+  const presets: { dot: DotColor; dot_label: string; card_color: CardColor; factor: number; occ: number; text: string; detail: string; events?: string[] }[] = [
+    { dot: "green", dot_label: "Gute Auslastung", card_color: "green", factor: 1.0, occ: 78, text: "Stabile Nachfrage – marktüblicher Preis empfohlen.", detail: "Solide Marktnachfrage und stabile Buchungslage. Der empfohlene Preis liegt im Marktdurchschnitt für vergleichbare Objekte." },
+    { dot: "green", dot_label: "Gute Auslastung", card_color: "green", factor: 1.05, occ: 82, text: "Leicht erhöhte Nachfrage erkannt.", detail: "Die Buchungsrate liegt über dem Wochenmittel. Eine moderate Preiserhöhung ist möglich." },
+    { dot: "yellow", dot_label: "Event in der Nähe", card_color: "orange", factor: 1.18, occ: 91, text: "Event in der Nähe – höherer Preis möglich.", detail: "Ein lokales Event treibt die Nachfrage. Wir empfehlen einen Aufschlag, ohne die Buchungswahrscheinlichkeit zu gefährden.", events: ["Stadtfest"] },
+    { dot: "green", dot_label: "Gute Auslastung", card_color: "green", factor: 1.02, occ: 75, text: "Marktüblicher Preis empfohlen.", detail: "Keine besonderen Faktoren – stabile, marktübliche Preisempfehlung." },
+    { dot: "yellow", dot_label: "Event in der Nähe", card_color: "orange", factor: 1.22, occ: 94, text: "Wochenend-Peak mit Event-Bonus.", detail: "Freitag mit hoher Wochenendnachfrage und einem Event in der Region.", events: ["Konzert in der Arena"] },
+    { dot: "green", dot_label: "Gute Auslastung", card_color: "blue", factor: 1.15, occ: 88, text: "Wochenende – höhere Buchungsrate.", detail: "Samstage zeigen die höchste Buchungsrate – Premium-Preis empfohlen." },
+    { dot: "red", dot_label: "Schwache Nachfrage", card_color: "red", factor: 0.85, occ: 42, text: "Schwache Nachfrage – Preis senken.", detail: "Sonntagabend ist traditionell schwach gebucht. Eine Preissenkung erhöht die Buchungswahrscheinlichkeit." },
   ];
-  const out: DayRecommendation[] = [];
-  for (let i = 0; i < days; i++) {
-    const d = addDays(today, i);
-    const dow = d.getDay();
-    const isWeekend = dow === 5 || dow === 6;
-    const seed = (i * 17 + 3) % 100;
-    const isEvent = seed > 85;
-    const isLow = !isWeekend && seed < 18;
-    const factor = isEvent ? 1.25 : isWeekend ? 1.1 : isLow ? 0.85 : 1;
-    const price = Math.round((basePrice || 90) * factor);
-    const occ = isEvent ? 88 + (seed % 10) : isWeekend ? 75 + (seed % 15) : isLow ? 35 + (seed % 15) : 60 + (seed % 20);
-    const status: DayRecommendation["status"] = isEvent ? "event" : isLow ? "low" : "good";
-    out.push({
-      datum: format(d, "yyyy-MM-dd"),
-      empfohlener_preis: price,
-      auslastung: occ,
-      status,
-      event: isEvent ? "Lokales Event" : undefined,
-      reason: reasons[(i + (isEvent ? 2 : isLow ? 3 : isWeekend ? 1 : 0)) % reasons.length],
-    });
-  }
-  return out;
+  const days: DayCard[] = presets.map((p, i) => {
+    const d = addDays(startDate, i);
+    const price = Math.round((basePrice || 90) * p.factor);
+    const change = Math.round(((price / (basePrice || 90)) - 1) * 100);
+    return {
+      weekday: weekdays[i].toUpperCase(),
+      label: format(d, "dd. MMM", { locale: de }),
+      price: `${price} €/Nacht`,
+      change_pct: change,
+      dot: p.dot,
+      dot_label: p.dot_label,
+      card_color: p.card_color,
+      occupancy: p.occ,
+      card_text: p.text,
+      detail_text: p.detail,
+      active_events: p.events,
+    };
+  });
+  const avg = Math.round(days.reduce((s, d) => s + parseInt(d.price), 0) / days.length);
+  return {
+    days,
+    summary: `Diese Woche zeigt eine solide Buchungslage mit Spitzen am Wochenende. Bester Tag: Freitag, schwächster Tag: Sonntag.`,
+    top_event: "Konzert in der Arena (Freitag)",
+    week_avg: avg,
+    best_day: "Freitag",
+    worst_day: "Sonntag",
+    market_avg: Math.round(avg * 0.95),
+    market_min: Math.round(avg * 0.7),
+    market_max: Math.round(avg * 1.3),
+    competitors: [
+      { type: "Wohnung", size: 60, price: avg - 5, quality: "Mittel", platform: "Airbnb", distance: 0.4 },
+      { type: "Wohnung", size: 72, price: avg + 8, quality: "Hochwertig", platform: "Booking.com", distance: 0.9 },
+      { type: "Haus", size: 95, price: avg + 22, quality: "Hochwertig", platform: "VRBO", distance: 1.5 },
+    ],
+    events: [
+      { name: "Stadtfest", date: format(addDays(startDate, 2), "yyyy-MM-dd"), description: "Innenstadt, ganztägig" },
+      { name: "Konzert in der Arena", date: format(addDays(startDate, 4), "yyyy-MM-dd"), description: "Großevent mit überregionaler Anziehung" },
+    ],
+  };
 };
 
 const StaticMapBinder = ({ onReady }: { onReady: (m: LeafletMap) => void }) => {
