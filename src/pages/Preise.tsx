@@ -660,25 +660,11 @@ const Preise = () => {
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                 className="w-full max-w-6xl"
               >
-                <h2 className="display text-3xl sm:text-4xl text-white">
-                  Deine Preisempfehlung für {plz}
-                </h2>
-                <p className="mt-2 text-sm text-white/70">
-                  7 Tage im Detail mit Empfehlung pro Tag.
-                </p>
-
-                {/* Legend */}
-                <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-white/70">
-                  <LegendDot className="bg-emerald-400/80" label="Gute Auslastung" />
-                  <LegendDot className="bg-amber-400/80" label="Event in der Nähe" />
-                  <LegendDot className="bg-red-400/80" label="Schwache Nachfrage" />
-                </div>
-
-                {/* Klickbare Wochenansicht – Details (Begründung) erscheinen inline beim Klick */}
-                <WeekRow
-                  days={results}
-                  expandedDay={expandedDay}
-                  onToggle={(d) => setExpandedDay((prev) => (prev === d ? null : d))}
+                <WeekResults
+                  data={results}
+                  plz={plz}
+                  openDayIdx={openDayIdx}
+                  setOpenDayIdx={setOpenDayIdx}
                 />
 
                 <div className="mt-8 flex justify-center">
