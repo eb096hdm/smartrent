@@ -251,6 +251,7 @@ const Preise = () => {
       komfort,
       aktueller_preis: Number(aktuellerPreis),
       ansicht,
+      woche_start: woche,
       plattformen,
       aktualitaetspruefung,
       besonderheiten,
