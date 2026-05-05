@@ -35,7 +35,6 @@ type DayCard = {
   weekday: string;
   label: string;
   price: string;
-  change_pct: number;
   dot: DotColor;
   dot_label: string;
   card_color: CardColor;
@@ -43,6 +42,7 @@ type DayCard = {
   card_text: string;
   detail_text: string;
   active_events?: string[];
+  change_pct?: number;
 };
 
 type Competitor = {
