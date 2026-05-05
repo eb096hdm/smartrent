@@ -79,8 +79,6 @@ const Profil = () => {
           user_id: userId,
           vorname: profile.vorname || null,
           nachname: profile.nachname || null,
-          telefon: profile.telefon || null,
-          geburtsdatum: profile.geburtsdatum || null,
         },
         { onConflict: "user_id" },
       );
