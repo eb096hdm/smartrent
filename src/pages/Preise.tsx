@@ -723,7 +723,6 @@ const Preise = () => {
           </AnimatePresence>
         </div>
 
-        <Footer />
       </div>
     </main>
   );
