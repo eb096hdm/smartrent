@@ -7,20 +7,12 @@ import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-/** Returns the Monday of the week the given date belongs to (week starts Monday). */
-const startOfWeekMon = (d: Date) => {
-  const x = startOfDay(d);
-  const dow = x.getDay(); // 0=Sun..6=Sat
-  const diff = (dow + 6) % 7;
-  return addDays(x, -diff);
-};
-
 interface WeekPickerProps {
-  /** Monday of the selected week */
+  /** First day of the selected 7-day range */
   value: Date;
-  onChange: (mondayOfWeek: Date) => void;
+  onChange: (startDay: Date) => void;
   className?: string;
-  /** Earliest selectable date (default: today's Monday) */
+  /** Earliest selectable start date (default: today) */
   minDate?: Date;
 }
 
@@ -29,22 +21,19 @@ export const WeekPicker: React.FC<WeekPickerProps> = ({ value, onChange, classNa
   const [hovered, setHovered] = React.useState<Date | null>(null);
   const [month, setMonth] = React.useState<Date>(value);
 
-  const selectedStart = React.useMemo(() => startOfWeekMon(value), [value]);
+  const selectedStart = React.useMemo(() => startOfDay(value), [value]);
   const selectedEnd = React.useMemo(() => addDays(selectedStart, 6), [selectedStart]);
 
-  const previewStart = hovered ? startOfWeekMon(hovered) : null;
+  const previewStart = hovered ? startOfDay(hovered) : null;
   const previewEnd = previewStart ? addDays(previewStart, 6) : null;
 
-  const minMonday = React.useMemo(
-    () => startOfWeekMon(minDate ?? new Date()),
-    [minDate],
-  );
+  const minDay = React.useMemo(() => startOfDay(minDate ?? new Date()), [minDate]);
 
   const handleSelect = (d?: Date) => {
     if (!d) return;
-    const monday = startOfWeekMon(d);
-    if (monday < minMonday) return;
-    onChange(monday);
+    const start = startOfDay(d);
+    if (start < minDay) return;
+    onChange(start);
     setOpen(false);
   };
 
@@ -82,19 +71,19 @@ export const WeekPicker: React.FC<WeekPickerProps> = ({ value, onChange, classNa
           onSelect={handleSelect}
           onDayMouseEnter={(d) => setHovered(d)}
           onDayMouseLeave={() => setHovered(null)}
-          fromDate={minMonday}
+          fromDate={minDay}
           modifiers={{
-            selectedWeek: (d) => d >= selectedStart && d <= selectedEnd,
+            selectedRange: (d) => d >= selectedStart && d <= selectedEnd,
             selectedStart: (d) => isSameDay(d, selectedStart),
             selectedEnd: (d) => isSameDay(d, selectedEnd),
-            previewWeek: (d) =>
+            previewRange: (d) =>
               !!previewStart && !!previewEnd && d >= previewStart && d <= previewEnd,
           }}
           modifiersClassNames={{
-            selectedWeek: "bg-white/15 text-white",
+            selectedRange: "bg-white/15 text-white",
             selectedStart: "rounded-l-full",
             selectedEnd: "rounded-r-full",
-            previewWeek: "bg-white/10",
+            previewRange: "bg-white/10",
           }}
           components={{
             IconLeft: () => <ChevronLeft className="h-4 w-4" />,
@@ -124,7 +113,7 @@ export const WeekPicker: React.FC<WeekPickerProps> = ({ value, onChange, classNa
           }}
         />
         <div className="mt-2 px-2 pb-1 text-[11px] text-white/50">
-          Klicke auf einen beliebigen Tag — die ganze Woche (Mo–So) wird ausgewählt.
+          Klicke auf einen Tag — die folgenden 7 Tage werden ausgewählt.
         </div>
       </PopoverContent>
     </Popover>
