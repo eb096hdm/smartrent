@@ -12,8 +12,6 @@ import { Label } from "@/components/ui/label";
 type Profile = {
   vorname: string | null;
   nachname: string | null;
-  telefon: string | null;
-  geburtsdatum: string | null;
 };
 
 const Profil = () => {
