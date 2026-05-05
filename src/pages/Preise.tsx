@@ -306,29 +306,22 @@ const Preise = () => {
     try {
       let data: WeekResponse | null = null;
       if (MAKE_WEBHOOK_URL) {
+        const r = await fetch(MAKE_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!r.ok) throw new Error("Webhook error");
+        const text = await r.text();
         try {
-          const r = await fetch(MAKE_WEBHOOK_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          });
-          const text = await r.text();
-          if (!r.ok) {
-            console.warn("Webhook returned error status, using mock fallback", r.status, text);
+          const parsed = JSON.parse(text) as WeekResponse;
+          if (parsed && Array.isArray(parsed.days) && parsed.days.length > 0) {
+            data = parsed;
           } else {
-            try {
-              const parsed = JSON.parse(text) as WeekResponse;
-              if (parsed && Array.isArray(parsed.days) && parsed.days.length > 0) {
-                data = parsed;
-              } else {
-                console.warn("Webhook returned empty/invalid data, using mock fallback", text);
-              }
-            } catch (err) {
-              console.warn("Webhook returned non-JSON, using mock fallback", text, err);
-            }
+            console.warn("Webhook returned empty/invalid data, using mock fallback", text);
           }
         } catch (err) {
-          console.warn("Webhook request failed, using mock fallback", err);
+          console.warn("Webhook returned non-JSON, using mock fallback", text, err);
         }
       }
       if (!data) {
