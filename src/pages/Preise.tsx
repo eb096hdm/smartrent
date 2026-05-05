@@ -35,7 +35,6 @@ type DayCard = {
   weekday: string;
   label: string;
   price: string;
-  change_pct: number;
   dot: DotColor;
   dot_label: string;
   card_color: CardColor;
@@ -43,6 +42,7 @@ type DayCard = {
   card_text: string;
   detail_text: string;
   active_events?: string[];
+  change_pct?: number;
 };
 
 type Competitor = {
@@ -64,15 +64,15 @@ type EventItem = {
 type WeekResponse = {
   days: DayCard[];
   summary: string;
-  top_event: string | null;
-  week_avg: number;
-  best_day: string;
-  worst_day: string;
   market_avg: number;
-  market_min: number;
-  market_max: number;
   competitors: Competitor[];
   events: EventItem[];
+  top_event?: string | null;
+  week_avg?: number;
+  best_day?: string;
+  worst_day?: string;
+  market_min?: number;
+  market_max?: number;
 };
 
 type Ansicht = "woche" | "monat";
@@ -802,10 +802,12 @@ const WeekResults = ({
 
   const highlight = (text: string) => {
     if (!text) return text;
-    const parts = text.split(new RegExp(`(${data.best_day}|${data.worst_day})`, "g"));
+    const tokens = [data.best_day, data.worst_day].filter(Boolean) as string[];
+    if (tokens.length === 0) return <span>{text}</span>;
+    const parts = text.split(new RegExp(`(${tokens.join("|")})`, "g"));
     return parts.map((p, i) =>
-      p === data.best_day ? <span key={i} className="text-emerald-300 font-medium">{p}</span> :
-      p === data.worst_day ? <span key={i} className="text-red-300 font-medium">{p}</span> :
+      p && p === data.best_day ? <span key={i} className="text-emerald-300 font-medium">{p}</span> :
+      p && p === data.worst_day ? <span key={i} className="text-red-300 font-medium">{p}</span> :
       <span key={i}>{p}</span>
     );
   };
@@ -849,10 +851,12 @@ const WeekResults = ({
       {/* Summary */}
       <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
         <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-          <div>
-            <div className="text-xs text-white/60">Wochen-Durchschnitt</div>
-            <div className="text-2xl font-semibold text-white">{data.week_avg} €</div>
-          </div>
+          {typeof data.week_avg === "number" && (
+            <div>
+              <div className="text-xs text-white/60">Wochen-Durchschnitt</div>
+              <div className="text-2xl font-semibold text-white">{data.week_avg} €</div>
+            </div>
+          )}
           {data.top_event && (
             <div className="rounded-full bg-amber-400/15 border border-amber-400/40 px-4 py-1.5 text-xs text-amber-200">
               📍 {data.top_event}
@@ -865,10 +869,10 @@ const WeekResults = ({
       {/* Market section */}
       <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
         <h3 className="text-lg font-medium text-white">Konkurrenz im Markt</h3>
-        <div className="mt-4 grid grid-cols-3 gap-4">
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Stat label="Ø Markt" value={`${data.market_avg} €`} />
-          <Stat label="Min" value={`${data.market_min} €`} />
-          <Stat label="Max" value={`${data.market_max} €`} />
+          {typeof data.market_min === "number" && <Stat label="Min" value={`${data.market_min} €`} />}
+          {typeof data.market_max === "number" && <Stat label="Max" value={`${data.market_max} €`} />}
         </div>
         {data.competitors?.length > 0 && (
           <div className="mt-5 overflow-x-auto">
@@ -941,12 +945,14 @@ const WeekResults = ({
                   <p className="mt-1 text-sm text-amber-100">{open.active_events.join(", ")}</p>
                 </div>
               )}
-              <p className={cn(
-                "mt-4 text-sm font-medium",
-                open.change_pct > 0 ? "text-emerald-300" : open.change_pct < 0 ? "text-red-300" : "text-white/70"
-              )}>
-                {open.change_pct > 0 ? "+" : ""}{open.change_pct}% {open.change_pct >= 0 ? "über" : "unter"} deinem aktuellen Preis
-              </p>
+              {typeof open.change_pct === "number" && (
+                <p className={cn(
+                  "mt-4 text-sm font-medium",
+                  open.change_pct > 0 ? "text-emerald-300" : open.change_pct < 0 ? "text-red-300" : "text-white/70"
+                )}>
+                  {open.change_pct > 0 ? "+" : ""}{open.change_pct}% {open.change_pct >= 0 ? "über" : "unter"} deinem aktuellen Preis
+                </p>
+              )}
             </>
           )}
         </DialogContent>
