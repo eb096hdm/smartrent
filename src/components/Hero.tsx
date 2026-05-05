@@ -3,6 +3,7 @@ import { ArrowUpRight, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import heroBg from "@/assets/hero-apartment.jpg";
 
 const navItems = [
   { label: "Leistungen", href: "#services" },
