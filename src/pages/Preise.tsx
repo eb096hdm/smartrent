@@ -8,7 +8,7 @@ import type { Map as LeafletMap } from "leaflet";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type FeatureCollection = any;
 import "leaflet/dist/leaflet.css";
-import { Footer } from "@/components/Footer";
+
 import { Switch } from "@/components/ui/switch";
 import { WeekPicker } from "@/components/WeekPicker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
