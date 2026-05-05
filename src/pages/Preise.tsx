@@ -851,10 +851,12 @@ const WeekResults = ({
       {/* Summary */}
       <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
         <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-          <div>
-            <div className="text-xs text-white/60">Wochen-Durchschnitt</div>
-            <div className="text-2xl font-semibold text-white">{data.week_avg} €</div>
-          </div>
+          {typeof data.week_avg === "number" && (
+            <div>
+              <div className="text-xs text-white/60">Wochen-Durchschnitt</div>
+              <div className="text-2xl font-semibold text-white">{data.week_avg} €</div>
+            </div>
+          )}
           {data.top_event && (
             <div className="rounded-full bg-amber-400/15 border border-amber-400/40 px-4 py-1.5 text-xs text-amber-200">
               📍 {data.top_event}
