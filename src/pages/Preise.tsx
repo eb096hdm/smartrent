@@ -126,6 +126,27 @@ const Preise = () => {
 
   // Step 2 fields
   const [ansicht] = useState<Ansicht>("woche");
+  const weekOptions = useMemo(() => {
+    const today = new Date();
+    const dow = today.getDay(); // 0=Sun..6=Sat
+    const offsetToMonday = (dow + 6) % 7;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - offsetToMonday);
+    monday.setHours(0, 0, 0, 0);
+    return Array.from({ length: 6 }).map((_, i) => {
+      const start = addDays(monday, i * 7);
+      const end = addDays(start, 6);
+      const value = format(start, "yyyy-MM-dd");
+      const label =
+        i === 0
+          ? `Diese Woche (${format(start, "d. MMM", { locale: de })} – ${format(end, "d. MMM", { locale: de })})`
+          : i === 1
+            ? `Nächste Woche (${format(start, "d. MMM", { locale: de })} – ${format(end, "d. MMM", { locale: de })})`
+            : `${format(start, "d. MMM", { locale: de })} – ${format(end, "d. MMM yyyy", { locale: de })}`;
+      return { value, label };
+    });
+  }, []);
+  const [woche, setWoche] = useState<string>(weekOptions[0].value);
   const [plattformen, setPlattformen] = useState<string[]>([]);
   const [aktualitaetspruefung, setAktualitaetspruefung] = useState(true);
   const [besonderheiten, setBesonderheiten] = useState<string[]>([]);
@@ -230,6 +251,7 @@ const Preise = () => {
       komfort,
       aktueller_preis: Number(aktuellerPreis),
       ansicht,
+      woche_start: woche,
       plattformen,
       aktualitaetspruefung,
       besonderheiten,
@@ -504,7 +526,22 @@ const Preise = () => {
                           <p className="mt-2 text-sm text-white/70">Je mehr Details, desto genauer deine Preisempfehlung.</p>
 
                           <div className="mt-6 space-y-6">
-                            {/* Ansicht ist fest auf Wochenübersicht (7 Tage) gesetzt – Monatsansicht wurde entfernt */}
+                            {/* Woche auswählen */}
+                            <div>
+                              <label htmlFor="woche" className={labelCls}>Welche Woche möchtest du analysieren?</label>
+                              <select
+                                id="woche"
+                                value={woche}
+                                onChange={(e) => setWoche(e.target.value)}
+                                className={cn(inputCls, "appearance-none pr-10 bg-[hsl(var(--ink))]")}
+                              >
+                                {weekOptions.map((opt) => (
+                                  <option key={opt.value} value={opt.value} className="bg-[hsl(var(--ink))] text-white">
+                                    {opt.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
 
                             {/* Plattformen */}
                             <div>
