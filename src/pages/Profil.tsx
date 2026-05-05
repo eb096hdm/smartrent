@@ -17,7 +17,7 @@ type Profile = {
 const Profil = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>("");
-  const [profile, setProfile] = useState<Profile>({ vorname: "", nachname: "", telefon: "", geburtsdatum: "" });
+  const [profile, setProfile] = useState<Profile>({ vorname: "", nachname: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
