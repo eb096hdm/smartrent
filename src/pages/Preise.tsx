@@ -10,6 +10,7 @@ type FeatureCollection = any;
 import "leaflet/dist/leaflet.css";
 import { Footer } from "@/components/Footer";
 import { Switch } from "@/components/ui/switch";
+import { WeekPicker } from "@/components/WeekPicker";
 import { cn } from "@/lib/utils";
 
 const navItems = [
