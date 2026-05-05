@@ -12,14 +12,12 @@ import { Label } from "@/components/ui/label";
 type Profile = {
   vorname: string | null;
   nachname: string | null;
-  telefon: string | null;
-  geburtsdatum: string | null;
 };
 
 const Profil = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>("");
-  const [profile, setProfile] = useState<Profile>({ vorname: "", nachname: "", telefon: "", geburtsdatum: "" });
+  const [profile, setProfile] = useState<Profile>({ vorname: "", nachname: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -43,7 +41,7 @@ const Profil = () => {
 
       const { data: p, error } = await supabase
         .from("profiles")
-        .select("vorname,nachname,telefon,geburtsdatum")
+        .select("vorname,nachname")
         .eq("user_id", session.user.id)
         .maybeSingle();
       if (error) {
@@ -52,8 +50,6 @@ const Profil = () => {
         setProfile({
           vorname: p.vorname ?? "",
           nachname: p.nachname ?? "",
-          telefon: p.telefon ?? "",
-          geburtsdatum: p.geburtsdatum ?? "",
         });
       }
       setLoading(false);
@@ -83,8 +79,6 @@ const Profil = () => {
           user_id: userId,
           vorname: profile.vorname || null,
           nachname: profile.nachname || null,
-          telefon: profile.telefon || null,
-          geburtsdatum: profile.geburtsdatum || null,
         },
         { onConflict: "user_id" },
       );
@@ -132,14 +126,6 @@ const Profil = () => {
                 <Label htmlFor="nachname" className="text-white/80">Nachname</Label>
                 <Input id="nachname" value={profile.nachname ?? ""} onChange={(e) => setProfile((p) => ({ ...p, nachname: e.target.value }))} className="bg-white/10 border-white/15 text-white" />
               </div>
-            </div>
-            <div>
-              <Label htmlFor="telefon" className="text-white/80">Telefon</Label>
-              <Input id="telefon" value={profile.telefon ?? ""} onChange={(e) => setProfile((p) => ({ ...p, telefon: e.target.value }))} placeholder="+491701234567" className="bg-white/10 border-white/15 text-white" />
-            </div>
-            <div>
-              <Label htmlFor="geburtsdatum" className="text-white/80">Geburtsdatum</Label>
-              <Input id="geburtsdatum" type="date" value={profile.geburtsdatum ?? ""} onChange={(e) => setProfile((p) => ({ ...p, geburtsdatum: e.target.value }))} className="bg-white/10 border-white/15 text-white" />
             </div>
 
             <Button type="submit" className="w-full" disabled={saving}>
