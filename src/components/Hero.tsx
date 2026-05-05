@@ -52,7 +52,7 @@ export const Hero = () => {
           </Link>
         </div>
 
-        <div className="px-6 sm:px-10 pt-16 pb-10">
+        <div className="relative px-6 sm:px-10 pt-16 pb-10">
           <div className="flex flex-col items-center justify-center min-h-[480px]">
             <div className="text-center">
               <motion.h1
