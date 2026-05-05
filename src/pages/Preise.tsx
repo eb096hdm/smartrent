@@ -845,15 +845,19 @@ const WeekResults = ({
   setOpenDayIdx: (i: number | null) => void;
 }) => {
   const open = openDayIdx !== null ? data.days[openDayIdx] : null;
+  const summary = data.summary ?? {};
+  const market = data.market ?? {};
+  const competitors = market.competitors ?? [];
+  const events = data.events ?? [];
 
-  const highlight = (text: string) => {
-    if (!text) return text;
-    const tokens = [data.best_day, data.worst_day].filter(Boolean) as string[];
+  const highlight = (text?: string) => {
+    if (!text) return null;
+    const tokens = [summary.best_day, summary.worst_day].filter(Boolean) as string[];
     if (tokens.length === 0) return <span>{text}</span>;
     const parts = text.split(new RegExp(`(${tokens.join("|")})`, "g"));
     return parts.map((p, i) =>
-      p && p === data.best_day ? <span key={i} className="text-emerald-300 font-medium">{p}</span> :
-      p && p === data.worst_day ? <span key={i} className="text-red-300 font-medium">{p}</span> :
+      p && p === summary.best_day ? <span key={i} className="text-emerald-300 font-medium">{p}</span> :
+      p && p === summary.worst_day ? <span key={i} className="text-red-300 font-medium">{p}</span> :
       <span key={i}>{p}</span>
     );
   };
@@ -887,7 +891,7 @@ const WeekResults = ({
             </div>
             <div className="mt-1 text-sm text-white/80">{d.label}</div>
             <p className="mt-3 text-2xl font-semibold text-white leading-tight">{d.price}</p>
-            <p className="mt-1 text-xs text-white/60">Auslastung: {d.occupancy}%</p>
+            <p className="mt-1 text-xs text-white/60">{d.occupancy}</p>
             <p className="mt-3 text-xs text-white/70 line-clamp-2">{d.card_text}</p>
             <p className="mt-3 text-[10px] uppercase tracking-wider text-white/40">Details ansehen</p>
           </button>
@@ -897,30 +901,38 @@ const WeekResults = ({
       {/* Summary */}
       <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
         <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-          {typeof data.week_avg === "number" && (
+          {summary.week_avg != null && (
             <div>
-              <div className="text-xs text-white/60">Wochen-Durchschnitt</div>
-              <div className="text-2xl font-semibold text-white">{data.week_avg} €</div>
+              <div className="text-2xl font-semibold text-white">{summary.week_avg}</div>
             </div>
           )}
-          {data.top_event && (
+          {summary.top_event && (
             <div className="rounded-full bg-amber-400/15 border border-amber-400/40 px-4 py-1.5 text-xs text-amber-200">
-              📍 {data.top_event}
+              📍 {summary.top_event}{summary.top_event_day ? ` (${summary.top_event_day})` : ""}
             </div>
           )}
         </div>
-        <p className="mt-4 text-sm text-white/80 leading-relaxed">{highlight(data.summary)}</p>
+        {summary.text && (
+          <p className="mt-4 text-sm text-white/80 leading-relaxed">{highlight(summary.text)}</p>
+        )}
       </div>
 
       {/* Market section */}
       <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
-        <h3 className="text-lg font-medium text-white">Konkurrenz im Markt</h3>
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Stat label="Ø Markt" value={`${data.market_avg} €`} />
-          {typeof data.market_min === "number" && <Stat label="Min" value={`${data.market_min} €`} />}
-          {typeof data.market_max === "number" && <Stat label="Max" value={`${data.market_max} €`} />}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <h3 className="text-lg font-medium text-white">Konkurrenz im Markt</h3>
+          {market.level && (
+            <span className="rounded-full border border-white/20 px-3 py-1 text-xs text-white/70">
+              {market.level}
+            </span>
+          )}
         </div>
-        {data.competitors?.length > 0 && (
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {market.avg != null && <Stat label="Ø Markt" value={String(market.avg)} />}
+          {market.min != null && <Stat label="Min" value={String(market.min)} />}
+          {market.max != null && <Stat label="Max" value={String(market.max)} />}
+        </div>
+        {competitors.length > 0 && (
           <div className="mt-5 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -934,14 +946,14 @@ const WeekResults = ({
                 </tr>
               </thead>
               <tbody>
-                {data.competitors.map((c, i) => (
+                {competitors.map((c, i) => (
                   <tr key={i} className="border-b border-white/5 text-white/85">
                     <td className="py-2 pr-3">{c.type}</td>
-                    <td className="py-2 pr-3">{c.size} m²</td>
-                    <td className="py-2 pr-3">{c.price} €</td>
+                    <td className="py-2 pr-3">{c.size_sqm}</td>
+                    <td className="py-2 pr-3">{c.price}</td>
                     <td className="py-2 pr-3">{c.quality}</td>
                     <td className="py-2 pr-3">{c.platform}</td>
-                    <td className="py-2 pr-3">{c.distance} km</td>
+                    <td className="py-2 pr-3">{c.distance_km}</td>
                   </tr>
                 ))}
               </tbody>
@@ -951,15 +963,20 @@ const WeekResults = ({
       </div>
 
       {/* Events */}
-      {data.events?.length > 0 && (
+      {events.length > 0 && (
         <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
           <h3 className="text-lg font-medium text-white">Events diese Woche</h3>
           <ul className="mt-3 space-y-2">
-            {data.events.map((e, i) => (
-              <li key={i} className="text-sm text-white/80">
+            {events.map((e, i) => (
+              <li key={i} className="text-sm text-white/80 flex flex-wrap items-baseline gap-x-2">
                 <span className="text-white font-medium">{e.name ?? "Event"}</span>
                 {e.date && <span className="text-white/50"> · {e.date}</span>}
                 {e.description && <span className="text-white/60"> – {e.description}</span>}
+                {e.impact && (
+                  <span className="ml-1 rounded-full bg-amber-400/15 border border-amber-400/40 px-2 py-0.5 text-[10px] text-amber-200">
+                    {e.impact}
+                  </span>
+                )}
               </li>
             ))}
           </ul>
@@ -982,7 +999,7 @@ const WeekResults = ({
               </DialogHeader>
               <div className="mt-2">
                 <p className="text-3xl font-semibold text-white">{open.price}</p>
-                <p className="mt-1 text-xs text-white/60">{open.dot_label} · Auslastung {open.occupancy}%</p>
+                <p className="mt-1 text-xs text-white/60">{open.dot_label} · {open.occupancy}</p>
               </div>
               <p className="mt-3 text-sm text-white/85 leading-relaxed">{open.detail_text}</p>
               {open.active_events && open.active_events.length > 0 && (
@@ -991,13 +1008,25 @@ const WeekResults = ({
                   <p className="mt-1 text-sm text-amber-100">{open.active_events.join(", ")}</p>
                 </div>
               )}
-              {typeof open.change_pct === "number" && (
-                <p className={cn(
-                  "mt-4 text-sm font-medium",
-                  open.change_pct > 0 ? "text-emerald-300" : open.change_pct < 0 ? "text-red-300" : "text-white/70"
-                )}>
-                  {open.change_pct > 0 ? "+" : ""}{open.change_pct}% {open.change_pct >= 0 ? "über" : "unter"} deinem aktuellen Preis
-                </p>
+              {open.change_label && (
+                <p className="mt-4 text-sm font-medium text-white/85">{open.change_label}</p>
+              )}
+              {open.factors && (
+                <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {([
+                    ["Saison", open.factors.saison],
+                    ["Event", open.factors.event],
+                    ["Konkurrenz", open.factors.konkurrenz],
+                    ["Komfort", open.factors.komfort],
+                  ] as const).map(([label, val]) =>
+                    val != null ? (
+                      <div key={label} className="rounded-lg border border-white/10 bg-white/5 p-2 text-center">
+                        <div className="text-[10px] uppercase tracking-wide text-white/50">{label}</div>
+                        <div className="mt-0.5 text-sm font-medium text-white">{val}</div>
+                      </div>
+                    ) : null
+                  )}
+                </div>
               )}
             </>
           )}
