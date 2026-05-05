@@ -313,8 +313,17 @@ const Preise = () => {
         });
         if (!r.ok) throw new Error("Webhook error");
         const text = await r.text();
+        // Strip ```json ... ``` fences if Make.com wrapped the body in markdown
+        let cleaned = text.trim();
+        const fence = cleaned.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+        if (fence) cleaned = fence[1].trim();
+        // Fallback: extract first {...} block
+        if (!cleaned.startsWith("{")) {
+          const m = cleaned.match(/\{[\s\S]*\}/);
+          if (m) cleaned = m[0];
+        }
         try {
-          const parsed = JSON.parse(text) as WeekResponse;
+          const parsed = JSON.parse(cleaned) as WeekResponse;
           if (parsed && Array.isArray(parsed.days) && parsed.days.length > 0) {
             data = parsed;
           } else {
