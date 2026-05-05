@@ -127,14 +127,6 @@ const Profil = () => {
                 <Input id="nachname" value={profile.nachname ?? ""} onChange={(e) => setProfile((p) => ({ ...p, nachname: e.target.value }))} className="bg-white/10 border-white/15 text-white" />
               </div>
             </div>
-            <div>
-              <Label htmlFor="telefon" className="text-white/80">Telefon</Label>
-              <Input id="telefon" value={profile.telefon ?? ""} onChange={(e) => setProfile((p) => ({ ...p, telefon: e.target.value }))} placeholder="+491701234567" className="bg-white/10 border-white/15 text-white" />
-            </div>
-            <div>
-              <Label htmlFor="geburtsdatum" className="text-white/80">Geburtsdatum</Label>
-              <Input id="geburtsdatum" type="date" value={profile.geburtsdatum ?? ""} onChange={(e) => setProfile((p) => ({ ...p, geburtsdatum: e.target.value }))} className="bg-white/10 border-white/15 text-white" />
-            </div>
 
             <Button type="submit" className="w-full" disabled={saving}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Änderungen speichern"}
