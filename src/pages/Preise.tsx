@@ -24,7 +24,7 @@ const DE_CENTER: [number, number] = [51.1657, 10.4515];
 const DE_ZOOM = 7;
 const PLZ_ZOOM = 11;
 
-const MAKE_WEBHOOK_URL = "";
+const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/i1mew6hs760cdj6jhllf9ww6677v1yea";
 
 type DayRecommendation = {
   datum: string; // ISO yyyy-MM-dd
