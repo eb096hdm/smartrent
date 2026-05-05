@@ -517,19 +517,8 @@ const Preise = () => {
                           <div className="mt-6 space-y-6">
                             {/* Woche auswählen */}
                             <div>
-                              <label htmlFor="woche" className={labelCls}>Welche Woche möchtest du analysieren?</label>
-                              <select
-                                id="woche"
-                                value={woche}
-                                onChange={(e) => setWoche(e.target.value)}
-                                className={cn(inputCls, "appearance-none pr-10 bg-[hsl(var(--ink))]")}
-                              >
-                                {weekOptions.map((opt) => (
-                                  <option key={opt.value} value={opt.value} className="bg-[hsl(var(--ink))] text-white">
-                                    {opt.label}
-                                  </option>
-                                ))}
-                              </select>
+                              <label className={labelCls}>Welche Woche möchtest du analysieren?</label>
+                              <WeekPicker value={wocheDate} onChange={setWocheDate} minDate={initialMonday} />
                             </div>
 
                             {/* Plattformen */}
