@@ -869,10 +869,10 @@ const WeekResults = ({
       {/* Market section */}
       <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
         <h3 className="text-lg font-medium text-white">Konkurrenz im Markt</h3>
-        <div className="mt-4 grid grid-cols-3 gap-4">
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Stat label="Ø Markt" value={`${data.market_avg} €`} />
-          <Stat label="Min" value={`${data.market_min} €`} />
-          <Stat label="Max" value={`${data.market_max} €`} />
+          {typeof data.market_min === "number" && <Stat label="Min" value={`${data.market_min} €`} />}
+          {typeof data.market_max === "number" && <Stat label="Max" value={`${data.market_max} €`} />}
         </div>
         {data.competitors?.length > 0 && (
           <div className="mt-5 overflow-x-auto">
