@@ -34,7 +34,7 @@ export const MapPreviewCTA = () => {
           }}
           aria-hidden
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/60 to-background/30" />
+        
 
       </button>
     </Reveal>
