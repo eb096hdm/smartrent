@@ -7,7 +7,7 @@ const services = [
   { icon: null, title: "Team", body: "Wir sind Levin, Alex, Elias und Kerstin – vier Studierenden der Digital- und Medienwirtschaft. Und wir stecken hinter SmartRent. Alles fing mit einem kleinen Brainstorming an. Und jetzt? Jetzt machen wir Dynamic Pricing für private Vermieter:innen in Deutschland einfach zugänglich: plattformübergreifend und verständlich. Unsere KI erklärt euch unsere Preisgestaltung." },
   
   { icon: null, title: "Mission", body: "Dein Apartment. Dein Preis. Endlich erklärt. SmartRent analysiert Events, Nachfrage und Konkurrenz in deiner Umgebung — und gibt dir einen konkreten Mietpreis für heute, morgen und das Wochenende." },
-  { icon: null, title: "Vision", body: "BLOCKER" },
+  { icon: null, title: "Vision", body: "Preise, denen Vermieter vertrauen können — weil sie verstehen, wie sie entstehen." },
 ];
 
 export const Services = () => {
