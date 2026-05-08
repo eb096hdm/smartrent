@@ -383,9 +383,9 @@ const Preise = () => {
   const labelCls = "block text-xs font-medium text-white/80";
 
   return (
-    <main className="relative min-h-screen bg-ink text-ink-foreground">
+    <main className="relative min-h-screen bg-[#2a1f17] text-ink-foreground">
       <div
-        className="fixed inset-0 z-0 [filter:grayscale(0.7)_brightness(0.8)] pointer-events-none"
+        className="fixed inset-0 z-0 [filter:sepia(0.55)_saturate(1.3)_hue-rotate(-12deg)_brightness(0.95)] pointer-events-none"
         aria-hidden="true"
       >
         <MapContainer
@@ -393,21 +393,22 @@ const Preise = () => {
           zoom={DE_ZOOM}
           zoomControl={false}
           attributionControl={false}
-          style={{ width: "100%", height: "100%", background: "hsl(var(--ink))" }}
+          style={{ width: "100%", height: "100%", background: "#2a1f17" }}
         >
           <StaticMapBinder onReady={(m) => { mapRef.current = m; }} />
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png"
+            url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"
             subdomains="abcd"
           />
           {geo && (
             <GeoJSON
               data={geo}
               style={{
-                fillColor: "hsl(0 0% 100%)",
-                fillOpacity: 0.06,
-                color: "hsl(0 0% 100% / 0.35)",
+                fillColor: "#f5d9b8",
+                fillOpacity: 0.08,
+                color: "#f5d9b8",
                 weight: 1,
+                opacity: 0.4,
               }}
               interactive={false}
             />
@@ -417,11 +418,11 @@ const Preise = () => {
               key={plz}
               data={plzBoundary}
               style={{
-                color: "#ffffff",
+                color: "#ffd9a8",
                 weight: 2,
-                opacity: 0.6,
-                fillColor: "#ffffff",
-                fillOpacity: 0.07,
+                opacity: 0.7,
+                fillColor: "#ffd9a8",
+                fillOpacity: 0.1,
               }}
               interactive={false}
             />
@@ -429,7 +430,7 @@ const Preise = () => {
         </MapContainer>
       </div>
 
-      <div className="fixed inset-0 z-[1] bg-black/25 pointer-events-none" aria-hidden="true" />
+      <div className="fixed inset-0 z-[1] bg-gradient-to-b from-[#2a1f17]/50 via-[#3d2817]/40 to-[#2a1f17]/60 pointer-events-none" aria-hidden="true" />
 
       <div className="relative z-[2]">
         <header className="fixed top-0 inset-x-0 z-50 bg-black/40 [backdrop-filter:blur(10px)] [-webkit-backdrop-filter:blur(10px)] border-b border-white/10 shadow-[0_2px_20px_rgba(0,0,0,0.25)]">
