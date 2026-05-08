@@ -18,7 +18,7 @@ export const Services = () => {
         <Reveal className="text-center flex flex-col items-center">
           <span className="pill">Über Uns</span>
           <h2 className="display mt-6 text-4xl sm:text-5xl lg:text-6xl max-w-3xl">Wer steckt hinter SmartRent?</h2>
-          <p className="mt-5 text-muted-foreground max-w-xl">BLOCKER</p>
+          
         </Reveal>
 
         <div className="mt-14">
