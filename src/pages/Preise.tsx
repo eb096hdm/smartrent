@@ -509,10 +509,12 @@ const Preise = () => {
           )}
 
 
+          {(showTool || step !== "plz") && (
           <motion.div
             layout
-            animate={{ y: step === "plz" ? 0 : -8 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: step === "plz" ? 0 : -8 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className={`w-full min-w-0 sm:min-w-[520px] max-w-[640px] ${step === "plz" ? "min-h-[calc(100vh-12rem)] flex items-center" : ""}`}
           >
             <div className={cardCls}>
