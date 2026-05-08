@@ -6,20 +6,12 @@ import { MapPreviewCTA } from "./MapPreviewCTA";
 export const About = () => (
   <section id="about" className="px-3 sm:px-5 py-16 sm:py-24 text-left">
     <div className="max-w-7xl mx-auto px-3 sm:px-6">
-      <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
-        <Reveal>
-          <span className="pill">Leistungen</span>
-          <h2 className="display mt-6 text-5xl sm:text-6xl lg:text-7xl">
-            Unsere Preisentscheidungen
-          </h2>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <p className="text-lg text-foreground/80 leading-relaxed lg:pt-12 whitespace-pre-line">
-            Dein Apartment. Dein Preis. Endlich erklärt.{"\n"}
-            SmartRent analysiert Events, Nachfrage und Konkurrenz in deiner Umgebung — und gibt dir einen konkreten Mietpreis für heute, morgen und das Wochenende.
-          </p>
-        </Reveal>
-      </div>
+      <Reveal>
+        <span className="pill">Leistungen</span>
+        <h2 className="display mt-6 text-5xl sm:text-6xl lg:text-7xl">
+          Unsere Preisentscheidungen
+        </h2>
+      </Reveal>
 
       {/* === Neuer Unterbereich: Interaktive Preisempfehlungs-Karte === */}
       {/* Direkt unter dem Header "Unsere Preisentscheidungen". Klick auf das */}
