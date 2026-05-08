@@ -195,6 +195,7 @@ type Step = "plz" | "details" | "loading" | "results" | "error";
 const Preise = () => {
   const [geo, setGeo] = useState<FeatureCollection | null>(null);
   const [step, setStep] = useState<Step>("plz");
+  const [showTool, setShowTool] = useState(false);
   const [detailsStep, setDetailsStep] = useState<1 | 2>(1);
 
   const [plz, setPlz] = useState("");
