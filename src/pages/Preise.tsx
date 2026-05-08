@@ -447,7 +447,7 @@ const Preise = () => {
 
         <div className="flex flex-col items-center gap-8 px-4 sm:px-10 pt-28 pb-16 min-h-screen">
           {/* Hero */}
-          {step === "plz" && (
+          {step === "plz" && !showTool && (
             <section className="relative w-full max-w-[720px] mx-auto overflow-hidden rounded-[2rem] border border-[#E8D5B0]/30 shadow-2xl">
               {/* Warm gradient + bokeh */}
               <div className="absolute inset-0 bg-[linear-gradient(135deg,#B94F0F_0%,#C05C1A_25%,#D4623A_50%,#E8A44A_75%,#E8D5B0_100%)]" aria-hidden="true" />
