@@ -445,7 +445,66 @@ const Preise = () => {
         </header>
 
         <div className="flex flex-col items-center gap-8 px-4 sm:px-10 pt-28 pb-16 min-h-screen">
-          {/* PLZ panel */}
+          {/* Hero */}
+          {step === "plz" && (
+            <section className="relative w-full max-w-[720px] mx-auto overflow-hidden rounded-[2rem] border border-[#E8D5B0]/30 shadow-2xl">
+              {/* Warm gradient + bokeh */}
+              <div className="absolute inset-0 bg-[linear-gradient(135deg,#B94F0F_0%,#C05C1A_25%,#D4623A_50%,#E8A44A_75%,#E8D5B0_100%)]" aria-hidden="true" />
+              <div className="absolute -top-20 -left-16 h-72 w-72 rounded-full bg-[#E8A44A]/50 blur-3xl" aria-hidden="true" />
+              <div className="absolute -bottom-24 -right-10 h-80 w-80 rounded-full bg-[#D4623A]/50 blur-3xl" aria-hidden="true" />
+              <div className="absolute top-1/3 right-1/4 h-40 w-40 rounded-full bg-[#F2E6D0]/40 blur-2xl" aria-hidden="true" />
+              {/* Grain */}
+              <div
+                className="absolute inset-0 opacity-[0.06] mix-blend-overlay pointer-events-none"
+                aria-hidden="true"
+                style={{
+                  backgroundImage:
+                    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
+                }}
+              />
+
+              <div className="relative flex flex-col items-center text-center px-6 sm:px-10 py-20 sm:py-24">
+                <motion.span
+                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.05 }}
+                  className="inline-flex items-center gap-2 rounded-xl border border-[#F5EDD8]/20 bg-[#2A1F14] px-3.5 py-1.5 text-xs font-medium text-[#F5EDD8]"
+                >
+                  <MapPin className="h-3.5 w-3.5" />
+                  Interaktive Karte
+                </motion.span>
+
+                <motion.h1
+                  initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.15 }}
+                  className="mt-6 font-bold tracking-tight text-[#1A1108] text-4xl sm:text-5xl leading-[1.05]"
+                  style={{ fontFamily: "'Fraunces', 'DM Sans', serif" }}
+                >
+                  Finde die optimale Preisempfehlung für deine Region
+                </motion.h1>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}
+                  className="mt-5 max-w-xl text-base sm:text-lg text-[#4A3520]/90"
+                >
+                  Gib deine Postleitzahl ein und entdecke datenbasierte Preisempfehlungen für dein Mietobjekt — plattformübergreifend und in Sekunden.
+                </motion.p>
+
+                <motion.button
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.45 }}
+                  type="button"
+                  onClick={() => {
+                    const el = document.getElementById("plz");
+                    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    setTimeout(() => el?.focus(), 400);
+                  }}
+                  className="group mt-9 inline-flex items-center gap-2.5 rounded-full bg-[#2A1F14] px-7 py-3.5 text-sm sm:text-base font-medium text-[#F5EDD8] shadow-[0_10px_30px_-10px_rgba(192,92,26,0.6)] transition-all duration-300 hover:shadow-[0_18px_40px_-10px_rgba(232,164,74,0.75)] hover:-translate-y-0.5"
+                >
+                  Jetzt Preisempfehlung erhalten
+                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </motion.button>
+              </div>
+            </section>
+          )}
+
+
           <motion.div
             layout
             animate={{ y: step === "plz" ? 0 : -8 }}
