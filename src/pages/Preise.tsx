@@ -383,9 +383,9 @@ const Preise = () => {
   const labelCls = "block text-xs font-medium text-white/80";
 
   return (
-    <main className="relative min-h-screen bg-[#2a1f17] text-ink-foreground">
+    <main className="relative min-h-screen bg-[#3a2418] text-ink-foreground">
       <div
-        className="fixed inset-0 z-0 [filter:sepia(0.55)_saturate(1.3)_hue-rotate(-12deg)_brightness(0.95)] pointer-events-none"
+        className="fixed inset-0 z-0 [filter:sepia(1)_saturate(1.6)_hue-rotate(-18deg)_brightness(0.95)] pointer-events-none"
         aria-hidden="true"
       >
         <MapContainer
@@ -393,7 +393,7 @@ const Preise = () => {
           zoom={DE_ZOOM}
           zoomControl={false}
           attributionControl={false}
-          style={{ width: "100%", height: "100%", background: "#2a1f17" }}
+          style={{ width: "100%", height: "100%", background: "#c98a55" }}
         >
           <StaticMapBinder onReady={(m) => { mapRef.current = m; }} />
           <TileLayer
@@ -404,11 +404,11 @@ const Preise = () => {
             <GeoJSON
               data={geo}
               style={{
-                fillColor: "#f5d9b8",
-                fillOpacity: 0.08,
-                color: "#f5d9b8",
+                fillColor: "#fff1d6",
+                fillOpacity: 0.18,
+                color: "#fff1d6",
                 weight: 1,
-                opacity: 0.4,
+                opacity: 0.5,
               }}
               interactive={false}
             />
@@ -418,11 +418,11 @@ const Preise = () => {
               key={plz}
               data={plzBoundary}
               style={{
-                color: "#ffd9a8",
+                color: "#fff1d6",
                 weight: 2,
-                opacity: 0.7,
-                fillColor: "#ffd9a8",
-                fillOpacity: 0.1,
+                opacity: 0.85,
+                fillColor: "#fff1d6",
+                fillOpacity: 0.18,
               }}
               interactive={false}
             />
@@ -430,7 +430,7 @@ const Preise = () => {
         </MapContainer>
       </div>
 
-      <div className="fixed inset-0 z-[1] bg-gradient-to-b from-[#2a1f17]/50 via-[#3d2817]/40 to-[#2a1f17]/60 pointer-events-none" aria-hidden="true" />
+      <div className="fixed inset-0 z-[1] bg-gradient-to-b from-[#3a2418]/55 via-[#5a2e15]/40 to-[#3a2418]/65 pointer-events-none" aria-hidden="true" />
 
       <div className="relative z-[2]">
         <header className="fixed top-0 inset-x-0 z-50 bg-black/40 [backdrop-filter:blur(10px)] [-webkit-backdrop-filter:blur(10px)] border-b border-white/10 shadow-[0_2px_20px_rgba(0,0,0,0.25)]">
