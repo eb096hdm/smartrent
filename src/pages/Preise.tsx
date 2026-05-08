@@ -449,7 +449,7 @@ const Preise = () => {
 
 
 
-          {(showTool || step !== "plz") && (
+          {(
           <motion.div
             layout
             initial={{ opacity: 0, y: 16 }}
