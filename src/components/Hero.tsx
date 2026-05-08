@@ -33,9 +33,9 @@ export const Hero = () => {
           alt="Gemütliche, sonnendurchflutete Wohnung mit Laptop und Preisdaten"
           width={1920}
           height={1080}
-          className="absolute inset-0 h-full w-full object-cover opacity-60"
+          className="absolute inset-0 h-full w-full object-cover opacity-90 contrast-110 saturate-110 brightness-110"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/50 to-ink/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-ink/40 via-ink/20 to-ink/60" />
         <div className="relative flex items-center justify-between px-6 sm:px-10 pt-8">
           <a href="#" className="text-2xl font-semibold tracking-tight">SmartRent</a>
           <nav className="hidden md:flex items-center gap-8">
