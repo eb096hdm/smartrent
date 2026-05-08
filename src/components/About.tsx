@@ -14,8 +14,9 @@ export const About = () => (
           </h2>
         </Reveal>
         <Reveal delay={0.1}>
-          <p className="text-lg text-foreground/80 leading-relaxed lg:pt-12">
-            BLOCKER
+          <p className="text-lg text-foreground/80 leading-relaxed lg:pt-12 whitespace-pre-line">
+            Dein Apartment. Dein Preis. Endlich erklärt.{"\n"}
+            SmartRent analysiert Events, Nachfrage und Konkurrenz in deiner Umgebung — und gibt dir einen konkreten Mietpreis für heute, morgen und das Wochenende.
           </p>
         </Reveal>
       </div>
