@@ -449,7 +449,6 @@ const Preise = () => {
 
 
 
-          {(
           <motion.div
             layout
             initial={{ opacity: 0, y: 16 }}
