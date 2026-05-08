@@ -491,7 +491,6 @@ const Preise = () => {
               </form>
             </div>
           </motion.div>
-          )}
 
           {/* Details — 2-step form */}
           <AnimatePresence>
