@@ -195,6 +195,7 @@ type Step = "plz" | "details" | "loading" | "results" | "error";
 const Preise = () => {
   const [geo, setGeo] = useState<FeatureCollection | null>(null);
   const [step, setStep] = useState<Step>("plz");
+  const [showTool, setShowTool] = useState(false);
   const [detailsStep, setDetailsStep] = useState<1 | 2>(1);
 
   const [plz, setPlz] = useState("");
@@ -446,7 +447,7 @@ const Preise = () => {
 
         <div className="flex flex-col items-center gap-8 px-4 sm:px-10 pt-28 pb-16 min-h-screen">
           {/* Hero */}
-          {step === "plz" && (
+          {step === "plz" && !showTool && (
             <section className="relative w-full max-w-[720px] mx-auto overflow-hidden rounded-[2rem] border border-[#E8D5B0]/30 shadow-2xl">
               {/* Warm gradient + bokeh */}
               <div className="absolute inset-0 bg-[linear-gradient(135deg,#B94F0F_0%,#C05C1A_25%,#D4623A_50%,#E8A44A_75%,#E8D5B0_100%)]" aria-hidden="true" />
@@ -491,9 +492,12 @@ const Preise = () => {
                   initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.45 }}
                   type="button"
                   onClick={() => {
-                    const el = document.getElementById("plz");
-                    el?.scrollIntoView({ behavior: "smooth", block: "center" });
-                    setTimeout(() => el?.focus(), 400);
+                    setShowTool(true);
+                    setTimeout(() => {
+                      const el = document.getElementById("plz");
+                      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      el?.focus();
+                    }, 200);
                   }}
                   className="group mt-9 inline-flex items-center gap-2.5 rounded-full bg-[#2A1F14] px-7 py-3.5 text-sm sm:text-base font-medium text-[#F5EDD8] shadow-[0_10px_30px_-10px_rgba(192,92,26,0.6)] transition-all duration-300 hover:shadow-[0_18px_40px_-10px_rgba(232,164,74,0.75)] hover:-translate-y-0.5"
                 >
@@ -505,10 +509,12 @@ const Preise = () => {
           )}
 
 
+          {(showTool || step !== "plz") && (
           <motion.div
             layout
-            animate={{ y: step === "plz" ? 0 : -8 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: step === "plz" ? 0 : -8 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className={`w-full min-w-0 sm:min-w-[520px] max-w-[640px] ${step === "plz" ? "min-h-[calc(100vh-12rem)] flex items-center" : ""}`}
           >
             <div className={cardCls}>
@@ -546,6 +552,7 @@ const Preise = () => {
               </form>
             </div>
           </motion.div>
+          )}
 
           {/* Details — 2-step form */}
           <AnimatePresence>
