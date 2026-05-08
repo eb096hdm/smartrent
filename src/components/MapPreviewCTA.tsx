@@ -2,8 +2,6 @@
 // mit Overlay und CTA-Button. Klick führt direkt zur interaktiven Preise-Karte.
 
 import { useNavigate } from "react-router-dom";
-import { MapPin, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Reveal } from "./Reveal";
 
 export const MapPreviewCTA = () => {
