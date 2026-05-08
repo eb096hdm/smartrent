@@ -492,9 +492,12 @@ const Preise = () => {
                   initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.45 }}
                   type="button"
                   onClick={() => {
-                    const el = document.getElementById("plz");
-                    el?.scrollIntoView({ behavior: "smooth", block: "center" });
-                    setTimeout(() => el?.focus(), 400);
+                    setShowTool(true);
+                    setTimeout(() => {
+                      const el = document.getElementById("plz");
+                      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      el?.focus();
+                    }, 200);
                   }}
                   className="group mt-9 inline-flex items-center gap-2.5 rounded-full bg-[#2A1F14] px-7 py-3.5 text-sm sm:text-base font-medium text-[#F5EDD8] shadow-[0_10px_30px_-10px_rgba(192,92,26,0.6)] transition-all duration-300 hover:shadow-[0_18px_40px_-10px_rgba(232,164,74,0.75)] hover:-translate-y-0.5"
                 >
