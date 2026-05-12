@@ -7,7 +7,7 @@ const faqs = [
   { q: "Was ist SmartRent und für wen ist es geeignet?", a: "SmartRent ist ein dynamisches Preisgestaltungs-Tool für private Vermieter:innen in DE. Es richtet sich vor allem diejenigen, die ihre Preise automatisch optimieren möchten." },
   { q: "Kann ich den Preisvorschlägen vertrauen?", a: "SmartRent macht Preisvorschläge und erklärt sie auf Deutsch – du entscheidest, ob du sie übernimmst oder manuell anpasst. Kein Algorithmus handelt ohne deine Zustimmung. Du behältst also die volle Kontrolle." },
   { q: "Was unterscheidet SmartRent von anderen Pricing-Tools?", a: "Andere Tools geben dir einen Preis, aber keine Erklärung. SmartRent erklärt auf Deutsch, warum ein bestimmter Preis empfohlen wird. Dazu kommt: deutschsprachige Oberfläche, Fokus auf den DE-Markt und eine einfache Bedienung für nicht-professionelle Gastgeber." },
-  { q: "Brauche ich eine Baugenehmigung?", a: "Das hängt von Art und Umfang der Arbeiten ab. Wir beraten Sie und begleiten Sie bei Bedarf durch den Genehmigungsprozess." },
+  { q: "Welche Plattformen werden unterstützt?", a: "Das hängt von Art und Umfang der Arbeiten ab. Wir beraten Sie und begleiten Sie bei Bedarf durch den Genehmigungsprozess." },
   { q: "Geben Sie eine Garantie auf Ihre Arbeit?", a: "Selbstverständlich. Auf alle Arbeiten gewähren wir eine umfassende Garantie. Wir stehen für die Qualität jedes Projekts ein." },
   { q: "Kann ich während der Arbeiten zu Hause bleiben?", a: "In den meisten Fällen ja. Wir arbeiten effizient und sauber, um Ihren Alltag möglichst wenig zu stören." },
   { q: "Wie starte ich ein Projekt?", a: "Schreiben Sie uns über das Kontaktformular oder rufen Sie an. Wir vereinbaren einen Beratungstermin und erstellen ein passgenaues Angebot." },
