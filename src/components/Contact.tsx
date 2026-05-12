@@ -17,7 +17,7 @@ export const Contact = () => {
         <div className="grid lg:grid-cols-2 gap-12">
           <Reveal>
             <span className="inline-flex items-center rounded-full bg-white/10 px-4 py-1.5 text-sm">Kontakt</span>
-            <h2 className="display mt-6 text-5xl sm:text-6xl lg:text-7xl">Kontaktieren Sie uns</h2>
+            <h2 className="display mt-6 text-5xl sm:text-6xl lg:text-7xl">Noch etwas unklar? Kontaktiere Uns!</h2>
             <p className="mt-6 text-white/70 max-w-md">Für Anfragen oder zur weiteren Besprechung Ihrer Vision erreichen Sie unser Team über die folgenden Kontaktdaten.</p>
 
             <div className="mt-12 space-y-5 text-sm">
