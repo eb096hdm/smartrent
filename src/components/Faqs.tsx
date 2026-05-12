@@ -4,7 +4,7 @@ import { Plus, X, ArrowUpRight } from "lucide-react";
 import { Reveal } from "./Reveal";
 
 const faqs = [
-  { q: "In welchem Gebiet sind Sie tätig?", a: "Wir betreuen vor allem Berlin und Umgebung, je nach Projekt sind aber auch weitere Strecken möglich. Sprechen Sie uns gerne zu Standort und Projektumfang an." },
+  { q: "Was ist SmartRent und für wen ist es geeignet?", a: "Wir betreuen vor allem Berlin und Umgebung, je nach Projekt sind aber auch weitere Strecken möglich. Sprechen Sie uns gerne zu Standort und Projektumfang an." },
   { q: "Wie lange dauert ein typisches Projekt?", a: "Die Dauer hängt vom Umfang ab. Eine Badrenovierung dauert ca. 1–2 Wochen, ein kompletter Dachausbau 4–8 Wochen. Im Beratungsgespräch erhalten Sie einen genauen Zeitplan." },
   { q: "Bieten Sie kostenlose Angebote an?", a: "Ja! Wir erstellen unverbindliche Angebote – einfach Kontakt aufnehmen und wir vereinbaren einen passenden Termin." },
   { q: "Brauche ich eine Baugenehmigung?", a: "Das hängt von Art und Umfang der Arbeiten ab. Wir beraten Sie und begleiten Sie bei Bedarf durch den Genehmigungsprozess." },
