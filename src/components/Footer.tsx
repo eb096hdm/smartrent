@@ -14,6 +14,7 @@ export const Footer = () => (
             <a href="#faqs" className="hover:text-white transition">FAQs</a>
             <a href="#services" className="hover:text-white transition">Leistungen</a>
             <a href="#contact" className="hover:text-white transition">Kontakt</a>
+            <a href="/impressum" className="hover:text-white transition">Impressum</a>
           </div>
         </div>
       </div>
