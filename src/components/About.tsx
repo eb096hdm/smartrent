@@ -30,12 +30,6 @@ export const About = () => (
         <MapPreviewCTA />
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-10 mt-20 sm:mt-28 pt-14 border-t border-border">
-        <CountUpStat end={10} suffix="+" label="Jahre Erfahrung" desc="Wir verbessern Wohnräume mit handwerklicher Präzision seit Jahren" />
-        <CountUpStat end={250} suffix="+" label="Abgeschlossene Projekte" desc="Über 250 erfolgreiche Projekte mit Qualität und Sorgfalt" />
-        <CountUpStat end={30} label="Erfahrene Handwerker:innen" desc="Unser Team aus 30 Expert:innen sichert Top-Qualität" />
-        <CountUpStat end={98} suffix="%" label="Kund:innen­zufriedenheit" desc="Alle Kund:innen sind mit unserer Arbeit und unserem Service zufrieden" />
-      </div>
     </div>
   </section>
 );
