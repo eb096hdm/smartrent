@@ -10,7 +10,7 @@ export const Footer = () => (
           <div className="grid grid-cols-2 gap-y-3 text-sm text-white/80">
             <a href="#about" className="hover:text-white transition">Über uns</a>
             <a href="#testimonials" className="hover:text-white transition">Referenzen</a>
-            <a href="#services" className="hover:text-white transition">Unsere Arbeit</a>
+            
             <a href="#faqs" className="hover:text-white transition">FAQs</a>
             <a href="#services" className="hover:text-white transition">Leistungen</a>
             
