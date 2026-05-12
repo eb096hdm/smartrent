@@ -10,7 +10,7 @@ const faqs = [
   { q: "Welche Plattformen werden unterstützt?", a: "BLOCKER" },
   { q: "Was passiert mit meinen Daten?", a: "Deine Daten werden ausschließlich zur Preisoptimierung genutzt und nicht an Dritte weitergegeben. SmartRent speichert nur die Informationen, die für die Berechnung notwendig sind." },
   { q: "Was kostet SmartRent?", a: "Genaue Preisinformationen folgen beim offiziellen Launch. Geplant ist ein einfaches, faires Modell ohne versteckte Kosten. Transparent, wie der Kern des Produkts selbst." },
-  { q: "Wie starte ich ein Projekt?", a: "Schreiben Sie uns über das Kontaktformular oder rufen Sie an. Wir vereinbaren einen Beratungstermin und erstellen ein passgenaues Angebot." },
+  
 ];
 
 export const Faqs = () => {
