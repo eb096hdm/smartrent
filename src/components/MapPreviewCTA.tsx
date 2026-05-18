@@ -64,27 +64,6 @@ export const MapPreviewCTA = () => {
             </Button>
           </div>
         </div>
-          <span className="pill mb-4 inline-flex items-center gap-1">
-            <MapPin className="h-3.5 w-3.5" /> Interaktive Karte
-          </span>
-          <h3 className="display text-2xl sm:text-3xl lg:text-4xl max-w-xl">
-            Finde die optimale Preisempfehlung für deine Region
-          </h3>
-          <p className="mt-3 text-sm sm:text-base text-muted-foreground max-w-md">
-            Gib deine Postleitzahl ein und erhalte datenbasierte Preisempfehlungen in Sekunden.
-          </p>
-          <Button
-            size="lg"
-            className="mt-6 group-hover:translate-y-[-2px] transition-transform"
-            onClick={(e) => {
-              e.stopPropagation();
-              goToMap();
-            }}
-          >
-            Jetzt Preisempfehlung erhalten
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
       </button>
     </Reveal>
   );
