@@ -728,7 +728,7 @@ const Preise = () => {
                 />
 
                 <div className="mt-8 flex justify-center">
-                  <PrimaryButton type="button" onClick={resetToDetails}>Preise anpassen</PrimaryButton>
+                  <PrimaryButton type="button" onClick={resetToDetails}>Preise übernehmen</PrimaryButton>
                 </div>
               </motion.div>
             )}
