@@ -49,7 +49,7 @@ export const MapPreviewCTA = () => {
               Finde die optimale Preisempfehlung für deine Region
             </h2>
             <p className="mt-3 text-sm sm:text-base text-muted-foreground max-w-md">
-              Gib deine Postleitzahl ein und erhalte datenbasierte Preisempfehlungen in Sekunden.
+              Gib deine Postleitzahl ein – SmartRent analysiert aktuelle Marktdaten in deiner Region und berechnet in Sekunden, welcher Preis für dein Objekt heute optimal ist.
             </p>
             <Button
               size="lg"
@@ -59,7 +59,7 @@ export const MapPreviewCTA = () => {
                 goToMap();
               }}
             >
-              Jetzt Preisempfehlung erhalten
+              Jetzt Preisempfehlung berechnen
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
