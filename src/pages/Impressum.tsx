@@ -13,10 +13,10 @@ const Impressum = () => {
         <section className="mt-10">
           <h2 className="text-xl font-medium">1. Anbieter</h2>
           <div className="mt-3 text-muted-foreground space-y-1">
-            <p>[UNTERNEHMENSNAME]</p>
+            <p>SmartRent</p>
             <p>[RECHTSFORM, z. B. UG (haftungsbeschränkt)]</p>
-            <p>[STRAßE & HAUSNUMMER]</p>
-            <p>[PLZ ORT]</p>
+            <p>Nobelstraße 10</p>
+            <p>70569 Stuttgart</p>
             <p>Deutschland</p>
           </div>
         </section>
