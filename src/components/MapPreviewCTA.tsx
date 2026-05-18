@@ -45,9 +45,9 @@ export const MapPreviewCTA = () => {
             <span className="pill mb-4 inline-flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" /> Interaktive Karte
             </span>
-            <h3 className="display text-2xl sm:text-3xl lg:text-4xl max-w-xl">
+            <h2 className="display text-2xl sm:text-3xl lg:text-4xl max-w-xl">
               Finde die optimale Preisempfehlung für deine Region
-            </h3>
+            </h2>
             <p className="mt-3 text-sm sm:text-base text-muted-foreground max-w-md">
               Gib deine Postleitzahl ein und erhalte datenbasierte Preisempfehlungen in Sekunden.
             </p>
