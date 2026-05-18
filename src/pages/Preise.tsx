@@ -391,9 +391,9 @@ const Preise = () => {
   const labelCls = "block text-xs font-medium text-white/80";
 
   return (
-    <main className="relative min-h-screen bg-[#3a2418] text-ink-foreground">
+    <main className="relative min-h-screen bg-[#f8f8f8] text-ink-foreground">
       <div
-        className="fixed inset-0 z-0 [filter:sepia(1)_saturate(1.6)_hue-rotate(-18deg)_brightness(0.95)] pointer-events-none"
+        className="fixed inset-0 z-0 pointer-events-none"
         aria-hidden="true"
       >
         <MapContainer
@@ -401,7 +401,7 @@ const Preise = () => {
           zoom={DE_ZOOM}
           zoomControl={false}
           attributionControl={false}
-          style={{ width: "100%", height: "100%", background: "#c98a55" }}
+          style={{ width: "100%", height: "100%", background: "#f8f8f8" }}
         >
           <StaticMapBinder onReady={(m) => { mapRef.current = m; }} />
           <TileLayer
