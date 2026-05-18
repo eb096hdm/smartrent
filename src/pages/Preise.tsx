@@ -438,7 +438,7 @@ const Preise = () => {
         </MapContainer>
       </div>
 
-      <div className="fixed inset-0 z-[1] bg-gradient-to-b from-[#3a2418]/55 via-[#5a2e15]/40 to-[#3a2418]/65 pointer-events-none" aria-hidden="true" />
+      
 
       <div className="relative z-[2]">
         <header className="fixed top-0 inset-x-0 z-50 bg-black/40 [backdrop-filter:blur(10px)] [-webkit-backdrop-filter:blur(10px)] border-b border-white/10 shadow-[0_2px_20px_rgba(0,0,0,0.25)]">
