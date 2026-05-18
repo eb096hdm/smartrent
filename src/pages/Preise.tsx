@@ -401,7 +401,7 @@ const Preise = () => {
           zoom={DE_ZOOM}
           zoomControl={false}
           attributionControl={false}
-          style={{ width: "100%", height: "100%", background: "#f8f8f8" }}
+          style={{ width: "100%", height: "100%", background: "#ffffff" }}
         >
           <StaticMapBinder onReady={(m) => { mapRef.current = m; }} />
           <TileLayer
@@ -412,11 +412,11 @@ const Preise = () => {
             <GeoJSON
               data={geo}
               style={{
-                fillColor: "#fff1d6",
-                fillOpacity: 0.18,
-                color: "#fff1d6",
+                fillColor: "#ffffff",
+                fillOpacity: 0,
+                color: "#bbbbbb",
                 weight: 1,
-                opacity: 0.5,
+                opacity: 0.6,
               }}
               interactive={false}
             />
@@ -426,11 +426,11 @@ const Preise = () => {
               key={plz}
               data={plzBoundary}
               style={{
-                color: "#fff1d6",
+                color: "#999999",
                 weight: 2,
                 opacity: 0.85,
-                fillColor: "#fff1d6",
-                fillOpacity: 0.18,
+                fillColor: "#ffffff",
+                fillOpacity: 0,
               }}
               interactive={false}
             />
