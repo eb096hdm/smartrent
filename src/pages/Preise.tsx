@@ -236,6 +236,13 @@ const Preise = () => {
   const mapRef = useRef<LeafletMap | null>(null);
 
   useEffect(() => {
+    if (window.location.hash) {
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
     fetch("/maps/germany-states.geojson")
       .then((r) => r.json())
