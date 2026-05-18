@@ -28,7 +28,7 @@ export const MapPreviewCTA = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/60 to-background/30" aria-hidden />
 
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 sm:p-10 bg-amber-50">
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 sm:p-10 bg-[#faead6]">
           <span className="pill mb-4 inline-flex items-center gap-1">
             <MapPin className="h-3.5 w-3.5" /> Interaktive Karte
           </span>
