@@ -39,7 +39,7 @@ export const MapPreviewCTA = () => {
               />
             </MapContainer>
           </div>
-          <div className="absolute inset-0 bg-white/55" aria-hidden />
+          <div className="absolute inset-0 bg-white/60" aria-hidden />
 
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 sm:p-10">
             <span className="pill mb-4 inline-flex items-center gap-1">
