@@ -75,16 +75,24 @@ export const Hero = () => {
               className="mt-10"
             >
               {/* Direkter Zugang zur Preise-Karte ohne Registrierungs-Gate */}
-              <button
-                type="button"
-                onClick={() => navigate("/preise")}
-                className="group inline-flex items-center gap-3 rounded-full bg-white text-ink pl-6 pr-2 py-2 text-sm font-medium transition-all duration-300 hover:gap-4 hover:bg-white/90"
-              >
-                Jetzt Preise festlegen
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white transition-transform duration-300 group-hover:rotate-45">
-                  <ArrowUpRight className="h-4 w-4" />
-                </span>
-              </button>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => navigate("/preise")}
+                  className="group inline-flex items-center gap-3 rounded-full bg-white text-ink pl-6 pr-2 py-2 text-sm font-medium transition-all duration-300 hover:gap-4 hover:bg-white/90"
+                >
+                  Jetzt Preise festlegen
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white transition-transform duration-300 group-hover:rotate-45">
+                    <ArrowUpRight className="h-4 w-4" />
+                  </span>
+                </button>
+                <a
+                  href="#about"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-sm font-medium text-white/90 hover:bg-white/10 transition-colors"
+                >
+                  Über uns
+                </a>
+              </div>
             </motion.div>
           </div>
 
