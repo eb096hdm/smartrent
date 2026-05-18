@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { MapPin, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "./Reveal";
+import { MapContainer, TileLayer } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 export const MapPreviewCTA = () => {
   const navigate = useNavigate();
