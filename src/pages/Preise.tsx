@@ -880,7 +880,7 @@ const WeekResults = ({
 
   return (
     <>
-      <h2 className="display text-3xl sm:text-4xl text-white">
+      <h2 className="mt-2 text-sm text-black">
         Deine Preisempfehlung für {plz}
       </h2>
       {aktuellerPreis !== "" && Number(aktuellerPreis) > 0 && (
