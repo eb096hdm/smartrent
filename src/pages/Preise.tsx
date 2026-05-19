@@ -900,7 +900,7 @@ const WeekResults = ({
             key={i}
             onClick={() => setOpenDayIdx(i)}
             className="text-left rounded-2xl border-2 p-5 transition-all duration-300 hover:-translate-y-0.5 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)] bg-black/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-            style={{ borderColor: CARD_BORDER[d.card_color] }}
+            style={{ borderColor: DOT_BG[d.dot] }}
           >
             <div className="flex items-start justify-between gap-2">
               <span className="text-xs uppercase tracking-wide text-white/70">{d.weekday}</span>
