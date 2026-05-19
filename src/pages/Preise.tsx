@@ -725,6 +725,7 @@ const Preise = () => {
                   plz={plz}
                   openDayIdx={openDayIdx}
                   setOpenDayIdx={setOpenDayIdx}
+                  aktuellerPreis={aktuellerPreis}
                 />
 
                 <div className="mt-8 flex justify-center">
