@@ -913,7 +913,6 @@ const WeekResults = ({
             <div className="mt-1 text-sm text-white/80">{d.label}</div>
             <p className="mt-3 text-2xl font-semibold text-white leading-tight">{d.price}</p>
             <p className="mt-1 text-xs text-white/60">{d.occupancy}</p>
-            <p className="mt-3 text-xs text-white/70 line-clamp-2">{d.card_text}</p>
             <p className="mt-3 text-[10px] uppercase tracking-wider text-white/40">Details ansehen</p>
           </button>
         ))}
