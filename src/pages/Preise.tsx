@@ -852,11 +852,13 @@ const WeekResults = ({
   plz,
   openDayIdx,
   setOpenDayIdx,
+  aktuellerPreis,
 }: {
   data: WeekResponse;
   plz: string;
   openDayIdx: number | null;
   setOpenDayIdx: (i: number | null) => void;
+  aktuellerPreis?: number | "";
 }) => {
   const open = openDayIdx !== null ? data.days[openDayIdx] : null;
   const summary = data.summary ?? {};
