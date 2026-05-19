@@ -134,7 +134,7 @@ const buildMockResponse = (basePrice: number, startDate: Date): WeekResponse => 
       dot: p.dot,
       dot_label: p.dot_label,
       card_color: p.card_color,
-      occupancy: `Auslastung: ${p.occ}%`,
+      occupancy: `${p.occ}%`,
       card_text: p.text,
       detail_text: p.detail,
       active_events: p.events,
@@ -913,7 +913,6 @@ const WeekResults = ({
             <div className="mt-1 text-sm text-white/80">{d.label}</div>
             <p className="mt-3 text-2xl font-semibold text-white leading-tight">{d.price}</p>
             <p className="mt-1 text-xs text-white/60">{d.occupancy}</p>
-            <p className="mt-3 text-xs text-white/70 line-clamp-2">{d.card_text}</p>
             <p className="mt-3 text-[10px] uppercase tracking-wider text-white/40">Details ansehen</p>
           </button>
         ))}
@@ -1013,23 +1012,6 @@ const WeekResults = ({
               )}
               {open.change_label && (
                 <p className="mt-4 text-sm font-medium text-white/85">{open.change_label}</p>
-              )}
-              {open.factors && (
-                <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {([
-                    ["Saison", open.factors.saison],
-                    ["Event", open.factors.event],
-                    ["Konkurrenz", open.factors.konkurrenz],
-                    ["Komfort", open.factors.komfort],
-                  ] as const).map(([label, val]) =>
-                    val != null ? (
-                      <div key={label} className="rounded-lg border border-white/10 bg-white/5 p-2 text-center">
-                        <div className="text-[10px] uppercase tracking-wide text-white/50">{label}</div>
-                        <div className="mt-0.5 text-sm font-medium text-white">{val}</div>
-                      </div>
-                    ) : null
-                  )}
-                </div>
               )}
             </>
           )}
