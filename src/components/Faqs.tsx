@@ -14,7 +14,7 @@ const faqs = [
 ];
 
 export const Faqs = () => {
-  const [open, setOpen] = useState(0);
+  const [open, setOpen] = useState(-1);
   return (
     <section id="faqs" className="px-3 sm:px-5 py-16 sm:py-24">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 grid lg:grid-cols-[1fr_1.4fr] gap-12 lg:gap-20">
