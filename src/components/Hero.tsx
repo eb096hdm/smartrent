@@ -86,12 +86,6 @@ export const Hero = () => {
                     <ArrowUpRight className="h-4 w-4" />
                   </span>
                 </button>
-                <a
-                  href="#about"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-sm font-medium text-white/90 hover:bg-white/10 transition-colors"
-                >
-                  Über uns
-                </a>
               </div>
             </motion.div>
           </div>
