@@ -1013,23 +1013,6 @@ const WeekResults = ({
               {open.change_label && (
                 <p className="mt-4 text-sm font-medium text-white/85">{open.change_label}</p>
               )}
-              {open.factors && (
-                <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {([
-                    ["Saison", open.factors.saison],
-                    ["Event", open.factors.event],
-                    ["Konkurrenz", open.factors.konkurrenz],
-                    ["Komfort", open.factors.komfort],
-                  ] as const).map(([label, val]) =>
-                    val != null ? (
-                      <div key={label} className="rounded-lg border border-white/10 bg-white/5 p-2 text-center">
-                        <div className="text-[10px] uppercase tracking-wide text-white/50">{label}</div>
-                        <div className="mt-0.5 text-sm font-medium text-white">{val}</div>
-                      </div>
-                    ) : null
-                  )}
-                </div>
-              )}
             </>
           )}
         </DialogContent>
