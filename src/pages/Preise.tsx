@@ -134,7 +134,7 @@ const buildMockResponse = (basePrice: number, startDate: Date): WeekResponse => 
       dot: p.dot,
       dot_label: p.dot_label,
       card_color: p.card_color,
-      occupancy: `Auslastung: ${p.occ}%`,
+      occupancy: `${p.occ}%`,
       card_text: p.text,
       detail_text: p.detail,
       active_events: p.events,
