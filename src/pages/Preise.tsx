@@ -919,24 +919,6 @@ const WeekResults = ({
         ))}
       </div>
 
-      {/* Summary */}
-      <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
-        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-          {summary.week_avg != null && (
-            <div>
-              <div className="text-2xl font-semibold text-white">{summary.week_avg}</div>
-            </div>
-          )}
-          {summary.top_event && (
-            <div className="rounded-full bg-amber-400/15 border border-amber-400/40 px-4 py-1.5 text-xs text-amber-200">
-              📍 {summary.top_event}{summary.top_event_day ? ` (${summary.top_event_day})` : ""}
-            </div>
-          )}
-        </div>
-        {summary.text && (
-          <p className="mt-4 text-sm text-white/80 leading-relaxed">{highlight(summary.text)}</p>
-        )}
-      </div>
 
       {/* Market section */}
       <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
