@@ -880,6 +880,11 @@ const WeekResults = ({
       <h2 className="display text-3xl sm:text-4xl text-white">
         Deine Preisempfehlung für {plz}
       </h2>
+      {aktuellerPreis !== "" && Number(aktuellerPreis) > 0 && (
+        <p className="mt-2 text-sm text-white/80">
+          Dein aktueller Preis: {Number(aktuellerPreis)} €/Nacht
+        </p>
+      )}
       <p className="mt-2 text-sm text-white/70">
         7 Tage im Detail – klicke auf eine Karte für die Begründung.
       </p>
