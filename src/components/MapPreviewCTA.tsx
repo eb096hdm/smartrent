@@ -41,28 +41,6 @@ export const MapPreviewCTA = () => {
           </div>
           <div className="absolute inset-0 bg-white/60" aria-hidden />
 
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 sm:p-10">
-            <span className="pill mb-4 inline-flex items-center gap-1">
-              <MapPin className="h-3.5 w-3.5" /> Interaktive Karte
-            </span>
-            <h2 className="display text-2xl sm:text-3xl lg:text-4xl max-w-xl">
-              Finde die optimale Preisempfehlung für deine Region
-            </h2>
-            <p className="mt-3 text-sm sm:text-base text-muted-foreground max-w-md">
-              Gib deine Postleitzahl ein – SmartRent analysiert aktuelle Marktdaten in deiner Region und berechnet in Sekunden, welcher Preis für dein Objekt heute optimal ist.
-            </p>
-            <Button
-              size="lg"
-              className="mt-6 group-hover:translate-y-[-2px] transition-transform"
-              onClick={(e) => {
-                e.stopPropagation();
-                goToMap();
-              }}
-            >
-              Jetzt Preisempfehlung berechnen
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
         </div>
       </button>
     </Reveal>
