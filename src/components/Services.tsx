@@ -11,7 +11,7 @@ const services = [
 ];
 
 export const Services = () => {
-  const [open, setOpen] = useState(0);
+  const [open, setOpen] = useState(-1);
   return (
     <section id="services" className="px-3 sm:px-5 pb-16 sm:pb-24">
       <div className="section-card max-w-7xl mx-auto p-6 sm:p-12 lg:p-16">
