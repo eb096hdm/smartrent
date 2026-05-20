@@ -884,7 +884,7 @@ const WeekResults = ({
         Deine Preisempfehlung für {plz}
       </h2>
       {aktuellerPreis !== "" && Number(aktuellerPreis) > 0 && (
-        <p className="mt-2 text-sm text-white/80">
+        <p className="mt-2 text-slate-950 text-lg">
           Dein aktueller Preis: {Number(aktuellerPreis)} €/Nacht
         </p>
       )}
