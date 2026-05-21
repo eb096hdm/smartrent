@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowUpRight, Loader2, MapPin } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ArrowLeft, Loader2, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import type { Map as LeafletMap } from "leaflet";
@@ -241,6 +241,20 @@ const Preise = () => {
     setShowOverlay(true);
     setOverlayProgress(0);
     setOverlayText("Wird geladen …");
+  };
+
+  const handleGoBack = () => {
+    if (step === "results") {
+      setStep("details");
+      setDetailsStep(1);
+      setResults(null);
+    } else if (step === "details") {
+      if (detailsStep === 2) {
+        setDetailsStep(1);
+      } else {
+        setStep("plz");
+      }
+    }
   };
 
   useEffect(() => {
@@ -503,7 +517,10 @@ const Preise = () => {
 
                           {step1Error && <p role="alert" className="mt-3 text-xs text-red-500">{step1Error}</p>}
 
-                          <PrimaryButton type="submit">Weiter</PrimaryButton>
+                          <div className="mt-6 flex justify-center gap-4">
+                            <BackButton onClick={handleGoBack} />
+                            <PrimaryButton type="submit">Weiter</PrimaryButton>
+                          </div>
                         </motion.form>
                       )}
 
@@ -564,16 +581,8 @@ const Preise = () => {
                             </p>
                           )}
 
-                          <div className="mt-6 flex flex-wrap items-center gap-3">
-                            <button
-                              type="button"
-                              onClick={() => setDetailsStep(1)}
-                              disabled={step === "loading"}
-                              className="rounded-full px-5 py-2 text-sm transition-colors disabled:opacity-60"
-                              style={{ border: "0.5px solid #E8E4DE", color: "#7A7068", background: "#FFFFFF" }}
-                            >
-                              Zurück
-                            </button>
+                          <div className="mt-6 flex justify-center gap-4">
+                            <BackButton onClick={() => setDetailsStep(1)} disabled={step === "loading"} />
                             <PrimaryButton type="submit" disabled={step === "loading"}>
                               {step === "loading" ? "Wird berechnet…" : "Preisempfehlung berechnen"}
                               {step === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
@@ -619,7 +628,8 @@ const Preise = () => {
                   aktuellerPreis={aktuellerPreis}
                 />
 
-                <div className="mt-8 flex justify-center">
+                <div className="mt-8 flex justify-center gap-4">
+                  <BackButton onClick={handleGoBack} />
                   <PrimaryButton type="button" onClick={resetToDetails}>Preise übernehmen</PrimaryButton>
                 </div>
               </motion.div>
@@ -705,6 +715,25 @@ const PrimaryButton = ({
     <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white transition-transform duration-300 group-hover:rotate-45">
       <ArrowUpRight className="h-4 w-4" />
     </span>
+  </button>
+);
+
+const BackButton = ({
+  onClick, disabled,
+}: {
+  onClick?: () => void;
+  disabled?: boolean;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className="group mt-6 inline-flex items-center gap-3 rounded-full bg-white text-ink pl-2 pr-6 py-2 text-sm font-medium transition-all duration-300 hover:gap-4 hover:bg-white/90 disabled:opacity-60"
+  >
+    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white transition-transform duration-300 group-hover:-rotate-45">
+      <ArrowLeft className="h-4 w-4" />
+    </span>
+    Zurück
   </button>
 );
 
