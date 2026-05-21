@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ArrowUpRight, Loader2, MapPin } from "lucide-react";
-import { format, addDays } from "date-fns";
-import { de } from "date-fns/locale";
+import { format } from "date-fns";
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import type { Map as LeafletMap } from "leaflet";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -13,6 +12,8 @@ import { Switch } from "@/components/ui/switch";
 import { WeekPicker } from "@/components/WeekPicker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { fetchPriceRecommendation } from "@/api/pricing";
+import type { DotColor, CardColor, DayCard, Competitor, EventItem, SummaryBlock, MarketBlock, WeekResponse, PricingRequest } from "@/api/types";
 
 const navItems = [
   { label: "Über uns", href: "/#about" },
@@ -26,73 +27,6 @@ const DE_CENTER: [number, number] = [51.1657, 10.4515];
 const DE_ZOOM = 7;
 const PLZ_ZOOM = 11;
 
-const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/i1mew6hs760cdj6jhllf9ww6677v1yea";
-
-type DotColor = "green" | "yellow" | "red";
-type CardColor = "red" | "orange" | "green" | "blue";
-
-type Factors = {
-  saison?: number | string;
-  event?: number | string;
-  konkurrenz?: number | string;
-  komfort?: number | string;
-};
-
-type DayCard = {
-  weekday: string;
-  label: string;
-  price: string;
-  dot: DotColor;
-  dot_label: string;
-  card_color: CardColor;
-  occupancy: string;
-  card_text: string;
-  detail_text: string;
-  active_events?: string[];
-  change_label?: string;
-  factors?: Factors;
-};
-
-type Competitor = {
-  type: string;
-  size_sqm: string | number;
-  price: string | number;
-  quality: string;
-  platform: string;
-  distance_km: string | number;
-};
-
-type EventItem = {
-  name?: string;
-  date?: string;
-  description?: string;
-  impact?: string;
-  [k: string]: unknown;
-};
-
-type SummaryBlock = {
-  week_avg?: string | number;
-  top_event?: string | null;
-  top_event_day?: string | null;
-  text?: string;
-  best_day?: string;
-  worst_day?: string;
-};
-
-type MarketBlock = {
-  avg?: string | number;
-  min?: string | number;
-  max?: string | number;
-  level?: string;
-  competitors?: Competitor[];
-};
-
-type WeekResponse = {
-  days: DayCard[];
-  summary: SummaryBlock;
-  market: MarketBlock;
-  events: EventItem[];
-};
 
 type Ansicht = "woche" | "monat";
 
@@ -111,64 +45,6 @@ const BESONDERHEITEN_OPTIONS = [
   "Waschmaschine", "Klimaanlage", "Kamin",
 ] as const;
 
-const buildMockResponse = (basePrice: number, startDate: Date): WeekResponse => {
-  const weekdays = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
-  const presets: { dot: DotColor; dot_label: string; card_color: CardColor; factor: number; occ: number; text: string; detail: string; events?: string[] }[] = [
-    { dot: "green", dot_label: "Gute Auslastung", card_color: "green", factor: 1.0, occ: 78, text: "Stabile Nachfrage – marktüblicher Preis empfohlen.", detail: "Solide Marktnachfrage und stabile Buchungslage. Der empfohlene Preis liegt im Marktdurchschnitt für vergleichbare Objekte." },
-    { dot: "green", dot_label: "Gute Auslastung", card_color: "green", factor: 1.05, occ: 82, text: "Leicht erhöhte Nachfrage erkannt.", detail: "Die Buchungsrate liegt über dem Wochenmittel. Eine moderate Preiserhöhung ist möglich." },
-    { dot: "yellow", dot_label: "Event in der Nähe", card_color: "orange", factor: 1.18, occ: 91, text: "Event in der Nähe – höherer Preis möglich.", detail: "Ein lokales Event treibt die Nachfrage. Wir empfehlen einen Aufschlag, ohne die Buchungswahrscheinlichkeit zu gefährden.", events: ["Stadtfest"] },
-    { dot: "green", dot_label: "Gute Auslastung", card_color: "green", factor: 1.02, occ: 75, text: "Marktüblicher Preis empfohlen.", detail: "Keine besonderen Faktoren – stabile, marktübliche Preisempfehlung." },
-    { dot: "yellow", dot_label: "Event in der Nähe", card_color: "orange", factor: 1.22, occ: 94, text: "Wochenend-Peak mit Event-Bonus.", detail: "Freitag mit hoher Wochenendnachfrage und einem Event in der Region.", events: ["Konzert in der Arena"] },
-    { dot: "green", dot_label: "Gute Auslastung", card_color: "blue", factor: 1.15, occ: 88, text: "Wochenende – höhere Buchungsrate.", detail: "Samstage zeigen die höchste Buchungsrate – Premium-Preis empfohlen." },
-    { dot: "red", dot_label: "Schwache Nachfrage", card_color: "red", factor: 0.85, occ: 42, text: "Schwache Nachfrage – Preis senken.", detail: "Sonntagabend ist traditionell schwach gebucht. Eine Preissenkung erhöht die Buchungswahrscheinlichkeit." },
-  ];
-  const days: DayCard[] = presets.map((p, i) => {
-    const d = addDays(startDate, i);
-    const price = Math.round((basePrice || 90) * p.factor);
-    const change = Math.round(((price / (basePrice || 90)) - 1) * 100);
-    return {
-      weekday: weekdays[i].toUpperCase(),
-      label: format(d, "dd. MMM", { locale: de }),
-      price: `${price} €/Nacht`,
-      change_label: `${change > 0 ? "+" : ""}${change}% ${change >= 0 ? "über" : "unter"} deinem aktuellen Preis`,
-      dot: p.dot,
-      dot_label: p.dot_label,
-      card_color: p.card_color,
-      occupancy: `${p.occ}%`,
-      card_text: p.text,
-      detail_text: p.detail,
-      active_events: p.events,
-      factors: { saison: 1.1, event: 1.2, konkurrenz: 0.95, komfort: 0.85 },
-    };
-  });
-  const avg = Math.round(days.reduce((s, d) => s + parseInt(d.price), 0) / days.length);
-  return {
-    days,
-    summary: {
-      week_avg: `Wochen-Durchschnitt: ${avg} €`,
-      top_event: "Konzert in der Arena",
-      top_event_day: "Freitag",
-      text: "Diese Woche zeigt eine solide Buchungslage mit Spitzen am Wochenende. Bester Tag: Freitag, schwächster Tag: Sonntag.",
-      best_day: "Freitag",
-      worst_day: "Sonntag",
-    },
-    market: {
-      avg: `${Math.round(avg * 0.95)} €`,
-      min: `${Math.round(avg * 0.7)} €`,
-      max: `${Math.round(avg * 1.3)} €`,
-      level: "mittel",
-      competitors: [
-        { type: "Wohnung", size_sqm: "60 m²", price: `${avg - 5} €`, quality: "Mittel", platform: "Airbnb", distance_km: "0.4 km" },
-        { type: "Wohnung", size_sqm: "72 m²", price: `${avg + 8} €`, quality: "Hochwertig", platform: "Booking.com", distance_km: "0.9 km" },
-        { type: "Haus", size_sqm: "95 m²", price: `${avg + 22} €`, quality: "Hochwertig", platform: "VRBO", distance_km: "1.5 km" },
-      ],
-    },
-    events: [
-      { name: "Stadtfest", date: format(addDays(startDate, 2), "yyyy-MM-dd"), description: "Innenstadt, ganztägig" },
-      { name: "Konzert in der Arena", date: format(addDays(startDate, 4), "yyyy-MM-dd"), description: "Großevent mit überregionaler Anziehung" },
-    ],
-  };
-};
 
 const StaticMapBinder = ({ onReady }: { onReady: (m: LeafletMap) => void }) => {
   const map = useMap();
@@ -322,13 +198,13 @@ const Preise = () => {
 
     setStep("loading");
 
-    const payload = {
+    const payload: PricingRequest = {
       plz,
-      art,
+      art: art!,
       flaeche_qm: Number(flaeche),
       zimmer,
       max_gaeste: maxGaeste,
-      komfort,
+      komfort: komfort!,
       aktueller_preis: Number(aktuellerPreis),
       ansicht,
       woche_start: format(wocheDate, "yyyy-MM-dd"),
@@ -338,39 +214,7 @@ const Preise = () => {
     };
 
     try {
-      let data: WeekResponse | null = null;
-      if (MAKE_WEBHOOK_URL) {
-        const r = await fetch(MAKE_WEBHOOK_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!r.ok) throw new Error("Webhook error");
-        const text = await r.text();
-        // Strip ```json ... ``` fences if Make.com wrapped the body in markdown
-        let cleaned = text.trim();
-        const fence = cleaned.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
-        if (fence) cleaned = fence[1].trim();
-        // Fallback: extract first {...} block
-        if (!cleaned.startsWith("{")) {
-          const m = cleaned.match(/\{[\s\S]*\}/);
-          if (m) cleaned = m[0];
-        }
-        try {
-          const parsed = JSON.parse(cleaned) as WeekResponse;
-          if (parsed && Array.isArray(parsed.days) && parsed.days.length > 0) {
-            data = parsed;
-          } else {
-            console.warn("Webhook returned empty/invalid data, using mock fallback", text);
-          }
-        } catch (err) {
-          console.warn("Webhook returned non-JSON, using mock fallback", text, err);
-        }
-      }
-      if (!data) {
-        await new Promise((res) => setTimeout(res, 400));
-        data = buildMockResponse(Number(aktuellerPreis) || 90, wocheDate);
-      }
+      const data = await fetchPriceRecommendation(payload);
       setResults(data);
       setOpenDayIdx(null);
       setStep("results");
