@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { cn } from "@/lib/utils";
 import { fetchPriceRecommendation } from "@/api/pricing";
 import type { DotColor, CardColor, DayCard, Competitor, EventItem, SummaryBlock, MarketBlock, WeekResponse, PricingRequest } from "@/api/types";
+import { PriceRecommendationHeader } from "@/components/PriceRecommendationHeader";
 
 const navItems = [
   { label: "Über uns", href: "/#about" },
@@ -75,6 +76,7 @@ const Preise = () => {
   const [detailsStep, setDetailsStep] = useState<1 | 2>(1);
 
   const [plz, setPlz] = useState("");
+  const [cityName, setCityName] = useState("");
   const [plzError, setPlzError] = useState<string | null>(null);
 
   // Step 1 fields
@@ -110,6 +112,13 @@ const Preise = () => {
   const detailsRef = useRef<HTMLDivElement | null>(null);
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
+  const [navScrolled, setNavScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setNavScrolled(window.scrollY > 4);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     if (window.location.hash) {
@@ -143,6 +152,7 @@ const Preise = () => {
       if (r.ok) {
         const data = await r.json();
         const place = data?.places?.[0];
+        if (place) setCityName(place["place name"] ?? "");
         if (place && mapRef.current) {
           const lat = parseFloat(place.latitude);
           const lng = parseFloat(place.longitude);
@@ -230,14 +240,18 @@ const Preise = () => {
     setResults(null);
   };
 
-  const cardCls = "w-full rounded-2xl border border-white/10 bg-black/50 p-8 shadow-2xl [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]";
-  const inputCls = "mt-2 w-full rounded-full bg-white/10 border border-white/15 px-5 py-3 text-base text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/40 disabled:opacity-70";
-  const labelCls = "block text-xs font-medium text-white/80";
+  const cardCls = "w-full rounded-2xl bg-white p-8 shadow-sm";
+  const cardStyle = { border: "0.5px solid #E8E4DE" } as React.CSSProperties;
+  const inputCls = "mt-2 w-full rounded-xl bg-white px-5 py-3.5 text-base placeholder:text-[#9A8F85] focus:outline-none disabled:opacity-70";
+  const inputStyle = { border: "0.5px solid #E8E4DE", color: "#1A1714" } as React.CSSProperties;
+  const inputFocusCls = "focus:border-[#D4622A] focus:ring-[3px] focus:ring-[rgba(212,98,42,0.12)]";
+  const labelCls = "block text-[13px] font-medium";
 
   return (
-    <main className="relative min-h-screen bg-[#f8f8f8] text-ink-foreground">
+    <main className="relative min-h-screen text-[#1A1714]" style={{ background: "#F9F7F4" }}>
       <div
         className="fixed inset-0 z-0 pointer-events-none"
+        style={{ opacity: 0.35 }}
         aria-hidden="true"
       >
         <MapContainer
@@ -285,9 +299,15 @@ const Preise = () => {
       
 
       <div className="relative z-[2]">
-        <header className="fixed top-0 inset-x-0 z-50 bg-black/40 [backdrop-filter:blur(10px)] [-webkit-backdrop-filter:blur(10px)] border-b border-white/10 shadow-[0_2px_20px_rgba(0,0,0,0.25)]">
+        <header
+          className="fixed top-0 inset-x-0 z-50 transition-shadow duration-200"
+          style={{
+            background: "#D4622A",
+            boxShadow: navScrolled ? "0 2px 8px rgba(0,0,0,0.12)" : "none",
+          }}
+        >
           <div className="flex items-center justify-between px-6 sm:px-10 py-4">
-            <a href="/" className="text-2xl font-semibold tracking-tight">SmartRent</a>
+            <a href="/" className="text-2xl font-semibold tracking-tight text-white">SmartRent</a>
             <nav className="hidden md:flex items-center gap-8">
               {navItems.map((n) => (
                 <a key={n.href} href={n.href} className="nav-link">{n.label}</a>
@@ -307,16 +327,16 @@ const Preise = () => {
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className={`w-full min-w-0 sm:min-w-[520px] max-w-[640px] ${step === "plz" ? "min-h-[calc(100vh-12rem)] flex items-center" : ""}`}
           >
-            <div className={cardCls}>
-              <h1 className="display text-3xl sm:text-4xl text-white">
+            <div className={cardCls} style={cardStyle}>
+              <h1 className="display text-3xl sm:text-4xl" style={{ color: "#1A1714" }}>
                 Wo befindet sich dein Objekt?
               </h1>
-              <p className="mt-3 text-sm text-white/70">
+              <p className="mt-3 text-sm" style={{ color: "#7A7068" }}>
                 Gib deine Postleitzahl ein, um lokale Preisempfehlungen zu erhalten.
               </p>
 
               <form onSubmit={handlePlzSubmit} className="mt-6">
-                <label htmlFor="plz" className={labelCls}>Postleitzahl</label>
+                <label htmlFor="plz" className={labelCls} style={{ color: "#7A7068" }}>Postleitzahl</label>
                 <input
                   id="plz"
                   inputMode="numeric"
@@ -330,14 +350,15 @@ const Preise = () => {
                     setPlz(e.target.value.replace(/\D/g, "").slice(0, 5));
                   }}
                   placeholder="z.B. 10115"
-                  className={inputCls}
+                  className={cn(inputCls, inputFocusCls)}
+                  style={inputStyle}
                 />
-                {plzError && <p role="alert" className="mt-2 text-xs text-red-300">{plzError}</p>}
+                {plzError && <p role="alert" className="mt-2 text-xs text-red-500">{plzError}</p>}
 
                 {step === "plz" ? (
                   <PrimaryButton type="submit">Weiter</PrimaryButton>
                 ) : (
-                  <p className="mt-4 text-xs text-white/60">PLZ bestätigt: <span className="text-white">{plz}</span></p>
+                  <p className="mt-4 text-xs" style={{ color: "#9A8F85" }}>PLZ bestätigt: <span style={{ color: "#1A1714" }}>{plz}</span></p>
                 )}
               </form>
             </div>
@@ -355,12 +376,12 @@ const Preise = () => {
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className="w-full min-w-0 sm:min-w-[520px] max-w-[640px]"
               >
-                <div className={cardCls}>
+                <div className={cardCls} style={cardStyle}>
                   {/* Step indicator */}
                   <div className="flex items-center gap-2 mb-5" aria-label={`Schritt ${detailsStep} von 2`}>
-                    <span className={cn("h-2 w-2 rounded-full transition-all", detailsStep === 1 ? "bg-white" : "bg-transparent border border-white/50")} />
-                    <span className={cn("h-2 w-2 rounded-full transition-all", detailsStep === 2 ? "bg-white" : "bg-transparent border border-white/50")} />
-                    <span className="ml-2 text-xs text-white/60">Schritt {detailsStep} von 2</span>
+                    <span className={cn("h-2 w-2 rounded-full transition-all", detailsStep === 1 ? "bg-[#D4622A]" : "bg-transparent border border-[#E8E4DE]")} />
+                    <span className={cn("h-2 w-2 rounded-full transition-all", detailsStep === 2 ? "bg-[#D4622A]" : "bg-transparent border border-[#E8E4DE]")} />
+                    <span className="ml-2 text-xs" style={{ color: "#9A8F85" }}>Schritt {detailsStep} von 2</span>
                   </div>
 
                   <div className="relative overflow-hidden">
@@ -374,13 +395,13 @@ const Preise = () => {
                           transition={{ duration: 0.25, ease: "easeOut" }}
                           onSubmit={handleStep1Next}
                         >
-                          <h2 className="display text-2xl sm:text-3xl text-white">Dein Objekt im Detail</h2>
-                          <p className="mt-2 text-sm text-white/70">Ein paar Eckdaten zu deinem Objekt.</p>
+                          <h2 className="display text-2xl sm:text-3xl" style={{ color: "#1A1714" }}>Dein Objekt im Detail</h2>
+                          <p className="mt-2 text-sm" style={{ color: "#7A7068" }}>Ein paar Eckdaten zu deinem Objekt.</p>
 
                           <div className="mt-6 space-y-5">
                             {/* Art */}
                             <div>
-                              <label className={labelCls}>Art des Objekts</label>
+                              <label className={labelCls} style={{ color: "#7A7068" }}>Art des Objekts</label>
                               <div className="mt-2 flex flex-wrap gap-2">
                                 {ART_OPTIONS.map((opt) => (
                                   <PillButton key={opt} active={art === opt} onClick={() => setArt(opt)}>{opt}</PillButton>
@@ -390,7 +411,7 @@ const Preise = () => {
 
                             {/* Wohnfläche */}
                             <div>
-                              <label htmlFor="flaeche" className={labelCls}>Wohnfläche (m²)</label>
+                              <label htmlFor="flaeche" className={labelCls} style={{ color: "#7A7068" }}>Wohnfläche (m²)</label>
                               <div className="relative">
                                 <input
                                   id="flaeche"
@@ -403,9 +424,10 @@ const Preise = () => {
                                     setFlaeche(v === "" ? "" : Number(v));
                                   }}
                                   placeholder="z.B. 65"
-                                  className={cn(inputCls, "pr-14")}
+                                  className={cn(inputCls, inputFocusCls, "pr-14")}
+                                  style={inputStyle}
                                 />
-                                <span className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-sm text-white/60">m²</span>
+                                <span className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-sm" style={{ color: "#9A8F85" }}>m²</span>
                               </div>
                             </div>
 
@@ -414,7 +436,7 @@ const Preise = () => {
 
                             {/* Komfort */}
                             <div>
-                              <label className={labelCls}>Ausstattung & Komfort</label>
+                              <label className={labelCls} style={{ color: "#7A7068" }}>Ausstattung & Komfort</label>
                               <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 {KOMFORT_OPTIONS.map((opt) => {
                                   const active = komfort === opt.value;
@@ -423,15 +445,13 @@ const Preise = () => {
                                       type="button"
                                       key={opt.value}
                                       onClick={() => setKomfort(opt.value)}
-                                      className={cn(
-                                        "rounded-lg p-4 text-left transition-all",
-                                        active
-                                          ? "border border-white bg-white/[0.08]"
-                                          : "border border-white/20 hover:border-white/40",
-                                      )}
+                                      className="rounded-xl p-4 text-left bg-white transition-all"
+                                      style={{
+                                        border: active ? "1.5px solid #D4622A" : "0.5px solid #E8E4DE",
+                                      }}
                                     >
-                                      <div className="text-sm font-medium text-white">{opt.value}</div>
-                                      <div className="mt-1 text-xs text-white/60">{opt.desc}</div>
+                                      <div className="text-sm font-medium" style={{ color: active ? "#1A1714" : "#7A7068" }}>{opt.value}</div>
+                                      <div className="mt-1 text-xs" style={{ color: "#9A8F85" }}>{opt.desc}</div>
                                     </button>
                                   );
                                 })}
@@ -440,7 +460,7 @@ const Preise = () => {
 
                             {/* Preis */}
                             <div>
-                              <label htmlFor="preis" className={labelCls}>Dein aktueller Preis pro Nacht (€)</label>
+                              <label htmlFor="preis" className={labelCls} style={{ color: "#7A7068" }}>Dein aktueller Preis pro Nacht (€)</label>
                               <input
                                 id="preis"
                                 inputMode="numeric"
@@ -451,12 +471,13 @@ const Preise = () => {
                                   setAktuellerPreis(v === "" ? "" : Number(v));
                                 }}
                                 placeholder="z.B. 95"
-                                className={inputCls}
+                                className={cn(inputCls, inputFocusCls)}
+                                style={inputStyle}
                               />
                             </div>
                           </div>
 
-                          {step1Error && <p role="alert" className="mt-3 text-xs text-red-300">{step1Error}</p>}
+                          {step1Error && <p role="alert" className="mt-3 text-xs text-red-500">{step1Error}</p>}
 
                           <PrimaryButton type="submit">Weiter</PrimaryButton>
                         </motion.form>
@@ -471,19 +492,19 @@ const Preise = () => {
                           transition={{ duration: 0.25, ease: "easeOut" }}
                           onSubmit={handleFinalSubmit}
                         >
-                          <h2 className="display text-2xl sm:text-3xl text-white">Wie soll die Analyse laufen?</h2>
-                          <p className="mt-2 text-sm text-white/70">Je mehr Details, desto genauer deine Preisempfehlung.</p>
+                          <h2 className="display text-2xl sm:text-3xl" style={{ color: "#1A1714" }}>Wie soll die Analyse laufen?</h2>
+                          <p className="mt-2 text-sm" style={{ color: "#7A7068" }}>Je mehr Details, desto genauer deine Preisempfehlung.</p>
 
                           <div className="mt-6 space-y-6">
                             {/* Woche auswählen */}
                             <div>
-                              <label className={labelCls}>Welche Woche möchtest du analysieren?</label>
+                              <label className={labelCls} style={{ color: "#7A7068" }}>Welche Woche möchtest du analysieren?</label>
                               <WeekPicker value={wocheDate} onChange={setWocheDate} minDate={initialMonday} />
                             </div>
 
                             {/* Plattformen */}
                             <div>
-                              <label className={labelCls}>Auf welchen Plattformen bist du aktiv?</label>
+                              <label className={labelCls} style={{ color: "#7A7068" }}>Auf welchen Plattformen bist du aktiv?</label>
                               <div className="mt-2 flex flex-wrap gap-2">
                                 {PLATTFORM_OPTIONS.map((p) => (
                                   <PillButton key={p} active={plattformen.includes(p)} onClick={() => togglePlattform(p)}>{p}</PillButton>
@@ -494,16 +515,16 @@ const Preise = () => {
                             {/* Aktualitätsprüfung */}
                             <div className="flex items-start justify-between gap-4">
                               <div>
-                                <div className="text-xs font-medium text-white/80">Aktuelle Marktdaten prüfen</div>
-                                <p className="mt-1 text-xs text-white/60">Wir gleichen Konkurrenzpreise und lokale Events in Echtzeit ab.</p>
+                                <div className="text-xs font-medium" style={{ color: "#1A1714" }}>Aktuelle Marktdaten prüfen</div>
+                                <p className="mt-1 text-xs" style={{ color: "#7A7068" }}>Wir gleichen Konkurrenzpreise und lokale Events in Echtzeit ab.</p>
                               </div>
                               <Switch checked={aktualitaetspruefung} onCheckedChange={setAktualitaetspruefung} />
                             </div>
 
                             {/* Besonderheiten */}
                             <div>
-                              <label className={labelCls}>Besondere Merkmale (optional)</label>
-                              <p className="mt-1 text-xs text-white/60">Erhöht die Genauigkeit der Empfehlung.</p>
+                              <label className={labelCls} style={{ color: "#7A7068" }}>Besondere Merkmale (optional)</label>
+                              <p className="mt-1 text-xs" style={{ color: "#9A8F85" }}>Erhöht die Genauigkeit der Empfehlung.</p>
                               <div className="mt-2 flex flex-wrap gap-2">
                                 {BESONDERHEITEN_OPTIONS.map((b) => (
                                   <PillButton key={b} active={besonderheiten.includes(b)} onClick={() => toggleBesonderheit(b)}>{b}</PillButton>
@@ -512,9 +533,9 @@ const Preise = () => {
                             </div>
                           </div>
 
-                          {step2Error && <p role="alert" className="mt-3 text-xs text-red-300">{step2Error}</p>}
+                          {step2Error && <p role="alert" className="mt-3 text-xs text-red-500">{step2Error}</p>}
                           {step === "error" && (
-                            <p role="alert" className="mt-3 text-xs text-red-300">
+                            <p role="alert" className="mt-3 text-xs text-red-500">
                               Preis konnte nicht berechnet werden. Bitte versuche es erneut.
                             </p>
                           )}
@@ -524,7 +545,8 @@ const Preise = () => {
                               type="button"
                               onClick={() => setDetailsStep(1)}
                               disabled={step === "loading"}
-                              className="rounded-full border border-white/20 px-5 py-2 text-sm text-white/80 hover:border-white/40 hover:text-white transition-colors disabled:opacity-60"
+                              className="rounded-full px-5 py-2 text-sm transition-colors disabled:opacity-60"
+                              style={{ border: "0.5px solid #E8E4DE", color: "#7A7068", background: "#FFFFFF" }}
                             >
                               Zurück
                             </button>
@@ -547,7 +569,7 @@ const Preise = () => {
             <div className="w-full max-w-6xl">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {Array.from({ length: 12 }).map((_, i) => (
-                  <div key={i} className="rounded-2xl border border-white/10 bg-black/50 p-6 h-40 animate-pulse [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]" />
+                  <div key={i} className="rounded-xl bg-white p-6 h-40 animate-pulse" style={{ border: "0.5px solid #E8E4DE" }} />
                 ))}
               </div>
             </div>
@@ -567,6 +589,7 @@ const Preise = () => {
                 <WeekResults
                   data={results}
                   plz={plz}
+                  cityName={cityName}
                   openDayIdx={openDayIdx}
                   setOpenDayIdx={setOpenDayIdx}
                   aktuellerPreis={aktuellerPreis}
@@ -616,13 +639,15 @@ const PillButton = ({
   <button
     type="button"
     onClick={onClick}
-    className={cn(
-      "rounded-full px-3 py-2 text-sm transition-colors",
-      active
-        ? "bg-white text-ink border border-white"
-        : "bg-transparent text-white border border-white/30 hover:border-white/60",
-    )}
-    style={{ paddingLeft: 12, paddingRight: 12 }}
+    className="rounded-full px-3 py-2 text-sm transition-all"
+    style={{
+      paddingLeft: 14,
+      paddingRight: 14,
+      background: active ? "#D4622A" : "#FFFFFF",
+      border: active ? "1px solid #D4622A" : "0.5px solid #E8E4DE",
+      color: active ? "#FFFFFF" : "#7A7068",
+      fontWeight: active ? 500 : 400,
+    }}
   >
     {children}
   </button>
@@ -642,13 +667,14 @@ const NumberStepper = ({
   const inc = () => onChange(Math.min(max, value + 1));
   return (
     <div>
-      <label className="block text-xs font-medium text-white/80">{label}</label>
+      <label className="block text-[13px] font-medium" style={{ color: "#7A7068" }}>{label}</label>
       <div className="mt-2 flex items-center gap-3">
         <button
           type="button"
           onClick={dec}
           disabled={disabled || value <= min}
-          className="h-10 w-10 rounded-full bg-white/10 border border-white/15 text-white text-lg leading-none disabled:opacity-40"
+          className="h-10 w-10 rounded-full text-lg leading-none disabled:opacity-40 bg-white"
+          style={{ border: "0.5px solid #E8E4DE", color: "#1A1714" }}
           aria-label="verringern"
         >
           −
@@ -663,13 +689,15 @@ const NumberStepper = ({
             const n = Number(e.target.value);
             if (Number.isFinite(n)) onChange(Math.min(max, Math.max(min, n)));
           }}
-          className="w-20 text-center rounded-full bg-white/10 border border-white/15 px-3 py-2 text-base text-white focus:outline-none focus:ring-2 focus:ring-white/40 disabled:opacity-70 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="w-20 text-center rounded-full px-3 py-2 text-base focus:outline-none disabled:opacity-70 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          style={{ background: "#F9F7F4", border: "0.5px solid #E8E4DE", color: "#1A1714" }}
         />
         <button
           type="button"
           onClick={inc}
           disabled={disabled || value >= max}
-          className="h-10 w-10 rounded-full bg-white/10 border border-white/15 text-white text-lg leading-none disabled:opacity-40"
+          className="h-10 w-10 rounded-full text-lg leading-none disabled:opacity-40 bg-white"
+          style={{ border: "0.5px solid #E8E4DE", color: "#1A1714" }}
           aria-label="erhöhen"
         >
           +
@@ -694,12 +722,14 @@ const DOT_BG: Record<DotColor, string> = {
 const WeekResults = ({
   data,
   plz,
+  cityName,
   openDayIdx,
   setOpenDayIdx,
   aktuellerPreis,
 }: {
   data: WeekResponse;
   plz: string;
+  cityName?: string;
   openDayIdx: number | null;
   setOpenDayIdx: (i: number | null) => void;
   aktuellerPreis?: number | "";
@@ -716,52 +746,64 @@ const WeekResults = ({
     if (tokens.length === 0) return <span>{text}</span>;
     const parts = text.split(new RegExp(`(${tokens.join("|")})`, "g"));
     return parts.map((p, i) =>
-      p && p === summary.best_day ? <span key={i} className="text-emerald-300 font-medium">{p}</span> :
-      p && p === summary.worst_day ? <span key={i} className="text-red-300 font-medium">{p}</span> :
+      p && p === summary.best_day ? <span key={i} className="font-medium" style={{ color: "#2E7D32" }}>{p}</span> :
+      p && p === summary.worst_day ? <span key={i} className="font-medium" style={{ color: "#C62828" }}>{p}</span> :
       <span key={i}>{p}</span>
     );
   };
 
   return (
     <>
-      <h2 className="mt-2 text-sm text-black">
-        Deine Preisempfehlung für {plz}
-      </h2>
-      {aktuellerPreis !== "" && Number(aktuellerPreis) > 0 && (
-        <p className="mt-2 text-slate-950 text-lg">
-          Dein aktueller Preis: {Number(aktuellerPreis)} €/Nacht
-        </p>
-      )}
-      <p className="mt-2 text-sm text-white/70">
+      <PriceRecommendationHeader
+        postalCode={plz}
+        city={cityName || "Berlin Mitte"}
+        country="Deutschland"
+      />
+      <p className="mt-3 text-sm" style={{ color: "#7A7068" }}>
         7 Tage im Detail – klicke auf eine Karte für die Begründung.
       </p>
 
       {/* 7 Day cards */}
-      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
         {data.days.map((d, i) => (
           <button
             type="button"
             key={i}
             onClick={() => setOpenDayIdx(i)}
-            className="text-left rounded-2xl border border-gray-600 p-5 transition-all duration-300 hover:-translate-y-0.5 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)] bg-black/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            className="text-left rounded-xl overflow-hidden flex bg-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4622A]/40"
+            style={{ border: "0.5px solid #E8E4DE" }}
           >
-            <div className="flex items-start justify-between gap-2">
-              <span className="text-xs uppercase tracking-wide text-white/70">{d.weekday}</span>
+            <div
+              className="self-stretch flex-shrink-0"
+              style={{ width: 3, background: "#D4622A", borderRadius: 2, margin: "12px 0" }}
+            />
+            <div className="px-4 py-4 flex-1 min-w-0">
+              <span
+                className="uppercase font-medium"
+                style={{ fontSize: 11, color: "#9A8F85", letterSpacing: "0.07em" }}
+              >
+                {d.weekday}
+              </span>
+              <div className="mt-0.5" style={{ fontSize: 13, color: "#7A7068" }}>{d.label}</div>
+              <p className="mt-2 font-semibold leading-tight" style={{ fontSize: 24, color: "#1A1714" }}>{d.price}</p>
+              <p
+                className="mt-2 uppercase"
+                style={{ fontSize: 11, color: "#D4622A", letterSpacing: "0.07em", marginTop: 4 }}
+              >
+                Details ansehen
+              </p>
             </div>
-            <div className="mt-1 text-sm text-white/80">{d.label}</div>
-            <p className="mt-3 text-2xl font-semibold text-white leading-tight">{d.price}</p>
-            <p className="mt-3 text-[10px] uppercase tracking-wider text-white/40">Details ansehen</p>
           </button>
         ))}
       </div>
 
 
       {/* Market section */}
-      <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
+      <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <h3 className="text-lg font-medium text-white">Konkurrenz im Markt</h3>
+          <h3 className="text-lg font-medium" style={{ color: "#1A1714" }}>Konkurrenz im Markt</h3>
           {market.level && (
-            <span className="rounded-full border border-white/20 px-3 py-1 text-xs text-white/70">
+            <span className="rounded-full px-3 py-1 text-xs" style={{ border: "0.5px solid #E8E4DE", color: "#7A7068" }}>
               {market.level}
             </span>
           )}
@@ -775,7 +817,7 @@ const WeekResults = ({
           <div className="mt-5 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs text-white/50 border-b border-white/10">
+                <tr className="text-left text-xs" style={{ borderBottom: "1px solid #E8E4DE", color: "#9A8F85" }}>
                   <th className="py-2 pr-3 font-normal">Typ</th>
                   <th className="py-2 pr-3 font-normal">Größe</th>
                   <th className="py-2 pr-3 font-normal">Preis</th>
@@ -786,7 +828,7 @@ const WeekResults = ({
               </thead>
               <tbody>
                 {competitors.map((c, i) => (
-                  <tr key={i} className="border-b border-white/5 text-white/85">
+                  <tr key={i} style={{ borderBottom: "1px solid #F9F7F4", color: "#1A1714" }}>
                     <td className="py-2 pr-3">{c.type}</td>
                     <td className="py-2 pr-3">{c.size_sqm}</td>
                     <td className="py-2 pr-3">{c.price}</td>
@@ -803,13 +845,13 @@ const WeekResults = ({
 
       {/* Day modal */}
       <Dialog open={open !== null} onOpenChange={(o) => !o && setOpenDayIdx(null)}>
-        <DialogContent className="bg-black/90 border-white/10 text-white max-w-lg [backdrop-filter:blur(12px)] [-webkit-backdrop-filter:blur(12px)]">
+        <DialogContent className="max-w-lg" style={{ background: "#FFFFFF", border: "0.5px solid #E8E4DE" }}>
           {open && (
             <>
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-3 text-white">
+                <DialogTitle className="flex items-center gap-3" style={{ color: "#1A1714" }}>
                   <span
-                    className="h-2.5 w-2.5 rounded-full"
+                    className="h-2.5 w-2.5 rounded-full flex-shrink-0"
                     style={{ backgroundColor: DOT_BG[open.dot] }}
                   />
                   {open.weekday} · {open.label}
@@ -817,20 +859,20 @@ const WeekResults = ({
               </DialogHeader>
               <div className="mt-2">
                 {aktuellerPreis !== "" && Number(aktuellerPreis) > 0 && (
-                  <p className="text-sm text-gray-400 line-through">{Number(aktuellerPreis)} €/Nacht</p>
+                  <p className="text-sm line-through" style={{ color: "#9A8F85" }}>{Number(aktuellerPreis)} €/Nacht</p>
                 )}
-                <p className="text-3xl font-semibold text-white">{open.price}</p>
-                <p className="mt-1 text-xs text-white/60">{open.dot_label} · {open.occupancy}</p>
+                <p className="text-3xl font-semibold" style={{ color: "#1A1714" }}>{open.price}</p>
+                <p className="mt-1 text-xs" style={{ color: "#7A7068" }}>{open.dot_label} · {open.occupancy}</p>
               </div>
-              <p className="mt-3 text-sm text-white/85 leading-relaxed">{open.detail_text}</p>
+              <p className="mt-3 text-sm leading-relaxed" style={{ color: "#1A1714" }}>{open.detail_text}</p>
               {open.active_events && open.active_events.length > 0 && (
-                <div className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/10 p-3">
-                  <p className="text-xs uppercase tracking-wide text-amber-200/80">Aktive Events</p>
-                  <p className="mt-1 text-sm text-amber-100">{open.active_events.join(", ")}</p>
+                <div className="mt-3 rounded-lg p-3" style={{ border: "1px solid rgba(212,98,42,0.25)", background: "rgba(212,98,42,0.06)" }}>
+                  <p className="text-xs uppercase tracking-wide" style={{ color: "#D4622A", letterSpacing: "0.07em" }}>Aktive Events</p>
+                  <p className="mt-1 text-sm" style={{ color: "#1A1714" }}>{open.active_events.join(", ")}</p>
                 </div>
               )}
               {open.change_label && (
-                <p className="mt-4 text-sm font-medium text-white/85">{open.change_label}</p>
+                <p className="mt-4 text-sm font-medium" style={{ color: "#7A7068" }}>{open.change_label}</p>
               )}
             </>
           )}
@@ -842,8 +884,8 @@ const WeekResults = ({
 
 const Stat = ({ label, value }: { label: string; value: string }) => (
   <div>
-    <div className="text-xs text-white/60">{label}</div>
-    <div className="mt-1 text-lg font-semibold text-white">{value}</div>
+    <div className="text-xs" style={{ color: "#9A8F85" }}>{label}</div>
+    <div className="mt-1 text-lg font-semibold" style={{ color: "#1A1714" }}>{value}</div>
   </div>
 );
 

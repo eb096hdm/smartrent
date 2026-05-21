@@ -54,6 +54,15 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* SmartRent brand tokens */
+    --sr-accent:         #D4622A;
+    --sr-text-primary:   #1A1714;
+    --sr-text-secondary: #7A7068;
+    --sr-text-muted:     #9A8F85;
+    --sr-border:         #E8E4DE;
+    --sr-bg-card:        #FFFFFF;
+    --sr-bg-page:        #F9F7F4;
   }
 }
 
