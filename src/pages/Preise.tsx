@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowUpRight, Loader2, MapPin } from "lucide-react";
-import { format, addDays } from "date-fns";
-import { de } from "date-fns/locale";
+import { ArrowRight, ArrowLeft, Loader2, MapPin } from "lucide-react";
+import { format } from "date-fns";
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import type { Map as LeafletMap } from "leaflet";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -13,6 +12,9 @@ import { Switch } from "@/components/ui/switch";
 import { WeekPicker } from "@/components/WeekPicker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { fetchPriceRecommendation } from "@/api/pricing";
+import type { DotColor, CardColor, DayCard, Competitor, EventItem, SummaryBlock, MarketBlock, WeekResponse, PricingRequest } from "@/api/types";
+import { PriceRecommendationHeader } from "@/components/PriceRecommendationHeader";
 
 const navItems = [
   { label: "Über uns", href: "/#about" },
@@ -26,73 +28,6 @@ const DE_CENTER: [number, number] = [51.1657, 10.4515];
 const DE_ZOOM = 7;
 const PLZ_ZOOM = 11;
 
-const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/i1mew6hs760cdj6jhllf9ww6677v1yea";
-
-type DotColor = "green" | "yellow" | "red";
-type CardColor = "red" | "orange" | "green" | "blue";
-
-type Factors = {
-  saison?: number | string;
-  event?: number | string;
-  konkurrenz?: number | string;
-  komfort?: number | string;
-};
-
-type DayCard = {
-  weekday: string;
-  label: string;
-  price: string;
-  dot: DotColor;
-  dot_label: string;
-  card_color: CardColor;
-  occupancy: string;
-  card_text: string;
-  detail_text: string;
-  active_events?: string[];
-  change_label?: string;
-  factors?: Factors;
-};
-
-type Competitor = {
-  type: string;
-  size_sqm: string | number;
-  price: string | number;
-  quality: string;
-  platform: string;
-  distance_km: string | number;
-};
-
-type EventItem = {
-  name?: string;
-  date?: string;
-  description?: string;
-  impact?: string;
-  [k: string]: unknown;
-};
-
-type SummaryBlock = {
-  week_avg?: string | number;
-  top_event?: string | null;
-  top_event_day?: string | null;
-  text?: string;
-  best_day?: string;
-  worst_day?: string;
-};
-
-type MarketBlock = {
-  avg?: string | number;
-  min?: string | number;
-  max?: string | number;
-  level?: string;
-  competitors?: Competitor[];
-};
-
-type WeekResponse = {
-  days: DayCard[];
-  summary: SummaryBlock;
-  market: MarketBlock;
-  events: EventItem[];
-};
 
 type Ansicht = "woche" | "monat";
 
@@ -111,64 +46,6 @@ const BESONDERHEITEN_OPTIONS = [
   "Waschmaschine", "Klimaanlage", "Kamin",
 ] as const;
 
-const buildMockResponse = (basePrice: number, startDate: Date): WeekResponse => {
-  const weekdays = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
-  const presets: { dot: DotColor; dot_label: string; card_color: CardColor; factor: number; occ: number; text: string; detail: string; events?: string[] }[] = [
-    { dot: "green", dot_label: "Gute Auslastung", card_color: "green", factor: 1.0, occ: 78, text: "Stabile Nachfrage – marktüblicher Preis empfohlen.", detail: "Solide Marktnachfrage und stabile Buchungslage. Der empfohlene Preis liegt im Marktdurchschnitt für vergleichbare Objekte." },
-    { dot: "green", dot_label: "Gute Auslastung", card_color: "green", factor: 1.05, occ: 82, text: "Leicht erhöhte Nachfrage erkannt.", detail: "Die Buchungsrate liegt über dem Wochenmittel. Eine moderate Preiserhöhung ist möglich." },
-    { dot: "yellow", dot_label: "Event in der Nähe", card_color: "orange", factor: 1.18, occ: 91, text: "Event in der Nähe – höherer Preis möglich.", detail: "Ein lokales Event treibt die Nachfrage. Wir empfehlen einen Aufschlag, ohne die Buchungswahrscheinlichkeit zu gefährden.", events: ["Stadtfest"] },
-    { dot: "green", dot_label: "Gute Auslastung", card_color: "green", factor: 1.02, occ: 75, text: "Marktüblicher Preis empfohlen.", detail: "Keine besonderen Faktoren – stabile, marktübliche Preisempfehlung." },
-    { dot: "yellow", dot_label: "Event in der Nähe", card_color: "orange", factor: 1.22, occ: 94, text: "Wochenend-Peak mit Event-Bonus.", detail: "Freitag mit hoher Wochenendnachfrage und einem Event in der Region.", events: ["Konzert in der Arena"] },
-    { dot: "green", dot_label: "Gute Auslastung", card_color: "blue", factor: 1.15, occ: 88, text: "Wochenende – höhere Buchungsrate.", detail: "Samstage zeigen die höchste Buchungsrate – Premium-Preis empfohlen." },
-    { dot: "red", dot_label: "Schwache Nachfrage", card_color: "red", factor: 0.85, occ: 42, text: "Schwache Nachfrage – Preis senken.", detail: "Sonntagabend ist traditionell schwach gebucht. Eine Preissenkung erhöht die Buchungswahrscheinlichkeit." },
-  ];
-  const days: DayCard[] = presets.map((p, i) => {
-    const d = addDays(startDate, i);
-    const price = Math.round((basePrice || 90) * p.factor);
-    const change = Math.round(((price / (basePrice || 90)) - 1) * 100);
-    return {
-      weekday: weekdays[i].toUpperCase(),
-      label: format(d, "dd. MMM", { locale: de }),
-      price: `${price} €/Nacht`,
-      change_label: `${change > 0 ? "+" : ""}${change}% ${change >= 0 ? "über" : "unter"} deinem aktuellen Preis`,
-      dot: p.dot,
-      dot_label: p.dot_label,
-      card_color: p.card_color,
-      occupancy: `${p.occ}%`,
-      card_text: p.text,
-      detail_text: p.detail,
-      active_events: p.events,
-      factors: { saison: 1.1, event: 1.2, konkurrenz: 0.95, komfort: 0.85 },
-    };
-  });
-  const avg = Math.round(days.reduce((s, d) => s + parseInt(d.price), 0) / days.length);
-  return {
-    days,
-    summary: {
-      week_avg: `Wochen-Durchschnitt: ${avg} €`,
-      top_event: "Konzert in der Arena",
-      top_event_day: "Freitag",
-      text: "Diese Woche zeigt eine solide Buchungslage mit Spitzen am Wochenende. Bester Tag: Freitag, schwächster Tag: Sonntag.",
-      best_day: "Freitag",
-      worst_day: "Sonntag",
-    },
-    market: {
-      avg: `${Math.round(avg * 0.95)} €`,
-      min: `${Math.round(avg * 0.7)} €`,
-      max: `${Math.round(avg * 1.3)} €`,
-      level: "mittel",
-      competitors: [
-        { type: "Wohnung", size_sqm: "60 m²", price: `${avg - 5} €`, quality: "Mittel", platform: "Airbnb", distance_km: "0.4 km" },
-        { type: "Wohnung", size_sqm: "72 m²", price: `${avg + 8} €`, quality: "Hochwertig", platform: "Booking.com", distance_km: "0.9 km" },
-        { type: "Haus", size_sqm: "95 m²", price: `${avg + 22} €`, quality: "Hochwertig", platform: "VRBO", distance_km: "1.5 km" },
-      ],
-    },
-    events: [
-      { name: "Stadtfest", date: format(addDays(startDate, 2), "yyyy-MM-dd"), description: "Innenstadt, ganztägig" },
-      { name: "Konzert in der Arena", date: format(addDays(startDate, 4), "yyyy-MM-dd"), description: "Großevent mit überregionaler Anziehung" },
-    ],
-  };
-};
 
 const StaticMapBinder = ({ onReady }: { onReady: (m: LeafletMap) => void }) => {
   const map = useMap();
@@ -199,6 +76,7 @@ const Preise = () => {
   const [detailsStep, setDetailsStep] = useState<1 | 2>(1);
 
   const [plz, setPlz] = useState("");
+  const [cityName, setCityName] = useState("");
   const [plzError, setPlzError] = useState<string | null>(null);
 
   // Step 1 fields
@@ -234,6 +112,16 @@ const Preise = () => {
   const detailsRef = useRef<HTMLDivElement | null>(null);
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
+  const [navScrolled, setNavScrolled] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [overlayProgress, setOverlayProgress] = useState(0);
+  const [overlayText, setOverlayText] = useState("Wird geladen …");
+
+  useEffect(() => {
+    const onScroll = () => setNavScrolled(window.scrollY > 4);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     if (window.location.hash) {
@@ -267,6 +155,7 @@ const Preise = () => {
       if (r.ok) {
         const data = await r.json();
         const place = data?.places?.[0];
+        if (place) setCityName(place["place name"] ?? "");
         if (place && mapRef.current) {
           const lat = parseFloat(place.latitude);
           const lng = parseFloat(place.longitude);
@@ -322,13 +211,13 @@ const Preise = () => {
 
     setStep("loading");
 
-    const payload = {
+    const payload: PricingRequest = {
       plz,
-      art,
+      art: art!,
       flaeche_qm: Number(flaeche),
       zimmer,
       max_gaeste: maxGaeste,
-      komfort,
+      komfort: komfort!,
       aktueller_preis: Number(aktuellerPreis),
       ansicht,
       woche_start: format(wocheDate, "yyyy-MM-dd"),
@@ -338,39 +227,7 @@ const Preise = () => {
     };
 
     try {
-      let data: WeekResponse | null = null;
-      if (MAKE_WEBHOOK_URL) {
-        const r = await fetch(MAKE_WEBHOOK_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!r.ok) throw new Error("Webhook error");
-        const text = await r.text();
-        // Strip ```json ... ``` fences if Make.com wrapped the body in markdown
-        let cleaned = text.trim();
-        const fence = cleaned.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
-        if (fence) cleaned = fence[1].trim();
-        // Fallback: extract first {...} block
-        if (!cleaned.startsWith("{")) {
-          const m = cleaned.match(/\{[\s\S]*\}/);
-          if (m) cleaned = m[0];
-        }
-        try {
-          const parsed = JSON.parse(cleaned) as WeekResponse;
-          if (parsed && Array.isArray(parsed.days) && parsed.days.length > 0) {
-            data = parsed;
-          } else {
-            console.warn("Webhook returned empty/invalid data, using mock fallback", text);
-          }
-        } catch (err) {
-          console.warn("Webhook returned non-JSON, using mock fallback", text, err);
-        }
-      }
-      if (!data) {
-        await new Promise((res) => setTimeout(res, 400));
-        data = buildMockResponse(Number(aktuellerPreis) || 90, wocheDate);
-      }
+      const data = await fetchPriceRecommendation(payload);
       setResults(data);
       setOpenDayIdx(null);
       setStep("results");
@@ -381,19 +238,56 @@ const Preise = () => {
   };
 
   const resetToDetails = () => {
-    setStep("details");
-    setDetailsStep(1);
-    setResults(null);
+    setShowOverlay(true);
+    setOverlayProgress(0);
+    setOverlayText("Wird geladen …");
   };
 
-  const cardCls = "w-full rounded-2xl border border-white/10 bg-black/50 p-8 shadow-2xl [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]";
-  const inputCls = "mt-2 w-full rounded-full bg-white/10 border border-white/15 px-5 py-3 text-base text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/40 disabled:opacity-70";
-  const labelCls = "block text-xs font-medium text-white/80";
+  const handleGoBack = () => {
+    if (step === "results") {
+      setStep("details");
+      setDetailsStep(1);
+      setResults(null);
+    } else if (step === "details") {
+      if (detailsStep === 2) {
+        setDetailsStep(1);
+      } else {
+        setStep("plz");
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!showOverlay) return;
+
+    const timeline = [
+      { time: 600, progress: 18, text: "Wird geladen …" },
+      { time: 1100, progress: 42, text: "Marktdaten werden abgerufen …" },
+      { time: 1800, progress: 67, text: "Preise werden berechnet …" },
+      { time: 2600, progress: 89, text: "Fast fertig …" },
+      { time: 3200, progress: 100, text: "Weiterleitung …" },
+    ];
+
+    timeline.forEach((step) => {
+      setTimeout(() => {
+        setOverlayProgress(step.progress);
+        setOverlayText(step.text);
+      }, step.time);
+    });
+  }, [showOverlay]);
+
+  const cardCls = "w-full rounded-2xl bg-white p-8 shadow-sm";
+  const cardStyle = { border: "0.5px solid #E8E4DE" } as React.CSSProperties;
+  const inputCls = "mt-2 w-full rounded-xl bg-white px-5 py-3.5 text-base placeholder:text-[#9A8F85] focus:outline-none disabled:opacity-70";
+  const inputStyle = { border: "0.5px solid #E8E4DE", color: "#1A1714" } as React.CSSProperties;
+  const inputFocusCls = "focus:border-[#D4622A] focus:ring-[3px] focus:ring-[rgba(212,98,42,0.12)]";
+  const labelCls = "block text-[13px] font-medium";
 
   return (
-    <main className="relative min-h-screen bg-[#f8f8f8] text-ink-foreground">
+    <main className="relative min-h-screen text-[#1A1714]" style={{ background: "#F9F7F4" }}>
       <div
         className="fixed inset-0 z-0 pointer-events-none"
+        style={{ opacity: 0.35 }}
         aria-hidden="true"
       >
         <MapContainer
@@ -441,9 +335,17 @@ const Preise = () => {
       
 
       <div className="relative z-[2]">
-        <header className="fixed top-0 inset-x-0 z-50 bg-black/40 [backdrop-filter:blur(10px)] [-webkit-backdrop-filter:blur(10px)] border-b border-white/10 shadow-[0_2px_20px_rgba(0,0,0,0.25)]">
+        <header
+          className="fixed top-0 inset-x-0 z-50 transition-shadow duration-200"
+          style={{
+            background: "rgba(212, 98, 42, 0.85)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            boxShadow: navScrolled ? "0 2px 8px rgba(0,0,0,0.12)" : "none",
+          }}
+        >
           <div className="flex items-center justify-between px-6 sm:px-10 py-4">
-            <a href="/" className="text-2xl font-semibold tracking-tight">SmartRent</a>
+            <a href="/" className="text-2xl font-semibold tracking-tight text-white">SmartRent</a>
             <nav className="hidden md:flex items-center gap-8">
               {navItems.map((n) => (
                 <a key={n.href} href={n.href} className="nav-link">{n.label}</a>
@@ -463,16 +365,16 @@ const Preise = () => {
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className={`w-full min-w-0 sm:min-w-[520px] max-w-[640px] ${step === "plz" ? "min-h-[calc(100vh-12rem)] flex items-center" : ""}`}
           >
-            <div className={cardCls}>
-              <h1 className="display text-3xl sm:text-4xl text-white">
+            <div className={cardCls} style={cardStyle}>
+              <h1 className="display text-3xl sm:text-4xl" style={{ color: "#1A1714" }}>
                 Wo befindet sich dein Objekt?
               </h1>
-              <p className="mt-3 text-sm text-white/70">
+              <p className="mt-3 text-sm" style={{ color: "#7A7068" }}>
                 Gib deine Postleitzahl ein, um lokale Preisempfehlungen zu erhalten.
               </p>
 
               <form onSubmit={handlePlzSubmit} className="mt-6">
-                <label htmlFor="plz" className={labelCls}>Postleitzahl</label>
+                <label htmlFor="plz" className={labelCls} style={{ color: "#7A7068" }}>Postleitzahl</label>
                 <input
                   id="plz"
                   inputMode="numeric"
@@ -486,14 +388,15 @@ const Preise = () => {
                     setPlz(e.target.value.replace(/\D/g, "").slice(0, 5));
                   }}
                   placeholder="z.B. 10115"
-                  className={inputCls}
+                  className={cn(inputCls, inputFocusCls)}
+                  style={inputStyle}
                 />
-                {plzError && <p role="alert" className="mt-2 text-xs text-red-300">{plzError}</p>}
+                {plzError && <p role="alert" className="mt-2 text-xs text-red-500">{plzError}</p>}
 
                 {step === "plz" ? (
                   <PrimaryButton type="submit">Weiter</PrimaryButton>
                 ) : (
-                  <p className="mt-4 text-xs text-white/60">PLZ bestätigt: <span className="text-white">{plz}</span></p>
+                  <p className="mt-4 text-xs" style={{ color: "#9A8F85" }}>PLZ bestätigt: <span style={{ color: "#1A1714" }}>{plz}</span></p>
                 )}
               </form>
             </div>
@@ -511,12 +414,12 @@ const Preise = () => {
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className="w-full min-w-0 sm:min-w-[520px] max-w-[640px]"
               >
-                <div className={cardCls}>
+                <div className={cardCls} style={cardStyle}>
                   {/* Step indicator */}
                   <div className="flex items-center gap-2 mb-5" aria-label={`Schritt ${detailsStep} von 2`}>
-                    <span className={cn("h-2 w-2 rounded-full transition-all", detailsStep === 1 ? "bg-white" : "bg-transparent border border-white/50")} />
-                    <span className={cn("h-2 w-2 rounded-full transition-all", detailsStep === 2 ? "bg-white" : "bg-transparent border border-white/50")} />
-                    <span className="ml-2 text-xs text-white/60">Schritt {detailsStep} von 2</span>
+                    <span className={cn("h-2 w-2 rounded-full transition-all", detailsStep === 1 ? "bg-[#D4622A]" : "bg-transparent border border-[#E8E4DE]")} />
+                    <span className={cn("h-2 w-2 rounded-full transition-all", detailsStep === 2 ? "bg-[#D4622A]" : "bg-transparent border border-[#E8E4DE]")} />
+                    <span className="ml-2 text-xs" style={{ color: "#9A8F85" }}>Schritt {detailsStep} von 2</span>
                   </div>
 
                   <div className="relative overflow-hidden">
@@ -530,13 +433,13 @@ const Preise = () => {
                           transition={{ duration: 0.25, ease: "easeOut" }}
                           onSubmit={handleStep1Next}
                         >
-                          <h2 className="display text-2xl sm:text-3xl text-white">Dein Objekt im Detail</h2>
-                          <p className="mt-2 text-sm text-white/70">Ein paar Eckdaten zu deinem Objekt.</p>
+                          <h2 className="display text-2xl sm:text-3xl" style={{ color: "#1A1714" }}>Dein Objekt im Detail</h2>
+                          <p className="mt-2 text-sm" style={{ color: "#7A7068" }}>Ein paar Eckdaten zu deinem Objekt.</p>
 
                           <div className="mt-6 space-y-5">
                             {/* Art */}
                             <div>
-                              <label className={labelCls}>Art des Objekts</label>
+                              <label className={labelCls} style={{ color: "#7A7068" }}>Art des Objekts</label>
                               <div className="mt-2 flex flex-wrap gap-2">
                                 {ART_OPTIONS.map((opt) => (
                                   <PillButton key={opt} active={art === opt} onClick={() => setArt(opt)}>{opt}</PillButton>
@@ -546,7 +449,7 @@ const Preise = () => {
 
                             {/* Wohnfläche */}
                             <div>
-                              <label htmlFor="flaeche" className={labelCls}>Wohnfläche (m²)</label>
+                              <label htmlFor="flaeche" className={labelCls} style={{ color: "#7A7068" }}>Wohnfläche (m²)</label>
                               <div className="relative">
                                 <input
                                   id="flaeche"
@@ -559,9 +462,10 @@ const Preise = () => {
                                     setFlaeche(v === "" ? "" : Number(v));
                                   }}
                                   placeholder="z.B. 65"
-                                  className={cn(inputCls, "pr-14")}
+                                  className={cn(inputCls, inputFocusCls, "pr-14")}
+                                  style={inputStyle}
                                 />
-                                <span className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-sm text-white/60">m²</span>
+                                <span className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-sm" style={{ color: "#9A8F85" }}>m²</span>
                               </div>
                             </div>
 
@@ -570,7 +474,7 @@ const Preise = () => {
 
                             {/* Komfort */}
                             <div>
-                              <label className={labelCls}>Ausstattung & Komfort</label>
+                              <label className={labelCls} style={{ color: "#7A7068" }}>Ausstattung & Komfort</label>
                               <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 {KOMFORT_OPTIONS.map((opt) => {
                                   const active = komfort === opt.value;
@@ -579,15 +483,13 @@ const Preise = () => {
                                       type="button"
                                       key={opt.value}
                                       onClick={() => setKomfort(opt.value)}
-                                      className={cn(
-                                        "rounded-lg p-4 text-left transition-all",
-                                        active
-                                          ? "border border-white bg-white/[0.08]"
-                                          : "border border-white/20 hover:border-white/40",
-                                      )}
+                                      className="rounded-xl p-4 text-left bg-white transition-all"
+                                      style={{
+                                        border: active ? "1.5px solid #D4622A" : "0.5px solid #E8E4DE",
+                                      }}
                                     >
-                                      <div className="text-sm font-medium text-white">{opt.value}</div>
-                                      <div className="mt-1 text-xs text-white/60">{opt.desc}</div>
+                                      <div className="text-sm font-medium" style={{ color: active ? "#1A1714" : "#7A7068" }}>{opt.value}</div>
+                                      <div className="mt-1 text-xs" style={{ color: "#9A8F85" }}>{opt.desc}</div>
                                     </button>
                                   );
                                 })}
@@ -596,7 +498,7 @@ const Preise = () => {
 
                             {/* Preis */}
                             <div>
-                              <label htmlFor="preis" className={labelCls}>Dein aktueller Preis pro Nacht (€)</label>
+                              <label htmlFor="preis" className={labelCls} style={{ color: "#7A7068" }}>Dein aktueller Preis pro Nacht (€)</label>
                               <input
                                 id="preis"
                                 inputMode="numeric"
@@ -607,14 +509,18 @@ const Preise = () => {
                                   setAktuellerPreis(v === "" ? "" : Number(v));
                                 }}
                                 placeholder="z.B. 95"
-                                className={inputCls}
+                                className={cn(inputCls, inputFocusCls)}
+                                style={inputStyle}
                               />
                             </div>
                           </div>
 
-                          {step1Error && <p role="alert" className="mt-3 text-xs text-red-300">{step1Error}</p>}
+                          {step1Error && <p role="alert" className="mt-3 text-xs text-red-500">{step1Error}</p>}
 
-                          <PrimaryButton type="submit">Weiter</PrimaryButton>
+                          <div className="mt-6 flex justify-center gap-4">
+                            <BackButton onClick={handleGoBack} />
+                            <PrimaryButton type="submit">Weiter</PrimaryButton>
+                          </div>
                         </motion.form>
                       )}
 
@@ -627,19 +533,19 @@ const Preise = () => {
                           transition={{ duration: 0.25, ease: "easeOut" }}
                           onSubmit={handleFinalSubmit}
                         >
-                          <h2 className="display text-2xl sm:text-3xl text-white">Wie soll die Analyse laufen?</h2>
-                          <p className="mt-2 text-sm text-white/70">Je mehr Details, desto genauer deine Preisempfehlung.</p>
+                          <h2 className="display text-2xl sm:text-3xl" style={{ color: "#1A1714" }}>Wie soll die Analyse laufen?</h2>
+                          <p className="mt-2 text-sm" style={{ color: "#7A7068" }}>Je mehr Details, desto genauer deine Preisempfehlung.</p>
 
                           <div className="mt-6 space-y-6">
                             {/* Woche auswählen */}
                             <div>
-                              <label className={labelCls}>Welche Woche möchtest du analysieren?</label>
+                              <label className={labelCls} style={{ color: "#7A7068" }}>Welche Woche möchtest du analysieren?</label>
                               <WeekPicker value={wocheDate} onChange={setWocheDate} minDate={initialMonday} />
                             </div>
 
                             {/* Plattformen */}
                             <div>
-                              <label className={labelCls}>Auf welchen Plattformen bist du aktiv?</label>
+                              <label className={labelCls} style={{ color: "#7A7068" }}>Auf welchen Plattformen bist du aktiv?</label>
                               <div className="mt-2 flex flex-wrap gap-2">
                                 {PLATTFORM_OPTIONS.map((p) => (
                                   <PillButton key={p} active={plattformen.includes(p)} onClick={() => togglePlattform(p)}>{p}</PillButton>
@@ -650,16 +556,16 @@ const Preise = () => {
                             {/* Aktualitätsprüfung */}
                             <div className="flex items-start justify-between gap-4">
                               <div>
-                                <div className="text-xs font-medium text-white/80">Aktuelle Marktdaten prüfen</div>
-                                <p className="mt-1 text-xs text-white/60">Wir gleichen Konkurrenzpreise und lokale Events in Echtzeit ab.</p>
+                                <div className="text-xs font-medium" style={{ color: "#1A1714" }}>Aktuelle Marktdaten prüfen</div>
+                                <p className="mt-1 text-xs" style={{ color: "#7A7068" }}>Wir gleichen Konkurrenzpreise und lokale Events in Echtzeit ab.</p>
                               </div>
                               <Switch checked={aktualitaetspruefung} onCheckedChange={setAktualitaetspruefung} />
                             </div>
 
                             {/* Besonderheiten */}
                             <div>
-                              <label className={labelCls}>Besondere Merkmale (optional)</label>
-                              <p className="mt-1 text-xs text-white/60">Erhöht die Genauigkeit der Empfehlung.</p>
+                              <label className={labelCls} style={{ color: "#7A7068" }}>Besondere Merkmale (optional)</label>
+                              <p className="mt-1 text-xs" style={{ color: "#9A8F85" }}>Erhöht die Genauigkeit der Empfehlung.</p>
                               <div className="mt-2 flex flex-wrap gap-2">
                                 {BESONDERHEITEN_OPTIONS.map((b) => (
                                   <PillButton key={b} active={besonderheiten.includes(b)} onClick={() => toggleBesonderheit(b)}>{b}</PillButton>
@@ -668,22 +574,15 @@ const Preise = () => {
                             </div>
                           </div>
 
-                          {step2Error && <p role="alert" className="mt-3 text-xs text-red-300">{step2Error}</p>}
+                          {step2Error && <p role="alert" className="mt-3 text-xs text-red-500">{step2Error}</p>}
                           {step === "error" && (
-                            <p role="alert" className="mt-3 text-xs text-red-300">
+                            <p role="alert" className="mt-3 text-xs text-red-500">
                               Preis konnte nicht berechnet werden. Bitte versuche es erneut.
                             </p>
                           )}
 
-                          <div className="mt-6 flex flex-wrap items-center gap-3">
-                            <button
-                              type="button"
-                              onClick={() => setDetailsStep(1)}
-                              disabled={step === "loading"}
-                              className="rounded-full border border-white/20 px-5 py-2 text-sm text-white/80 hover:border-white/40 hover:text-white transition-colors disabled:opacity-60"
-                            >
-                              Zurück
-                            </button>
+                          <div className="mt-6 flex justify-center gap-4">
+                            <BackButton onClick={() => setDetailsStep(1)} disabled={step === "loading"} />
                             <PrimaryButton type="submit" disabled={step === "loading"}>
                               {step === "loading" ? "Wird berechnet…" : "Preisempfehlung berechnen"}
                               {step === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
@@ -703,7 +602,7 @@ const Preise = () => {
             <div className="w-full max-w-6xl">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {Array.from({ length: 12 }).map((_, i) => (
-                  <div key={i} className="rounded-2xl border border-white/10 bg-black/50 p-6 h-40 animate-pulse [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]" />
+                  <div key={i} className="rounded-xl bg-white p-6 h-40 animate-pulse" style={{ border: "0.5px solid #E8E4DE" }} />
                 ))}
               </div>
             </div>
@@ -723,12 +622,14 @@ const Preise = () => {
                 <WeekResults
                   data={results}
                   plz={plz}
+                  cityName={cityName}
                   openDayIdx={openDayIdx}
                   setOpenDayIdx={setOpenDayIdx}
                   aktuellerPreis={aktuellerPreis}
                 />
 
-                <div className="mt-8 flex justify-center">
+                <div className="mt-8 flex justify-center gap-4">
+                  <BackButton onClick={handleGoBack} />
                   <PrimaryButton type="button" onClick={resetToDetails}>Preise übernehmen</PrimaryButton>
                 </div>
               </motion.div>
@@ -737,6 +638,61 @@ const Preise = () => {
         </div>
 
       </div>
+
+      {/* Price taking overlay */}
+      <AnimatePresence>
+        {showOverlay && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            style={{ background: "#F9F7F4" }}
+          >
+            <div className="flex flex-col items-center gap-8 px-6 text-center">
+              {/* Logo */}
+              <div className="flex items-center gap-3">
+                <div
+                  className="h-8 w-8 rounded-full flex-shrink-0"
+                  style={{ background: "#D4622A" }}
+                />
+                <span className="text-2xl font-semibold" style={{ color: "#1A1714" }}>
+                  SmartRent
+                </span>
+              </div>
+
+              {/* Headline */}
+              <div>
+                <h2 className="text-3xl font-semibold" style={{ color: "#1A1714" }}>
+                  Preis wird übernommen.
+                </h2>
+                <p className="mt-2 text-base" style={{ color: "#9A8F85" }}>
+                  Du wirst automatisch weitergeleitet.
+                </p>
+              </div>
+
+              {/* Progress bar container */}
+              <div className="w-full max-w-sm">
+                <div
+                  className="h-0.75 rounded-full overflow-hidden"
+                  style={{ background: "rgba(154, 143, 133, 0.25)" }}
+                >
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{ background: "#D4622A" }}
+                    initial={{ width: "0%" }}
+                    animate={{ width: `${overlayProgress}%` }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                  />
+                </div>
+                <p className="mt-3 text-sm" style={{ color: "#9A8F85" }}>
+                  {overlayText}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 };
@@ -756,9 +712,28 @@ const PrimaryButton = ({
     className="group mt-6 inline-flex items-center gap-3 rounded-full bg-white text-ink pl-6 pr-2 py-2 text-sm font-medium transition-all duration-300 hover:gap-4 hover:bg-white/90 disabled:opacity-60"
   >
     {children}
-    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white transition-transform duration-300 group-hover:rotate-45">
-      <ArrowUpRight className="h-4 w-4" />
+    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white">
+      <ArrowRight className="h-4 w-4" />
     </span>
+  </button>
+);
+
+const BackButton = ({
+  onClick, disabled,
+}: {
+  onClick?: () => void;
+  disabled?: boolean;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className="group mt-6 inline-flex items-center gap-3 rounded-full bg-white text-ink pl-2 pr-6 py-2 text-sm font-medium transition-all duration-300 hover:gap-4 hover:bg-white/90 disabled:opacity-60"
+  >
+    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white">
+      <ArrowLeft className="h-4 w-4" />
+    </span>
+    Zurück
   </button>
 );
 
@@ -772,13 +747,15 @@ const PillButton = ({
   <button
     type="button"
     onClick={onClick}
-    className={cn(
-      "rounded-full px-3 py-2 text-sm transition-colors",
-      active
-        ? "bg-white text-ink border border-white"
-        : "bg-transparent text-white border border-white/30 hover:border-white/60",
-    )}
-    style={{ paddingLeft: 12, paddingRight: 12 }}
+    className="rounded-full px-3 py-2 text-sm transition-all"
+    style={{
+      paddingLeft: 14,
+      paddingRight: 14,
+      background: active ? "#D4622A" : "#FFFFFF",
+      border: active ? "1px solid #D4622A" : "0.5px solid #E8E4DE",
+      color: active ? "#FFFFFF" : "#7A7068",
+      fontWeight: active ? 500 : 400,
+    }}
   >
     {children}
   </button>
@@ -798,13 +775,14 @@ const NumberStepper = ({
   const inc = () => onChange(Math.min(max, value + 1));
   return (
     <div>
-      <label className="block text-xs font-medium text-white/80">{label}</label>
+      <label className="block text-[13px] font-medium" style={{ color: "#7A7068" }}>{label}</label>
       <div className="mt-2 flex items-center gap-3">
         <button
           type="button"
           onClick={dec}
           disabled={disabled || value <= min}
-          className="h-10 w-10 rounded-full bg-white/10 border border-white/15 text-white text-lg leading-none disabled:opacity-40"
+          className="h-10 w-10 rounded-full text-lg leading-none disabled:opacity-40 bg-white"
+          style={{ border: "0.5px solid #E8E4DE", color: "#1A1714" }}
           aria-label="verringern"
         >
           −
@@ -819,13 +797,15 @@ const NumberStepper = ({
             const n = Number(e.target.value);
             if (Number.isFinite(n)) onChange(Math.min(max, Math.max(min, n)));
           }}
-          className="w-20 text-center rounded-full bg-white/10 border border-white/15 px-3 py-2 text-base text-white focus:outline-none focus:ring-2 focus:ring-white/40 disabled:opacity-70 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="w-20 text-center rounded-full px-3 py-2 text-base focus:outline-none disabled:opacity-70 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          style={{ background: "#F9F7F4", border: "0.5px solid #E8E4DE", color: "#1A1714" }}
         />
         <button
           type="button"
           onClick={inc}
           disabled={disabled || value >= max}
-          className="h-10 w-10 rounded-full bg-white/10 border border-white/15 text-white text-lg leading-none disabled:opacity-40"
+          className="h-10 w-10 rounded-full text-lg leading-none disabled:opacity-40 bg-white"
+          style={{ border: "0.5px solid #E8E4DE", color: "#1A1714" }}
           aria-label="erhöhen"
         >
           +
@@ -850,12 +830,14 @@ const DOT_BG: Record<DotColor, string> = {
 const WeekResults = ({
   data,
   plz,
+  cityName,
   openDayIdx,
   setOpenDayIdx,
   aktuellerPreis,
 }: {
   data: WeekResponse;
   plz: string;
+  cityName?: string;
   openDayIdx: number | null;
   setOpenDayIdx: (i: number | null) => void;
   aktuellerPreis?: number | "";
@@ -872,146 +854,172 @@ const WeekResults = ({
     if (tokens.length === 0) return <span>{text}</span>;
     const parts = text.split(new RegExp(`(${tokens.join("|")})`, "g"));
     return parts.map((p, i) =>
-      p && p === summary.best_day ? <span key={i} className="text-emerald-300 font-medium">{p}</span> :
-      p && p === summary.worst_day ? <span key={i} className="text-red-300 font-medium">{p}</span> :
+      p && p === summary.best_day ? <span key={i} className="font-medium" style={{ color: "#2E7D32" }}>{p}</span> :
+      p && p === summary.worst_day ? <span key={i} className="font-medium" style={{ color: "#C62828" }}>{p}</span> :
       <span key={i}>{p}</span>
     );
   };
 
   return (
     <>
-      <h2 className="mt-2 text-sm text-black">
-        Deine Preisempfehlung für {plz}
-      </h2>
-      {aktuellerPreis !== "" && Number(aktuellerPreis) > 0 && (
-        <p className="mt-2 text-slate-950 text-lg">
-          Dein aktueller Preis: {Number(aktuellerPreis)} €/Nacht
-        </p>
-      )}
-      <p className="mt-2 text-sm text-white/70">
+      <PriceRecommendationHeader
+        postalCode={plz}
+        city={cityName || "Berlin Mitte"}
+        country="Deutschland"
+      />
+      <p className="mt-3 text-sm" style={{ color: "#7A7068" }}>
         7 Tage im Detail – klicke auf eine Karte für die Begründung.
       </p>
 
       {/* 7 Day cards */}
-      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
         {data.days.map((d, i) => (
           <button
             type="button"
             key={i}
             onClick={() => setOpenDayIdx(i)}
-            className="text-left rounded-2xl border-2 p-5 transition-all duration-300 hover:-translate-y-0.5 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)] bg-black/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-            style={{ borderColor: DOT_BG[d.dot] }}
+            className="text-left rounded-xl overflow-hidden flex bg-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4622A]/40"
+            style={{ border: "0.5px solid #E8E4DE" }}
           >
-            <div className="flex items-start justify-between gap-2">
-              <span className="text-xs uppercase tracking-wide text-white/70">{d.weekday}</span>
+            <div
+              className="self-stretch flex-shrink-0"
+              style={{ width: 3, background: "#D4622A", borderRadius: 2, margin: "12px 0" }}
+            />
+            <div className="px-4 py-4 flex-1 min-w-0">
               <span
-                className="h-2.5 w-2.5 rounded-full mt-1 shrink-0"
-                style={{ backgroundColor: DOT_BG[d.dot] }}
-                title={d.dot_label}
-              />
+                className="uppercase font-medium"
+                style={{ fontSize: 11, color: "#9A8F85", letterSpacing: "0.07em" }}
+              >
+                {d.weekday}
+              </span>
+              <div className="mt-0.5" style={{ fontSize: 13, color: "#7A7068" }}>{d.label}</div>
+              <p className="mt-2 font-semibold leading-tight" style={{ fontSize: 24, color: "#1A1714" }}>{d.price}</p>
+              <p
+                className="mt-2 uppercase"
+                style={{ fontSize: 11, color: "#D4622A", letterSpacing: "0.07em", marginTop: 4 }}
+              >
+                Details ansehen
+              </p>
             </div>
-            <div className="mt-1 text-sm text-white/80">{d.label}</div>
-            <p className="mt-3 text-2xl font-semibold text-white leading-tight">{d.price}</p>
-            <p className="mt-1 text-xs text-white/60">{d.occupancy}</p>
-            <p className="mt-3 text-[10px] uppercase tracking-wider text-white/40">Details ansehen</p>
           </button>
         ))}
       </div>
 
 
       {/* Market section */}
-      <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
+      <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <h3 className="text-lg font-medium text-white">Konkurrenz im Markt</h3>
+          <h3 className="text-lg font-medium" style={{ color: "#1A1714" }}>Konkurrenz im Markt</h3>
           {market.level && (
-            <span className="rounded-full border border-white/20 px-3 py-1 text-xs text-white/70">
+            <span className="rounded-full px-3 py-1 text-xs" style={{ border: "0.5px solid #E8E4DE", color: "#7A7068" }}>
               {market.level}
             </span>
           )}
         </div>
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {market.avg != null && <Stat label="Ø Markt" value={String(market.avg)} />}
-          {market.min != null && <Stat label="Min" value={String(market.min)} />}
-          {market.max != null && <Stat label="Max" value={String(market.max)} />}
-        </div>
         {competitors.length > 0 && (
-          <div className="mt-5 overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs text-white/50 border-b border-white/10">
-                  <th className="py-2 pr-3 font-normal">Typ</th>
-                  <th className="py-2 pr-3 font-normal">Größe</th>
-                  <th className="py-2 pr-3 font-normal">Preis</th>
-                  <th className="py-2 pr-3 font-normal">Qualität</th>
-                  <th className="py-2 pr-3 font-normal">Plattform</th>
-                  <th className="py-2 pr-3 font-normal">Distanz</th>
-                </tr>
-              </thead>
-              <tbody>
-                {competitors.map((c, i) => (
-                  <tr key={i} className="border-b border-white/5 text-white/85">
-                    <td className="py-2 pr-3">{c.type}</td>
-                    <td className="py-2 pr-3">{c.size_sqm}</td>
-                    <td className="py-2 pr-3">{c.price}</td>
-                    <td className="py-2 pr-3">{c.quality}</td>
-                    <td className="py-2 pr-3">{c.platform}</td>
-                    <td className="py-2 pr-3">{c.distance_km}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-5 space-y-2.5">
+            {competitors.map((c, i) => {
+              const priceNum = parseInt(c.price.match(/\d+/)?.[0] || "0");
+              const minNum = market.min ? parseInt(market.min.match(/\d+/)?.[0] || "0") : 71;
+              const maxNum = market.max ? parseInt(market.max.match(/\d+/)?.[0] || "0") : 131;
+              const fillPct = ((priceNum - minNum) / (maxNum - minNum)) * 100;
+              const isHighlight = c.platform === "Booking.com";
+              const qualityBg = c.quality === "Hochwertig"
+                ? "rgba(212, 98, 42, 0.12)"
+                : "rgba(154, 143, 133, 0.15)";
+              const qualityColor = c.quality === "Hochwertig" ? "#D4622A" : "#9A8F85";
+
+              return (
+                <div key={i}>
+                  {isHighlight && (
+                    <div className="text-xs font-medium mb-1.5" style={{ color: "#D4622A", background: "rgba(212,98,42,0.08)", padding: "2px 10px", display: "inline-block", borderRadius: 6 }}>
+                      stärkster Mitbewerber
+                    </div>
+                  )}
+                  <div
+                    style={{
+                      background: "#F9F7F4",
+                      border: isHighlight ? "2px solid #D4622A" : "1px solid rgba(154, 143, 133, 0.3)",
+                      borderRadius: 12,
+                      padding: "16px 20px",
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div style={{ color: "#1A1714", fontSize: 14, fontWeight: 500 }}>
+                          {c.type} · {c.size_sqm}
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <div style={{ color: "#1A1714", fontSize: 20, fontWeight: 600 }}>
+                          {c.price}
+                        </div>
+                        <div
+                          className="text-xs mt-1"
+                          style={{
+                            background: qualityBg,
+                            color: qualityColor,
+                            padding: "2px 8px",
+                            borderRadius: 4,
+                            display: "inline-block",
+                            fontWeight: 500,
+                          }}
+                        >
+                          {c.quality}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between gap-2" style={{ fontSize: 12, color: "#9A8F85" }}>
+                      <span>{c.platform}</span>
+                      <span>{c.distance_km}</span>
+                    </div>
+                    <div className="mt-3">
+                      <div style={{ background: "rgba(154, 143, 133, 0.2)", height: 6, borderRadius: 3, overflow: "hidden" }}>
+                        <div
+                          style={{
+                            background: "#D4622A",
+                            height: "100%",
+                            width: `${Math.max(0, Math.min(100, fillPct))}%`,
+                            borderRadius: 3,
+                            transition: "width 0.3s ease",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Events */}
-      {events.length > 0 && (
-        <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
-          <h3 className="text-lg font-medium text-white">Events diese Woche</h3>
-          <ul className="mt-3 space-y-2">
-            {events.map((e, i) => (
-              <li key={i} className="text-sm text-white/80 flex flex-wrap items-baseline gap-x-2">
-                <span className="text-white font-medium">{e.name ?? "Event"}</span>
-                {e.date && <span className="text-white/50"> · {e.date}</span>}
-                {e.description && <span className="text-white/60"> – {e.description}</span>}
-                {e.impact && (
-                  <span className="ml-1 rounded-full bg-amber-400/15 border border-amber-400/40 px-2 py-0.5 text-[10px] text-amber-200">
-                    {e.impact}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
       {/* Day modal */}
       <Dialog open={open !== null} onOpenChange={(o) => !o && setOpenDayIdx(null)}>
-        <DialogContent className="bg-black/90 border-white/10 text-white max-w-lg [backdrop-filter:blur(12px)] [-webkit-backdrop-filter:blur(12px)]">
+        <DialogContent className="max-w-lg" style={{ background: "#FFFFFF", border: "0.5px solid #E8E4DE" }}>
           {open && (
             <>
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-3 text-white">
-                  <span
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: DOT_BG[open.dot] }}
-                  />
+                <DialogTitle style={{ color: "#1A1714" }}>
                   {open.weekday} · {open.label}
                 </DialogTitle>
               </DialogHeader>
               <div className="mt-2">
-                <p className="text-3xl font-semibold text-white">{open.price}</p>
-                <p className="mt-1 text-xs text-white/60">{open.dot_label} · {open.occupancy}</p>
+                {aktuellerPreis !== "" && Number(aktuellerPreis) > 0 && (
+                  <p className="text-sm line-through" style={{ color: "#9A8F85" }}>{Number(aktuellerPreis)} €/Nacht</p>
+                )}
+                <p className="text-3xl font-semibold" style={{ color: "#1A1714" }}>{open.price}</p>
+                <p className="mt-1 text-xs" style={{ color: "#7A7068" }}>{open.dot_label} · {open.occupancy}</p>
               </div>
-              <p className="mt-3 text-sm text-white/85 leading-relaxed">{open.detail_text}</p>
+              <p className="mt-3 text-sm leading-relaxed" style={{ color: "#1A1714" }}>{open.detail_text}</p>
               {open.active_events && open.active_events.length > 0 && (
-                <div className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/10 p-3">
-                  <p className="text-xs uppercase tracking-wide text-amber-200/80">Aktive Events</p>
-                  <p className="mt-1 text-sm text-amber-100">{open.active_events.join(", ")}</p>
+                <div className="mt-3 rounded-lg p-3" style={{ border: "1px solid rgba(212,98,42,0.25)", background: "rgba(212,98,42,0.06)" }}>
+                  <p className="text-xs uppercase tracking-wide" style={{ color: "#D4622A", letterSpacing: "0.07em" }}>Aktive Events</p>
+                  <p className="mt-1 text-sm" style={{ color: "#1A1714" }}>{open.active_events.join(", ")}</p>
                 </div>
               )}
               {open.change_label && (
-                <p className="mt-4 text-sm font-medium text-white/85">{open.change_label}</p>
+                <p className="mt-4 text-sm font-medium" style={{ color: "#7A7068" }}>{open.change_label}</p>
               )}
             </>
           )}
@@ -1023,8 +1031,8 @@ const WeekResults = ({
 
 const Stat = ({ label, value }: { label: string; value: string }) => (
   <div>
-    <div className="text-xs text-white/60">{label}</div>
-    <div className="mt-1 text-lg font-semibold text-white">{value}</div>
+    <div className="text-xs" style={{ color: "#9A8F85" }}>{label}</div>
+    <div className="mt-1 text-lg font-semibold" style={{ color: "#1A1714" }}>{value}</div>
   </div>
 );
 
