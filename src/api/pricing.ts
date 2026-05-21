@@ -71,9 +71,11 @@ const buildMockResponse = (basePrice: number, startDate: Date): WeekResponse => 
 };
 
 // ---------------------------------------------------------------------------
-// Main export – tries the Express backend first, falls back to mock data
+// Main export
+// Priority: 1) Express backend  2) Make.com direct  3) Mock data
 // ---------------------------------------------------------------------------
 export async function fetchPriceRecommendation(payload: PricingRequest): Promise<WeekResponse> {
+  // 1) Express backend (local dev with Vite proxy)
   try {
     const res = await fetch("/api/price-recommendation", {
       method: "POST",
@@ -85,10 +87,40 @@ export async function fetchPriceRecommendation(payload: PricingRequest): Promise
       if (data && Array.isArray(data.days) && data.days.length > 0) return data;
     }
   } catch {
-    // Backend not available (e.g. Lovable preview) – fall through to mock
+    // Backend not available – continue to next option
   }
 
-  // Small artificial delay so the loading spinner is visible
+  // 2) Make.com webhook directly from the browser (Lovable / no backend)
+  const webhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL as string | undefined;
+  if (webhookUrl) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      const res = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      if (res.ok) {
+        const text = await res.text();
+        let cleaned = text.trim();
+        const fence = cleaned.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+        if (fence) cleaned = fence[1].trim();
+        if (!cleaned.startsWith("{")) {
+          const m = cleaned.match(/\{[\s\S]*\}/);
+          if (m) cleaned = m[0];
+        }
+        const parsed = JSON.parse(cleaned) as WeekResponse;
+        if (parsed && Array.isArray(parsed.days) && parsed.days.length > 0) return parsed;
+      }
+    } catch {
+      // Webhook failed – fall through to mock
+    }
+  }
+
+  // 3) Mock data fallback (no backend, no webhook)
   await new Promise((res) => setTimeout(res, 600));
   return buildMockResponse(payload.aktueller_preis || 90, new Date(payload.woche_start));
 }
