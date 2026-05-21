@@ -743,20 +743,13 @@ const WeekResults = ({
             type="button"
             key={i}
             onClick={() => setOpenDayIdx(i)}
-            className="text-left rounded-2xl border-2 p-5 transition-all duration-300 hover:-translate-y-0.5 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)] bg-black/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-            style={{ borderColor: DOT_BG[d.dot] }}
+            className="text-left rounded-2xl border border-gray-600 p-5 transition-all duration-300 hover:-translate-y-0.5 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)] bg-black/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
             <div className="flex items-start justify-between gap-2">
               <span className="text-xs uppercase tracking-wide text-white/70">{d.weekday}</span>
-              <span
-                className="h-2.5 w-2.5 rounded-full mt-1 shrink-0"
-                style={{ backgroundColor: DOT_BG[d.dot] }}
-                title={d.dot_label}
-              />
             </div>
             <div className="mt-1 text-sm text-white/80">{d.label}</div>
             <p className="mt-3 text-2xl font-semibold text-white leading-tight">{d.price}</p>
-            <p className="mt-1 text-xs text-white/60">{d.occupancy}</p>
             <p className="mt-3 text-[10px] uppercase tracking-wider text-white/40">Details ansehen</p>
           </button>
         ))}
@@ -808,27 +801,6 @@ const WeekResults = ({
         )}
       </div>
 
-      {/* Events */}
-      {events.length > 0 && (
-        <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-6 [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]">
-          <h3 className="text-lg font-medium text-white">Events diese Woche</h3>
-          <ul className="mt-3 space-y-2">
-            {events.map((e, i) => (
-              <li key={i} className="text-sm text-white/80 flex flex-wrap items-baseline gap-x-2">
-                <span className="text-white font-medium">{e.name ?? "Event"}</span>
-                {e.date && <span className="text-white/50"> · {e.date}</span>}
-                {e.description && <span className="text-white/60"> – {e.description}</span>}
-                {e.impact && (
-                  <span className="ml-1 rounded-full bg-amber-400/15 border border-amber-400/40 px-2 py-0.5 text-[10px] text-amber-200">
-                    {e.impact}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
       {/* Day modal */}
       <Dialog open={open !== null} onOpenChange={(o) => !o && setOpenDayIdx(null)}>
         <DialogContent className="bg-black/90 border-white/10 text-white max-w-lg [backdrop-filter:blur(12px)] [-webkit-backdrop-filter:blur(12px)]">
@@ -844,6 +816,9 @@ const WeekResults = ({
                 </DialogTitle>
               </DialogHeader>
               <div className="mt-2">
+                {aktuellerPreis !== "" && Number(aktuellerPreis) > 0 && (
+                  <p className="text-sm text-gray-400 line-through">{Number(aktuellerPreis)} €/Nacht</p>
+                )}
                 <p className="text-3xl font-semibold text-white">{open.price}</p>
                 <p className="mt-1 text-xs text-white/60">{open.dot_label} · {open.occupancy}</p>
               </div>

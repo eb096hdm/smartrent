@@ -1,6 +1,7 @@
 import { addDays, format } from "date-fns";
 import { de } from "date-fns/locale";
 import type { PricingRequest, WeekResponse, DayCard, DotColor, CardColor } from "../../src/api/types.js";
+import { generateDayExplanations } from "./claude.js";
 
 const buildMockResponse = (basePrice: number, startDate: Date): WeekResponse => {
   const weekdays = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
@@ -86,7 +87,7 @@ export async function getPriceRecommendation(payload: PricingRequest): Promise<W
         }
         const parsed = JSON.parse(cleaned) as WeekResponse;
         if (parsed && Array.isArray(parsed.days) && parsed.days.length > 0) {
-          return parsed;
+          return enrichWithClaude(parsed, payload.aktueller_preis);
         }
         console.warn("Webhook returned empty/invalid data, using mock fallback");
       }
@@ -96,5 +97,17 @@ export async function getPriceRecommendation(payload: PricingRequest): Promise<W
   }
 
   await new Promise((res) => setTimeout(res, 400));
-  return buildMockResponse(payload.aktueller_preis || 90, new Date(payload.woche_start));
+  const data = buildMockResponse(payload.aktueller_preis || 90, new Date(payload.woche_start));
+  return enrichWithClaude(data, payload.aktueller_preis);
+}
+
+async function enrichWithClaude(data: WeekResponse, currentPrice: number): Promise<WeekResponse> {
+  if (!process.env.ANTHROPIC_API_KEY) return data;
+  try {
+    const explanations = await generateDayExplanations(data.days, data.events, currentPrice);
+    return { ...data, days: data.days.map((d, i) => ({ ...d, detail_text: explanations[i] ?? d.detail_text })) };
+  } catch (err) {
+    console.warn("Claude enrichment failed, using original detail_text:", err);
+    return data;
+  }
 }
