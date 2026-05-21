@@ -810,11 +810,6 @@ const WeekResults = ({
             </span>
           )}
         </div>
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {market.avg != null && <Stat label="Ø Markt" value={String(market.avg)} />}
-          {market.min != null && <Stat label="Min" value={String(market.min)} />}
-          {market.max != null && <Stat label="Max" value={String(market.max)} />}
-        </div>
         {competitors.length > 0 && (
           <div className="mt-5 space-y-2.5">
             {competitors.map((c, i) => {
@@ -899,11 +894,7 @@ const WeekResults = ({
           {open && (
             <>
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-3" style={{ color: "#1A1714" }}>
-                  <span
-                    className="h-2.5 w-2.5 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: DOT_BG[open.dot] }}
-                  />
+                <DialogTitle style={{ color: "#1A1714" }}>
                   {open.weekday} · {open.label}
                 </DialogTitle>
               </DialogHeader>
