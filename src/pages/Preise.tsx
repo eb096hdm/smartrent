@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowUpRight, ArrowLeft, Loader2, MapPin } from "lucide-react";
+import { ArrowRight, ArrowLeft, Loader2, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import type { Map as LeafletMap } from "leaflet";
@@ -712,8 +712,8 @@ const PrimaryButton = ({
     className="group mt-6 inline-flex items-center gap-3 rounded-full bg-white text-ink pl-6 pr-2 py-2 text-sm font-medium transition-all duration-300 hover:gap-4 hover:bg-white/90 disabled:opacity-60"
   >
     {children}
-    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white transition-transform duration-300 group-hover:rotate-45">
-      <ArrowUpRight className="h-4 w-4" />
+    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white">
+      <ArrowRight className="h-4 w-4" />
     </span>
   </button>
 );
@@ -730,7 +730,7 @@ const BackButton = ({
     disabled={disabled}
     className="group mt-6 inline-flex items-center gap-3 rounded-full bg-white text-ink pl-2 pr-6 py-2 text-sm font-medium transition-all duration-300 hover:gap-4 hover:bg-white/90 disabled:opacity-60"
   >
-    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white transition-transform duration-300 group-hover:-rotate-45">
+    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white">
       <ArrowLeft className="h-4 w-4" />
     </span>
     Zurück
