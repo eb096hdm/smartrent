@@ -113,6 +113,9 @@ const Preise = () => {
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const [navScrolled, setNavScrolled] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [overlayProgress, setOverlayProgress] = useState(0);
+  const [overlayText, setOverlayText] = useState("Wird geladen …");
 
   useEffect(() => {
     const onScroll = () => setNavScrolled(window.scrollY > 4);
@@ -235,10 +238,29 @@ const Preise = () => {
   };
 
   const resetToDetails = () => {
-    setStep("details");
-    setDetailsStep(1);
-    setResults(null);
+    setShowOverlay(true);
+    setOverlayProgress(0);
+    setOverlayText("Wird geladen …");
   };
+
+  useEffect(() => {
+    if (!showOverlay) return;
+
+    const timeline = [
+      { time: 600, progress: 18, text: "Wird geladen …" },
+      { time: 1100, progress: 42, text: "Marktdaten werden abgerufen …" },
+      { time: 1800, progress: 67, text: "Preise werden berechnet …" },
+      { time: 2600, progress: 89, text: "Fast fertig …" },
+      { time: 3200, progress: 100, text: "Weiterleitung …" },
+    ];
+
+    timeline.forEach((step) => {
+      setTimeout(() => {
+        setOverlayProgress(step.progress);
+        setOverlayText(step.text);
+      }, step.time);
+    });
+  }, [showOverlay]);
 
   const cardCls = "w-full rounded-2xl bg-white p-8 shadow-sm";
   const cardStyle = { border: "0.5px solid #E8E4DE" } as React.CSSProperties;
@@ -606,6 +628,61 @@ const Preise = () => {
         </div>
 
       </div>
+
+      {/* Price taking overlay */}
+      <AnimatePresence>
+        {showOverlay && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            style={{ background: "#F9F7F4" }}
+          >
+            <div className="flex flex-col items-center gap-8 px-6 text-center">
+              {/* Logo */}
+              <div className="flex items-center gap-3">
+                <div
+                  className="h-8 w-8 rounded-full flex-shrink-0"
+                  style={{ background: "#D4622A" }}
+                />
+                <span className="text-2xl font-semibold" style={{ color: "#1A1714" }}>
+                  SmartRent
+                </span>
+              </div>
+
+              {/* Headline */}
+              <div>
+                <h2 className="text-3xl font-semibold" style={{ color: "#1A1714" }}>
+                  Preis wird übernommen.
+                </h2>
+                <p className="mt-2 text-base" style={{ color: "#9A8F85" }}>
+                  Du wirst automatisch weitergeleitet.
+                </p>
+              </div>
+
+              {/* Progress bar container */}
+              <div className="w-full max-w-sm">
+                <div
+                  className="h-0.75 rounded-full overflow-hidden"
+                  style={{ background: "rgba(154, 143, 133, 0.25)" }}
+                >
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{ background: "#D4622A" }}
+                    initial={{ width: "0%" }}
+                    animate={{ width: `${overlayProgress}%` }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                  />
+                </div>
+                <p className="mt-3 text-sm" style={{ color: "#9A8F85" }}>
+                  {overlayText}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 };
