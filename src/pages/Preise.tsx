@@ -302,7 +302,9 @@ const Preise = () => {
         <header
           className="fixed top-0 inset-x-0 z-50 transition-shadow duration-200"
           style={{
-            background: "#D4622A",
+            background: "rgba(212, 98, 42, 0.85)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
             boxShadow: navScrolled ? "0 2px 8px rgba(0,0,0,0.12)" : "none",
           }}
         >
@@ -814,31 +816,79 @@ const WeekResults = ({
           {market.max != null && <Stat label="Max" value={String(market.max)} />}
         </div>
         {competitors.length > 0 && (
-          <div className="mt-5 overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs" style={{ borderBottom: "1px solid #E8E4DE", color: "#9A8F85" }}>
-                  <th className="py-2 pr-3 font-normal">Typ</th>
-                  <th className="py-2 pr-3 font-normal">Größe</th>
-                  <th className="py-2 pr-3 font-normal">Preis</th>
-                  <th className="py-2 pr-3 font-normal">Qualität</th>
-                  <th className="py-2 pr-3 font-normal">Plattform</th>
-                  <th className="py-2 pr-3 font-normal">Distanz</th>
-                </tr>
-              </thead>
-              <tbody>
-                {competitors.map((c, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid #F9F7F4", color: "#1A1714" }}>
-                    <td className="py-2 pr-3">{c.type}</td>
-                    <td className="py-2 pr-3">{c.size_sqm}</td>
-                    <td className="py-2 pr-3">{c.price}</td>
-                    <td className="py-2 pr-3">{c.quality}</td>
-                    <td className="py-2 pr-3">{c.platform}</td>
-                    <td className="py-2 pr-3">{c.distance_km}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-5 space-y-2.5">
+            {competitors.map((c, i) => {
+              const priceNum = parseInt(c.price.match(/\d+/)?.[0] || "0");
+              const minNum = market.min ? parseInt(market.min.match(/\d+/)?.[0] || "0") : 71;
+              const maxNum = market.max ? parseInt(market.max.match(/\d+/)?.[0] || "0") : 131;
+              const fillPct = ((priceNum - minNum) / (maxNum - minNum)) * 100;
+              const isHighlight = c.platform === "Booking.com";
+              const qualityBg = c.quality === "Hochwertig"
+                ? "rgba(212, 98, 42, 0.12)"
+                : "rgba(154, 143, 133, 0.15)";
+              const qualityColor = c.quality === "Hochwertig" ? "#D4622A" : "#9A8F85";
+
+              return (
+                <div key={i}>
+                  {isHighlight && (
+                    <div className="text-xs font-medium mb-1.5" style={{ color: "#D4622A", background: "rgba(212,98,42,0.08)", padding: "2px 10px", display: "inline-block", borderRadius: 6 }}>
+                      stärkster Mitbewerber
+                    </div>
+                  )}
+                  <div
+                    style={{
+                      background: "#F9F7F4",
+                      border: isHighlight ? "2px solid #D4622A" : "1px solid rgba(154, 143, 133, 0.3)",
+                      borderRadius: 12,
+                      padding: "16px 20px",
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div style={{ color: "#1A1714", fontSize: 14, fontWeight: 500 }}>
+                          {c.type} · {c.size_sqm}
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <div style={{ color: "#1A1714", fontSize: 20, fontWeight: 600 }}>
+                          {c.price}
+                        </div>
+                        <div
+                          className="text-xs mt-1"
+                          style={{
+                            background: qualityBg,
+                            color: qualityColor,
+                            padding: "2px 8px",
+                            borderRadius: 4,
+                            display: "inline-block",
+                            fontWeight: 500,
+                          }}
+                        >
+                          {c.quality}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between gap-2" style={{ fontSize: 12, color: "#9A8F85" }}>
+                      <span>{c.platform}</span>
+                      <span>{c.distance_km}</span>
+                    </div>
+                    <div className="mt-3">
+                      <div style={{ background: "rgba(154, 143, 133, 0.2)", height: 6, borderRadius: 3, overflow: "hidden" }}>
+                        <div
+                          style={{
+                            background: "#D4622A",
+                            height: "100%",
+                            width: `${Math.max(0, Math.min(100, fillPct))}%`,
+                            borderRadius: 3,
+                            transition: "width 0.3s ease",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
