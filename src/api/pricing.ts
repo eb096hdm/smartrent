@@ -3,7 +3,7 @@ import { de } from "date-fns/locale";
 import type { PricingRequest, WeekResponse, DayCard, DotColor, CardColor } from "./types";
 
 // ---------------------------------------------------------------------------
-// Mock fallback – used when the Express backend is unavailable (e.g. Lovable)
+// Mock fallback – used when neither backend nor webhook is available
 // ---------------------------------------------------------------------------
 const buildMockResponse = (basePrice: number, startDate: Date): WeekResponse => {
   const weekdays = ["MONTAG", "DIENSTAG", "MITTWOCH", "DONNERSTAG", "FREITAG", "SAMSTAG", "SONNTAG"];
@@ -11,13 +11,13 @@ const buildMockResponse = (basePrice: number, startDate: Date): WeekResponse => 
     dot: DotColor; dot_label: string; card_color: CardColor;
     factor: number; occ: number; text: string; detail: string; events?: string[];
   }[] = [
-    { dot: "green", dot_label: "Gute Auslastung",    card_color: "green",  factor: 1.00, occ: 78, text: "Stabile Nachfrage – marktüblicher Preis empfohlen.",       detail: "Solide Marktnachfrage und stabile Buchungslage. Der empfohlene Preis liegt im Marktdurchschnitt für vergleichbare Objekte." },
-    { dot: "green", dot_label: "Gute Auslastung",    card_color: "green",  factor: 1.05, occ: 82, text: "Leicht erhöhte Nachfrage erkannt.",                        detail: "Die Buchungsrate liegt über dem Wochenmittel. Eine moderate Preiserhöhung ist möglich." },
-    { dot: "yellow", dot_label: "Event in der Nähe", card_color: "orange", factor: 1.18, occ: 91, text: "Event in der Nähe – höherer Preis möglich.",                detail: "Ein lokales Event treibt die Nachfrage. Wir empfehlen einen Aufschlag, ohne die Buchungswahrscheinlichkeit zu gefährden.", events: ["Stadtfest"] },
-    { dot: "green", dot_label: "Gute Auslastung",    card_color: "green",  factor: 1.02, occ: 75, text: "Marktüblicher Preis empfohlen.",                           detail: "Keine besonderen Faktoren – stabile, marktübliche Preisempfehlung." },
-    { dot: "yellow", dot_label: "Event in der Nähe", card_color: "orange", factor: 1.22, occ: 94, text: "Wochenend-Peak mit Event-Bonus.",                          detail: "Freitag mit hoher Wochenendnachfrage und einem Event in der Region.", events: ["Konzert in der Arena"] },
-    { dot: "green", dot_label: "Gute Auslastung",    card_color: "blue",   factor: 1.15, occ: 88, text: "Wochenende – höhere Buchungsrate.",                       detail: "Samstage zeigen die höchste Buchungsrate – Premium-Preis empfohlen." },
-    { dot: "red",   dot_label: "Schwache Nachfrage", card_color: "red",    factor: 0.85, occ: 42, text: "Schwache Nachfrage – Preis senken.",                       detail: "Sonntagabend ist traditionell schwach gebucht. Eine Preissenkung erhöht die Buchungswahrscheinlichkeit." },
+    { dot: "green",  dot_label: "Gute Auslastung",    card_color: "green",  factor: 1.00, occ: 78, text: "Stabile Nachfrage – marktüblicher Preis empfohlen.",       detail: "Solide Marktnachfrage und stabile Buchungslage. Der empfohlene Preis liegt im Marktdurchschnitt für vergleichbare Objekte." },
+    { dot: "green",  dot_label: "Gute Auslastung",    card_color: "green",  factor: 1.05, occ: 82, text: "Leicht erhöhte Nachfrage erkannt.",                        detail: "Die Buchungsrate liegt über dem Wochenmittel. Eine moderate Preiserhöhung ist möglich." },
+    { dot: "yellow", dot_label: "Event in der Nähe",  card_color: "orange", factor: 1.18, occ: 91, text: "Event in der Nähe – höherer Preis möglich.",                detail: "Ein lokales Event treibt die Nachfrage. Wir empfehlen einen Aufschlag, ohne die Buchungswahrscheinlichkeit zu gefährden.", events: ["Stadtfest"] },
+    { dot: "green",  dot_label: "Gute Auslastung",    card_color: "green",  factor: 1.02, occ: 75, text: "Marktüblicher Preis empfohlen.",                           detail: "Keine besonderen Faktoren – stabile, marktübliche Preisempfehlung." },
+    { dot: "yellow", dot_label: "Event in der Nähe",  card_color: "orange", factor: 1.22, occ: 94, text: "Wochenend-Peak mit Event-Bonus.",                          detail: "Freitag mit hoher Wochenendnachfrage und einem Event in der Region.", events: ["Konzert in der Arena"] },
+    { dot: "green",  dot_label: "Gute Auslastung",    card_color: "blue",   factor: 1.15, occ: 88, text: "Wochenende – höhere Buchungsrate.",                        detail: "Samstage zeigen die höchste Buchungsrate – Premium-Preis empfohlen." },
+    { dot: "red",    dot_label: "Schwache Nachfrage", card_color: "red",    factor: 0.85, occ: 42, text: "Schwache Nachfrage – Preis senken.",                        detail: "Sonntagabend ist traditionell schwach gebucht. Eine Preissenkung erhöht die Buchungswahrscheinlichkeit." },
   ];
 
   const days: DayCard[] = presets.map((p, i) => {
@@ -58,8 +58,8 @@ const buildMockResponse = (basePrice: number, startDate: Date): WeekResponse => 
       max: `${Math.round(avg * 1.3)} €`,
       level: "mittel",
       competitors: [
-        { type: "Wohnung", size_sqm: "60 m²", price: `${avg - 5} €`, quality: "Mittel",      platform: "Airbnb",      distance_km: "0.4 km" },
-        { type: "Wohnung", size_sqm: "72 m²", price: `${avg + 8} €`, quality: "Hochwertig",  platform: "Booking.com", distance_km: "0.9 km" },
+        { type: "Wohnung", size_sqm: "60 m²", price: `${avg - 5} €`,  quality: "Mittel",     platform: "Airbnb",      distance_km: "0.4 km" },
+        { type: "Wohnung", size_sqm: "72 m²", price: `${avg + 8} €`,  quality: "Hochwertig", platform: "Booking.com", distance_km: "0.9 km" },
         { type: "Haus",    size_sqm: "95 m²", price: `${avg + 22} €`, quality: "Hochwertig", platform: "VRBO",        distance_km: "1.5 km" },
       ],
     },
@@ -71,9 +71,12 @@ const buildMockResponse = (basePrice: number, startDate: Date): WeekResponse => 
 };
 
 // ---------------------------------------------------------------------------
-// Main export – tries the Express backend first, falls back to mock data
+// Main export
+// Priority: 1) Express backend  2) Make.com direkt  3) Mock-Daten
 // ---------------------------------------------------------------------------
 export async function fetchPriceRecommendation(payload: PricingRequest): Promise<WeekResponse> {
+
+  // 1) Express backend via Vite proxy (funktioniert in lokaler Entwicklung)
   try {
     const res = await fetch("/api/price-recommendation", {
       method: "POST",
@@ -85,10 +88,40 @@ export async function fetchPriceRecommendation(payload: PricingRequest): Promise
       if (data && Array.isArray(data.days) && data.days.length > 0) return data;
     }
   } catch {
-    // Backend not available (e.g. Lovable preview) – fall through to mock
+    // Backend nicht erreichbar – weiter zur nächsten Option
   }
 
-  // Small artificial delay so the loading spinner is visible
+  // 2) Make.com Webhook direkt aus dem Browser (funktioniert in Lovable)
+  const webhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL as string | undefined;
+  if (webhookUrl) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      const res = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      if (res.ok) {
+        const text = await res.text();
+        let cleaned = text.trim();
+        const fence = cleaned.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+        if (fence) cleaned = fence[1].trim();
+        if (!cleaned.startsWith("{")) {
+          const m = cleaned.match(/\{[\s\S]*\}/);
+          if (m) cleaned = m[0];
+        }
+        const parsed = JSON.parse(cleaned) as WeekResponse;
+        if (parsed && Array.isArray(parsed.days) && parsed.days.length > 0) return parsed;
+      }
+    } catch {
+      // Webhook fehlgeschlagen – weiter zu Mock-Daten
+    }
+  }
+
+  // 3) Mock-Daten als letzter Fallback
   await new Promise((res) => setTimeout(res, 600));
   return buildMockResponse(payload.aktueller_preis || 90, new Date(payload.woche_start));
 }
