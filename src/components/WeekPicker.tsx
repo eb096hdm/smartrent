@@ -2,7 +2,7 @@ import * as React from "react";
 import { DayPicker } from "react-day-picker";
 import { addDays, format, isSameDay, startOfDay } from "date-fns";
 import { de } from "date-fns/locale";
-import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { CalendarIcon, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -18,6 +18,7 @@ interface WeekPickerProps {
 
 export const WeekPicker: React.FC<WeekPickerProps> = ({ value, onChange, className, minDate }) => {
   const [open, setOpen] = React.useState(false);
+  const [isSelected, setIsSelected] = React.useState(false);
   const [hovered, setHovered] = React.useState<Date | null>(null);
   const [month, setMonth] = React.useState<Date>(value);
 
@@ -34,6 +35,7 @@ export const WeekPicker: React.FC<WeekPickerProps> = ({ value, onChange, classNa
     const start = startOfDay(d);
     if (start < minDay) return;
     onChange(start);
+    setIsSelected(true);
     setOpen(false);
   };
 
@@ -45,15 +47,22 @@ export const WeekPicker: React.FC<WeekPickerProps> = ({ value, onChange, classNa
         <button
           type="button"
           className={cn(
-            "mt-2 flex w-full items-center justify-between rounded-full bg-white/10 border border-white/15 px-5 py-3 text-base text-white hover:border-white/30 transition-colors focus:outline-none focus:ring-2 focus:ring-white/40",
+            "mt-2 flex w-full items-center justify-between rounded-xl border border-[#E8E4DE] bg-white px-4 py-3 text-base transition-colors hover:border-[#C8C0B8] focus:outline-none focus:ring-[3px] focus:ring-[rgba(212,98,42,0.12)] focus:border-[#D4622A]",
             className,
           )}
         >
           <span className="flex items-center gap-3">
-            <CalendarIcon className="h-4 w-4 text-white/70" />
-            <span>{label}</span>
+            <CalendarIcon className="h-5 w-5 shrink-0 text-[#9A8F85]" />
+            <span className={isSelected ? "text-[#1A1714]" : "text-[#9A8F85]"}>
+              {isSelected ? label : "Woche auswählen …"}
+            </span>
           </span>
-          <span className="text-xs text-white/50">7 Tage</span>
+          <ChevronDown
+            className={cn(
+              "h-5 w-5 shrink-0 text-[#9A8F85] transition-transform duration-200",
+              open && "rotate-180",
+            )}
+          />
         </button>
       </PopoverTrigger>
       <PopoverContent

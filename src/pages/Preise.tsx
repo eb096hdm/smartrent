@@ -422,7 +422,7 @@ const Preise = () => {
                     <span className="ml-2 text-xs" style={{ color: "#9A8F85" }}>Schritt {detailsStep} von 2</span>
                   </div>
 
-                  <div className="relative overflow-hidden">
+                  <div className="relative overflow-hidden p-1">
                     <AnimatePresence mode="wait" initial={false}>
                       {detailsStep === 1 && (
                         <motion.form
