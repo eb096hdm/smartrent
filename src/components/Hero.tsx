@@ -6,10 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import heroBg from "@/assets/hero-apartment.jpg";
 
 const navItems = [
-  { label: "Leistungen", href: "#services" },
-  { label: "Referenzen", href: "#testimonials" },
-  { label: "FAQs", href: "#faqs" },
-  { label: "Kontakt", href: "#contact" },
+  { label: "So funktioniert's", href: "#so-funktionierts" },
+  { label: "Über Uns", href: "#ueber-uns" },
+  { label: "FAQ's", href: "#faqs" },
 ];
 
 export const Hero = () => {

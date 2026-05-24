@@ -22,7 +22,7 @@ const steps = [
 ];
 
 export const About = () => (
-  <section id="about" className="px-3 sm:px-5 py-16 sm:py-24 text-left">
+  <section id="so-funktionierts" className="px-3 sm:px-5 py-16 sm:py-24 text-left">
     <div className="max-w-7xl mx-auto px-3 sm:px-6">
       <Reveal>
         <span className="pill">So funktioniert's</span>

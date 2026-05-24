@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft, Loader2, MapPin } from "lucide-react";
+import { ArrowRight, ArrowLeft, Loader2, MapPin, User } from "lucide-react";
 import { format } from "date-fns";
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import type { Map as LeafletMap } from "leaflet";
@@ -13,15 +13,16 @@ import { WeekPicker } from "@/components/WeekPicker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { fetchPriceRecommendation } from "@/api/pricing";
+import { scrollToSection } from "@/lib/scrollToSection";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import type { DotColor, CardColor, DayCard, Competitor, EventItem, SummaryBlock, MarketBlock, WeekResponse, PricingRequest } from "@/api/types";
 import { PriceRecommendationHeader } from "@/components/PriceRecommendationHeader";
 
 const navItems = [
-  { label: "Über uns", href: "/#about" },
-  { label: "Leistungen", href: "/#services" },
-  { label: "Referenzen", href: "/#testimonials" },
-  { label: "FAQs", href: "/#faqs" },
-  { label: "Kontakt", href: "/#contact" },
+  { label: "So funktioniert's", href: "/#so-funktionierts" },
+  { label: "Über Uns", href: "/#ueber-uns" },
+  { label: "FAQ's", href: "/#faqs" },
 ];
 
 const DE_CENTER: [number, number] = [51.1657, 10.4515];
@@ -114,6 +115,7 @@ const Preise = () => {
   const mapRef = useRef<LeafletMap | null>(null);
   const [navScrolled, setNavScrolled] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
   const [overlayProgress, setOverlayProgress] = useState(0);
   const [overlayText, setOverlayText] = useState("Wird geladen …");
 
@@ -121,6 +123,14 @@ const Preise = () => {
     const onScroll = () => setNavScrolled(window.scrollY > 4);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsAuthed(!!session);
+    });
+    supabase.auth.getSession().then(({ data }) => setIsAuthed(!!data.session));
+    return () => sub.subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -180,7 +190,7 @@ const Preise = () => {
     } catch { /* silent */ }
 
     setStep("details");
-    setTimeout(() => detailsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 350);
+    setTimeout(() => scrollToSection(detailsRef.current), 350);
   };
 
   const handleStep1Next = (e: FormEvent) => {
@@ -338,19 +348,32 @@ const Preise = () => {
         <header
           className="fixed top-0 inset-x-0 z-50 transition-shadow duration-200"
           style={{
-            background: "rgba(212, 98, 42, 0.85)",
+            background: "rgba(237, 224, 200, 0.95)",
             backdropFilter: "blur(12px)",
             WebkitBackdropFilter: "blur(12px)",
-            boxShadow: navScrolled ? "0 2px 8px rgba(0,0,0,0.12)" : "none",
+            boxShadow: navScrolled ? "0 2px 8px rgba(61,48,40,0.10)" : "none",
           }}
         >
           <div className="flex items-center justify-between px-6 sm:px-10 py-4">
-            <a href="/" className="text-2xl font-semibold tracking-tight text-white">SmartRent</a>
+            <a href="/" className="text-2xl font-semibold tracking-tight text-[#3D3028]">SmartRent</a>
             <nav className="hidden md:flex items-center gap-8">
               {navItems.map((n) => (
-                <a key={n.href} href={n.href} className="nav-link">{n.label}</a>
+                <a
+                  key={n.href}
+                  href={n.href}
+                  className="relative text-sm text-[#3D3028]/70 hover:text-[#3D3028] transition-colors after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-px after:w-0 after:bg-[#3D3028] after:transition-all hover:after:w-full"
+                >
+                  {n.label}
+                </a>
               ))}
             </nav>
+            <Link
+              to={isAuthed ? "/profil" : "/auth"}
+              className="inline-flex items-center gap-2 rounded-full border border-[#3D3028]/25 px-4 py-2 text-sm font-medium text-[#3D3028] hover:bg-[#3D3028]/8 transition-colors"
+            >
+              <User className="h-4 w-4" />
+              {isAuthed ? "Profil" : "Anmelden"}
+            </Link>
           </div>
         </header>
 

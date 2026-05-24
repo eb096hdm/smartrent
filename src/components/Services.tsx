@@ -17,7 +17,7 @@ const items = [
 export const Services = () => {
   const [open, setOpen] = useState(-1);
   return (
-    <section id="services" className="px-3 sm:px-5 py-16 sm:py-24">
+    <section id="ueber-uns" className="px-3 sm:px-5 py-16 sm:py-24">
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
         <Reveal>
           <span className="pill">Über Uns</span>
