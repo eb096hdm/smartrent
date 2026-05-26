@@ -3,21 +3,21 @@ import { Reveal } from "./Reveal";
 const steps = [
   {
     number: "01",
-    title: "Inserat verbinden",
+    title: "Jetzt Preise festlegen",
     description:
-      "Trag deine Unterkunft ein und verbinde dein Airbnb- oder Booking-Inserat in wenigen Minuten.",
+      'Klicke auf den Button „Jetzt Preise festlegen", um zu deiner dynamischen Preisempfehlung zu gelangen.',
   },
   {
     number: "02",
-    title: "Markt analysieren lassen",
+    title: "Individuelle Daten",
     description:
-      "SmartRent analysiert Nachfrage, lokale Events und deine Konkurrenz automatisch.",
+      "Nun findest du die Eingabe deiner PLZ sowie die Möglichkeit, alle individuellen Daten zu deinem Mietobjekt einzugeben.",
   },
   {
     number: "03",
-    title: "Preisempfehlung erhalten",
+    title: "Preis berechnen",
     description:
-      "Du bekommst einen konkreten Preis – mit einer klaren Erklärung, warum.",
+      "Im letzten Schritt kannst du deine individuelle Preisempfehlung berechnen lassen. Du kannst den Preis übernehmen und wirst automatisch zur entsprechenden Seite weitergeleitet.",
   },
 ];
 
