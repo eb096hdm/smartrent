@@ -7,7 +7,6 @@ const sections = [
     content: (
       <>
         <p>SmartRent</p>
-        <p>[RECHTSFORM, z. B. UG (haftungsbeschränkt)]</p>
         <p>Nobelstraße 10</p>
         <p>70569 Stuttgart</p>
         <p>Deutschland</p>
@@ -19,8 +18,7 @@ const sections = [
     title: "Kontakt",
     content: (
       <>
-        <p>E-Mail: [EMAIL]</p>
-        <p>Telefon: [TELEFONNUMMER]</p>
+        <p>E-Mail: as480@hdm-stuttgart.de</p>
       </>
     ),
   },
@@ -29,36 +27,7 @@ const sections = [
     title: "Vertretungsberechtigte Person",
     content: (
       <>
-        <p>[VORNAME NACHNAME]</p>
-      </>
-    ),
-  },
-  {
-    number: "04",
-    title: "Registereintrag",
-    content: (
-      <>
-        <p>Handelsregister: [REGISTERGERICHT]</p>
-        <p>Registernummer: [HRB-NUMMER]</p>
-      </>
-    ),
-  },
-  {
-    number: "05",
-    title: "Umsatzsteuer-ID",
-    content: (
-      <>
-        <p>USt-IdNr.: [UST-ID]</p>
-      </>
-    ),
-  },
-  {
-    number: "06",
-    title: "Verantwortlich für redaktionelle Inhalte (§ 18 Abs. 2 MStV)",
-    content: (
-      <>
-        <p>[VORNAME NACHNAME]</p>
-        <p>[ANSCHRIFT]</p>
+        <p>Alexander Studenkov</p>
       </>
     ),
   },
