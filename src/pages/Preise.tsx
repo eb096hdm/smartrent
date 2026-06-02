@@ -8,7 +8,6 @@ import type { Map as LeafletMap } from "leaflet";
 type FeatureCollection = any;
 import "leaflet/dist/leaflet.css";
 
-import { Switch } from "@/components/ui/switch";
 import { WeekPicker } from "@/components/WeekPicker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -101,7 +100,6 @@ const Preise = () => {
   }, []);
   const [wocheDate, setWocheDate] = useState<Date>(initialMonday);
   const [plattformen, setPlattformen] = useState<string[]>([]);
-  const [aktualitaetspruefung, setAktualitaetspruefung] = useState(true);
   const [besonderheiten, setBesonderheiten] = useState<string[]>([]);
 
   const [step1Error, setStep1Error] = useState<string | null>(null);
@@ -232,7 +230,7 @@ const Preise = () => {
       ansicht,
       woche_start: format(wocheDate, "yyyy-MM-dd"),
       plattformen,
-      aktualitaetspruefung,
+      aktualitaetspruefung: true,
       besonderheiten,
     };
 
@@ -574,15 +572,6 @@ const Preise = () => {
                                   <PillButton key={p} active={plattformen.includes(p)} onClick={() => togglePlattform(p)}>{p}</PillButton>
                                 ))}
                               </div>
-                            </div>
-
-                            {/* Aktualitätsprüfung */}
-                            <div className="flex items-start justify-between gap-4">
-                              <div>
-                                <div className="text-xs font-medium" style={{ color: "#1A1714" }}>Aktuelle Marktdaten prüfen</div>
-                                <p className="mt-1 text-xs" style={{ color: "#7A7068" }}>Wir gleichen Konkurrenzpreise und lokale Events in Echtzeit ab.</p>
-                              </div>
-                              <Switch checked={aktualitaetspruefung} onCheckedChange={setAktualitaetspruefung} />
                             </div>
 
                             {/* Besonderheiten */}
