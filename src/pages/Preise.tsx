@@ -944,6 +944,15 @@ const WeekResults = ({
               </span>
               <div className="mt-0.5" style={{ fontSize: 13, color: "#7A7068" }}>{d.label}</div>
               <p className="mt-2 font-semibold leading-tight" style={{ fontSize: 24, color: "#1A1714" }}>{d.price}</p>
+              {d.data_confidence === "low" && (
+                <span
+                  className="mt-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide"
+                  style={{ background: "rgba(234, 179, 8, 0.12)", color: "#A16207", letterSpacing: "0.06em" }}
+                  title="Wenig Marktdaten verfügbar – Empfehlung mit Unsicherheit."
+                >
+                  Geringe Datenbasis
+                </span>
+              )}
               <p
                 className="mt-2 uppercase"
                 style={{ fontSize: 11, color: "#D4622A", letterSpacing: "0.07em", marginTop: 4 }}
