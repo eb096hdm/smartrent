@@ -603,7 +603,10 @@ const Preise = () => {
                                   <PillButton key={b} active={besonderheiten.includes(b)} onClick={() => toggleBesonderheit(b)}>{b}</PillButton>
                                 ))}
                               </div>
+                            </div>
                           </div>
+
+
 
                           {/* Honeypot – darf nicht ausgefüllt sein */}
                           <input
