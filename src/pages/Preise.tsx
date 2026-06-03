@@ -603,8 +603,20 @@ const Preise = () => {
                                   <PillButton key={b} active={besonderheiten.includes(b)} onClick={() => toggleBesonderheit(b)}>{b}</PillButton>
                                 ))}
                               </div>
-                            </div>
                           </div>
+
+                          {/* Honeypot – darf nicht ausgefüllt sein */}
+                          <input
+                            type="text"
+                            name="__hp"
+                            value={honeypot}
+                            onChange={(e) => setHoneypot(e.target.value)}
+                            style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+                            tabIndex={-1}
+                            autoComplete="off"
+                            aria-hidden="true"
+                          />
+
 
                           {step2Error && <p role="alert" className="mt-3 text-xs text-red-500">{step2Error}</p>}
                           {step === "error" && (
