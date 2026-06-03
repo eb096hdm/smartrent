@@ -931,9 +931,9 @@ const WeekResults = ({
         {competitors.length > 0 && (
           <div className="mt-5 space-y-2.5">
             {competitors.map((c, i) => {
-              const priceNum = parseInt(c.price.match(/\d+/)?.[0] || "0");
-              const minNum = market.min ? parseInt(market.min.match(/\d+/)?.[0] || "0") : 71;
-              const maxNum = market.max ? parseInt(market.max.match(/\d+/)?.[0] || "0") : 131;
+              const priceNum = parseInt(String(c.price).match(/\d+/)?.[0] || "0");
+              const minNum = market.min ? parseInt(String(market.min).match(/\d+/)?.[0] || "0") : 71;
+              const maxNum = market.max ? parseInt(String(market.max).match(/\d+/)?.[0] || "0") : 131;
               const fillPct = ((priceNum - minNum) / (maxNum - minNum)) * 100;
               const isHighlight = c.platform === "Booking.com";
               const qualityBg = c.quality === "Hochwertig"
