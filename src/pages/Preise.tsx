@@ -603,6 +603,9 @@ const Preise = () => {
                                   <PillButton key={b} active={besonderheiten.includes(b)} onClick={() => toggleBesonderheit(b)}>{b}</PillButton>
                                 ))}
                               </div>
+                              <p className="mt-2 text-[11px]" style={{ color: "#9A8F85" }}>
+                                Bitte keine persönlichen Daten (Adressen, Namen, Kontaktdaten) eingeben.
+                              </p>
                             </div>
                           </div>
 
