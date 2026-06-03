@@ -21,6 +21,7 @@ export type DayCard = {
   active_events?: string[];
   change_label?: string;
   factors?: Factors;
+  data_confidence?: "low" | "medium" | "high";
 };
 
 export type Competitor = {
