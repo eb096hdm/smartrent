@@ -603,6 +603,9 @@ const Preise = () => {
                                   <PillButton key={b} active={besonderheiten.includes(b)} onClick={() => toggleBesonderheit(b)}>{b}</PillButton>
                                 ))}
                               </div>
+                              <p className="mt-2 text-[11px]" style={{ color: "#9A8F85" }}>
+                                Bitte keine persönlichen Daten (Adressen, Namen, Kontaktdaten) eingeben.
+                              </p>
                             </div>
                           </div>
 
@@ -941,6 +944,15 @@ const WeekResults = ({
               </span>
               <div className="mt-0.5" style={{ fontSize: 13, color: "#7A7068" }}>{d.label}</div>
               <p className="mt-2 font-semibold leading-tight" style={{ fontSize: 24, color: "#1A1714" }}>{d.price}</p>
+              {d.data_confidence === "low" && (
+                <span
+                  className="mt-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide"
+                  style={{ background: "rgba(234, 179, 8, 0.12)", color: "#A16207", letterSpacing: "0.06em" }}
+                  title="Wenig Marktdaten verfügbar – Empfehlung mit Unsicherheit."
+                >
+                  Geringe Datenbasis
+                </span>
+              )}
               <p
                 className="mt-2 uppercase"
                 style={{ fontSize: 11, color: "#D4622A", letterSpacing: "0.07em", marginTop: 4 }}
@@ -1059,6 +1071,14 @@ const WeekResults = ({
                 <p className="mt-1 text-xs" style={{ color: "#7A7068" }}>{open.dot_label} · {open.occupancy}</p>
               </div>
               <p className="mt-3 text-sm leading-relaxed" style={{ color: "#1A1714" }}>{open.detail_text}</p>
+              {open.data_confidence === "low" && (
+                <div className="mt-3 rounded-lg p-3" style={{ border: "1px solid rgba(234,179,8,0.35)", background: "rgba(234,179,8,0.08)" }}>
+                  <p className="text-xs uppercase tracking-wide" style={{ color: "#A16207", letterSpacing: "0.07em" }}>Geringe Datenbasis</p>
+                  <p className="mt-1 text-sm" style={{ color: "#1A1714" }}>
+                    Für diese PLZ liegen wenige Vergleichsdaten vor. Die Empfehlung ist mit höherer Unsicherheit behaftet.
+                  </p>
+                </div>
+              )}
               {open.active_events && open.active_events.length > 0 && (
                 <div className="mt-3 rounded-lg p-3" style={{ border: "1px solid rgba(212,98,42,0.25)", background: "rgba(212,98,42,0.06)" }}>
                   <p className="text-xs uppercase tracking-wide" style={{ color: "#D4622A", letterSpacing: "0.07em" }}>Aktive Events</p>
