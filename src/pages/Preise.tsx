@@ -17,6 +17,8 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { DotColor, CardColor, DayCard, Competitor, EventItem, SummaryBlock, MarketBlock, WeekResponse, PricingRequest } from "@/api/types";
 import { PriceRecommendationHeader } from "@/components/PriceRecommendationHeader";
+import { validateSmartRentInput } from "@/utils/validateInput";
+import { checkRateLimit } from "@/hooks/useSecureWebhook";
 
 const navItems = [
   { label: "So funktioniert's", href: "/#so-funktionierts" },
@@ -101,6 +103,7 @@ const Preise = () => {
   const [wocheDate, setWocheDate] = useState<Date>(initialMonday);
   const [plattformen, setPlattformen] = useState<string[]>([]);
   const [besonderheiten, setBesonderheiten] = useState<string[]>([]);
+  const [honeypot, setHoneypot] = useState("");
 
   const [step1Error, setStep1Error] = useState<string | null>(null);
   const [step2Error, setStep2Error] = useState<string | null>(null);
@@ -217,9 +220,10 @@ const Preise = () => {
     setStep2Error(null);
     if (plattformen.length === 0) return setStep2Error("Bitte wähle mindestens eine Plattform.");
 
-    setStep("loading");
+    // Honeypot – Bot abfangen (silent success)
+    if (honeypot) return;
 
-    const payload: PricingRequest = {
+    const rawPayload = {
       plz,
       art: art!,
       flaeche_qm: Number(flaeche),
@@ -233,6 +237,22 @@ const Preise = () => {
       aktualitaetspruefung: true,
       besonderheiten,
     };
+
+    // Server-Input-Validierung & Sanitisierung
+    const { valid, errors, sanitized } = validateSmartRentInput(rawPayload);
+    if (!valid) {
+      const first = Object.values(errors)[0];
+      return setStep2Error(first ?? "Ungültige Eingabe.");
+    }
+
+    // Rate-Limit für Preisanfragen (5 / 10 min)
+    if (!checkRateLimit()) {
+      return setStep2Error("Zu viele Anfragen. Bitte warte einige Minuten.");
+    }
+
+    setStep("loading");
+
+    const payload = { ...sanitized, aktualitaetspruefung: true } as PricingRequest;
 
     try {
       const data = await fetchPriceRecommendation(payload);
@@ -586,6 +606,21 @@ const Preise = () => {
                             </div>
                           </div>
 
+
+
+                          {/* Honeypot – darf nicht ausgefüllt sein */}
+                          <input
+                            type="text"
+                            name="__hp"
+                            value={honeypot}
+                            onChange={(e) => setHoneypot(e.target.value)}
+                            style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+                            tabIndex={-1}
+                            autoComplete="off"
+                            aria-hidden="true"
+                          />
+
+
                           {step2Error && <p role="alert" className="mt-3 text-xs text-red-500">{step2Error}</p>}
                           {step === "error" && (
                             <p role="alert" className="mt-3 text-xs text-red-500">
@@ -931,9 +966,9 @@ const WeekResults = ({
         {competitors.length > 0 && (
           <div className="mt-5 space-y-2.5">
             {competitors.map((c, i) => {
-              const priceNum = parseInt(c.price.match(/\d+/)?.[0] || "0");
-              const minNum = market.min ? parseInt(market.min.match(/\d+/)?.[0] || "0") : 71;
-              const maxNum = market.max ? parseInt(market.max.match(/\d+/)?.[0] || "0") : 131;
+              const priceNum = parseInt(String(c.price).match(/\d+/)?.[0] || "0");
+              const minNum = market.min ? parseInt(String(market.min).match(/\d+/)?.[0] || "0") : 71;
+              const maxNum = market.max ? parseInt(String(market.max).match(/\d+/)?.[0] || "0") : 131;
               const fillPct = ((priceNum - minNum) / (maxNum - minNum)) * 100;
               const isHighlight = c.platform === "Booking.com";
               const qualityBg = c.quality === "Hochwertig"

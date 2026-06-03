@@ -92,14 +92,19 @@ export async function fetchPriceRecommendation(payload: PricingRequest): Promise
   }
 
   // 2) Make.com Webhook direkt aus dem Browser (funktioniert in Lovable)
-  const webhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL as string | undefined;
+  const webhookUrl = (import.meta.env.VITE_WEBHOOK_URL ??
+    import.meta.env.VITE_MAKE_WEBHOOK_URL) as string | undefined;
+  const webhookSecret = (import.meta.env.VITE_WEBHOOK_SECRET as string | undefined) ?? "";
   if (webhookUrl) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 15000);
+      const timeout = setTimeout(() => controller.abort(), 30000);
       const res = await fetch(webhookUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-SmartRent-Token": webhookSecret,
+        },
         body: JSON.stringify(payload),
         signal: controller.signal,
       });
