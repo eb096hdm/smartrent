@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle2, Home, Lightbulb, MapPin, Sparkles, X } from "lucide-react";
+import { CheckCircle2, Lightbulb, MapPin, Sparkles, X } from "lucide-react";
 
 interface ListingPreviewModalProps {
   isOpen: boolean;
@@ -8,9 +8,16 @@ interface ListingPreviewModalProps {
   date: string;
   recommendedPrice: number;
   previousPrice?: number;
+  propertyType: 'Haus' | 'Wohnung' | 'Zimmer';
 }
 
 const PLAYFAIR: React.CSSProperties = { fontFamily: "'Playfair Display', serif" };
+
+const propertyImages: Record<string, string> = {
+  Haus:    '/images/property-haus.jpg',
+  Wohnung: '/images/property-wohnung.jpg',
+  Zimmer:  '/images/property-zimmer.jpg',
+};
 
 export function ListingPreviewModal({
   isOpen,
@@ -19,6 +26,7 @@ export function ListingPreviewModal({
   date,
   recommendedPrice,
   previousPrice,
+  propertyType,
 }: ListingPreviewModalProps) {
   return (
     <AnimatePresence>
@@ -94,18 +102,13 @@ export function ListingPreviewModal({
                 transition={{ delay: 0.3, duration: 0.35 }}
                 className="rounded-2xl bg-white shadow-sm overflow-hidden"
               >
-                {/* Image placeholder */}
-                <div
-                  className="relative h-44 flex flex-col items-center justify-center gap-1.5"
-                  style={{ background: "#C4622D" }}
-                >
-                  <Home size={32} style={{ color: "rgba(255,255,255,0.5)" }} />
-                  <span
-                    className="text-xs uppercase tracking-widest"
-                    style={{ color: "rgba(255,255,255,0.5)" }}
-                  >
-                    Titelbild
-                  </span>
+                {/* Property image */}
+                <div className="relative">
+                  <img
+                    src={propertyImages[propertyType] ?? propertyImages['Wohnung']}
+                    alt={propertyType}
+                    className="w-full h-44 object-cover"
+                  />
                   <span
                     className="absolute top-3 left-3 rounded-full bg-white px-2.5 py-1 text-xs font-semibold"
                     style={{ color: "#2A1A0E" }}
@@ -163,7 +166,7 @@ export function ListingPreviewModal({
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.75, duration: 0.25, ease: "backOut" }}
                         className="text-4xl font-bold"
-                        style={{ ...PLAYFAIR, color: "#C4622D" }}
+                        style={{ ...PLAYFAIR, color: "#2A1A0E" }}
                       >
                         € {recommendedPrice}
                       </motion.span>
