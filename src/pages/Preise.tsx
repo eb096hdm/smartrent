@@ -677,7 +677,6 @@ const Preise = () => {
                   openDayIdx={openDayIdx}
                   setOpenDayIdx={setOpenDayIdx}
                   aktuellerPreis={aktuellerPreis}
-                  art={art}
                 />
 
                 <div className="mt-8 flex justify-center gap-4">
@@ -886,7 +885,6 @@ const WeekResults = ({
   openDayIdx,
   setOpenDayIdx,
   aktuellerPreis,
-  art,
 }: {
   data: WeekResponse;
   plz: string;
@@ -894,7 +892,6 @@ const WeekResults = ({
   openDayIdx: number | null;
   setOpenDayIdx: (i: number | null) => void;
   aktuellerPreis?: number | "";
-  art: ArtOption | null;
 }) => {
   const [selectedDay, setSelectedDay] = useState<{
     dayName: string;
@@ -984,7 +981,6 @@ const WeekResults = ({
         dayName={selectedDay?.dayName ?? ""}
         date={selectedDay?.date ?? ""}
         recommendedPrice={selectedDay?.price ?? 0}
-        propertyType={art ?? "Wohnung"}
       />
 
       {/* Market section */}

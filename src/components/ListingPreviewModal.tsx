@@ -8,16 +8,9 @@ interface ListingPreviewModalProps {
   date: string;
   recommendedPrice: number;
   previousPrice?: number;
-  propertyType: 'Haus' | 'Wohnung' | 'Zimmer';
 }
 
 const PLAYFAIR: React.CSSProperties = { fontFamily: "'Playfair Display', serif" };
-
-const propertyImages: Record<string, string> = {
-  Haus:    '/images/property-haus.jpg',
-  Wohnung: '/images/property-wohnung.jpg',
-  Zimmer:  '/images/property-zimmer.jpg',
-};
 
 export function ListingPreviewModal({
   isOpen,
@@ -26,7 +19,6 @@ export function ListingPreviewModal({
   date,
   recommendedPrice,
   previousPrice,
-  propertyType,
 }: ListingPreviewModalProps) {
   return (
     <AnimatePresence>
@@ -102,21 +94,6 @@ export function ListingPreviewModal({
                 transition={{ delay: 0.3, duration: 0.35 }}
                 className="rounded-2xl bg-white shadow-sm overflow-hidden"
               >
-                {/* Property image */}
-                <div className="relative">
-                  <img
-                    src={propertyImages[propertyType] ?? propertyImages['Wohnung']}
-                    alt={propertyType}
-                    className="w-full h-44 object-cover"
-                  />
-                  <span
-                    className="absolute top-3 left-3 rounded-full bg-white px-2.5 py-1 text-xs font-semibold"
-                    style={{ color: "#2A1A0E" }}
-                  >
-                    ⭐ Superhost
-                  </span>
-                </div>
-
                 {/* Card body */}
                 <div className="p-4">
                   {/* Meta row */}
