@@ -243,30 +243,6 @@ export function ListingPreviewModal({
                 </div>
               </motion.div>
 
-              {/* CTA buttons */}
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.3 }}
-                className="mt-4 flex flex-col gap-2"
-              >
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="w-full rounded-xl py-3.5 text-[15px] font-semibold text-white transition-opacity hover:opacity-90"
-                  style={{ background: "#C4622D" }}
-                >
-                  Preis übernehmen
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="w-full rounded-xl py-3.5 text-[15px] font-medium bg-transparent transition-colors hover:bg-[#C4622D]/5"
-                  style={{ border: "1px solid #C4622D", color: "#C4622D" }}
-                >
-                  Manuell anpassen
-                </button>
-              </motion.div>
             </div>
           </motion.div>
         </>
