@@ -39,10 +39,10 @@ type ArtOption = (typeof ART_OPTIONS)[number];
 const KOMFORT_OPTIONS: { value: "Basic" | "Mittel" | "Hochwertig"; desc: string }[] = [
   { value: "Basic", desc: "einfache Ausstattung" },
   { value: "Mittel", desc: "gut ausgestattet, modern" },
-  { value: "Hochwertig", desc: "Premium, besondere Merkmale" },
+  { value: "Hochwertig", desc: "besondere Merkmale" },
 ];
 
-const PLATTFORM_OPTIONS = ["Airbnb", "Booking.com", "VRBO", "Expedia", "Direkt"] as const;
+const PLATTFORM_OPTIONS = ["Airbnb", "Booking.com", "VRBO", "Expedia", "Direkt", "Keine / Andere"] as const;
 const BESONDERHEITEN_OPTIONS = [
   "Balkon / Terrasse", "Parkplatz", "Haustiere erlaubt",
   "Waschmaschine", "Klimaanlage", "Kamin",
@@ -511,7 +511,7 @@ const Preise = () => {
                             </div>
 
                             <NumberStepper label="Wie viele Zimmer hat dein Objekt?" value={zimmer} min={1} max={20} onChange={setZimmer} />
-                            <NumberStepper label="Maximale Gästeanzahl" value={maxGaeste} min={1} max={20} onChange={setMaxGaeste} />
+                            <NumberStepper label="Wie viele Personen können hier wohnen?" value={maxGaeste} min={1} max={20} onChange={setMaxGaeste} />
 
                             {/* Komfort */}
                             <div>
