@@ -17,6 +17,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { DotColor, CardColor, DayCard, Competitor, EventItem, SummaryBlock, MarketBlock, WeekResponse, PricingRequest } from "@/api/types";
 import { PriceRecommendationHeader } from "@/components/PriceRecommendationHeader";
+import { ListingPreviewModal } from "@/components/ListingPreviewModal";
 import { validateSmartRentInput } from "@/utils/validateInput";
 import { checkRateLimit } from "@/hooks/useSecureWebhook";
 
@@ -892,6 +893,12 @@ const WeekResults = ({
   setOpenDayIdx: (i: number | null) => void;
   aktuellerPreis?: number | "";
 }) => {
+  const [selectedDay, setSelectedDay] = useState<{
+    dayName: string;
+    date: string;
+    price: number;
+  } | null>(null);
+
   const open = openDayIdx !== null ? data.days[openDayIdx] : null;
   const summary = data.summary ?? {};
   const market = data.market ?? {};
@@ -927,8 +934,11 @@ const WeekResults = ({
           <button
             type="button"
             key={i}
-            onClick={() => setOpenDayIdx(i)}
-            className="text-left rounded-xl overflow-hidden flex bg-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4622A]/40"
+            onClick={() => {
+              const priceNum = parseInt(String(d.price).replace(/[^\d]/g, ""), 10);
+              setSelectedDay({ dayName: d.weekday, date: d.label, price: priceNum });
+            }}
+            className="cursor-pointer text-left rounded-xl overflow-hidden flex bg-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4622A]/40"
             style={{ border: "0.5px solid #E8E4DE" }}
           >
             <div
@@ -964,6 +974,14 @@ const WeekResults = ({
         ))}
       </div>
 
+
+      <ListingPreviewModal
+        isOpen={selectedDay !== null}
+        onClose={() => setSelectedDay(null)}
+        dayName={selectedDay?.dayName ?? ""}
+        date={selectedDay?.date ?? ""}
+        recommendedPrice={selectedDay?.price ?? 0}
+      />
 
       {/* Market section */}
       <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
