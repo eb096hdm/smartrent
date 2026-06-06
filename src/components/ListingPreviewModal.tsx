@@ -94,6 +94,22 @@ export function ListingPreviewModal({
                 transition={{ delay: 0.3, duration: 0.35 }}
                 className="rounded-2xl bg-white shadow-sm overflow-hidden"
               >
+                {/* Image placeholder */}
+                <div
+                  className="relative h-44 flex items-center justify-center"
+                  style={{ background: "#EDE0CC" }}
+                >
+                  <p className="text-sm font-medium text-center px-6" style={{ color: "#9a8070" }}>
+                    Hier könnte dein Objekt zu sehen sein
+                  </p>
+                  <span
+                    className="absolute top-3 left-3 rounded-full bg-white px-2.5 py-1 text-xs font-semibold"
+                    style={{ color: "#2A1A0E" }}
+                  >
+                    ⭐ Superhost
+                  </span>
+                </div>
+
                 {/* Card body */}
                 <div className="p-4">
                   {/* Meta row */}
