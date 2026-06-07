@@ -9,6 +9,8 @@ type FeatureCollection = any;
 import "leaflet/dist/leaflet.css";
 
 import { WeekPicker } from "@/components/WeekPicker";
+import ComparableCards, { type ComparableProperty } from "@/components/ComparableCards";
+import HostsTipps, { type HostTip } from "@/components/HostsTipps";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { fetchPriceRecommendation } from "@/api/pricing";
@@ -71,6 +73,52 @@ const StaticMapBinder = ({ onReady }: { onReady: (m: LeafletMap) => void }) => {
 };
 
 type Step = "plz" | "details" | "loading" | "results" | "error";
+
+const MOCK_COMPARABLES: ComparableProperty[] = [
+  {
+    id: "1",
+    name: "Apt. Stuttgart-Mitte",
+    district: "Mitte",
+    pricePerNight: 75,
+    rating: 4.8,
+  },
+  {
+    id: "2",
+    name: "Studio Vaihingen",
+    district: "Vaihingen",
+    pricePerNight: 62,
+    rating: 4.5,
+    badge: "cheapest",
+  },
+  {
+    id: "3",
+    name: "Ferienwohn. West",
+    district: "Stuttgart West",
+    pricePerNight: 89,
+    rating: 4.9,
+  },
+];
+
+const MOCK_TIPS: HostTip[] = [
+  {
+    id: "1",
+    variant: "price",
+    title: "Basispreis leicht senken",
+    body: "Vergleichbare Objekte in deiner Lage sind im Schnitt 8% günstiger. Eine Anpassung könnte deine Buchungsrate deutlich steigern.",
+  },
+  {
+    id: "2",
+    variant: "content",
+    title: "Ausstattung hervorheben",
+    body: "Objekte mit Balkon-Erwähnung im Titel erzielen bis zu 15% Aufschlag. Betone dieses Merkmal stärker in Titel und Beschreibung.",
+  },
+  {
+    id: "3",
+    variant: "season",
+    title: "August-Hochsaison nutzen",
+    body: "Im August liegt die Nachfrage 40% über dem Jahresdurchschnitt. Erhöhe deinen Preis für KW 31–35 um ca. +20%.",
+  },
+];
 
 const Preise = () => {
   const [geo, setGeo] = useState<FeatureCollection | null>(null);
@@ -985,90 +1033,8 @@ const WeekResults = ({
 
       {/* Market section */}
       <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <h3 className="text-lg font-medium" style={{ color: "#1A1714" }}>Konkurrenz im Markt</h3>
-          {market.level && (
-            <span className="rounded-full px-3 py-1 text-xs" style={{ border: "0.5px solid #E8E4DE", color: "#7A7068" }}>
-              {market.level}
-            </span>
-          )}
-        </div>
-        {competitors.length > 0 && (
-          <div className="mt-5 space-y-2.5">
-            {competitors.map((c, i) => {
-              const priceNum = parseInt(String(c.price).match(/\d+/)?.[0] || "0");
-              const minNum = market.min ? parseInt(String(market.min).match(/\d+/)?.[0] || "0") : 71;
-              const maxNum = market.max ? parseInt(String(market.max).match(/\d+/)?.[0] || "0") : 131;
-              const fillPct = ((priceNum - minNum) / (maxNum - minNum)) * 100;
-              const isHighlight = c.platform === "Booking.com";
-              const qualityBg = c.quality === "Hochwertig"
-                ? "rgba(212, 98, 42, 0.12)"
-                : "rgba(154, 143, 133, 0.15)";
-              const qualityColor = c.quality === "Hochwertig" ? "#D4622A" : "#9A8F85";
-
-              return (
-                <div key={i}>
-                  {isHighlight && (
-                    <div className="text-xs font-medium mb-1.5" style={{ color: "#D4622A", background: "rgba(212,98,42,0.08)", padding: "2px 10px", display: "inline-block", borderRadius: 6 }}>
-                      stärkster Mitbewerber
-                    </div>
-                  )}
-                  <div
-                    style={{
-                      background: "#F9F7F4",
-                      border: isHighlight ? "2px solid #D4622A" : "1px solid rgba(154, 143, 133, 0.3)",
-                      borderRadius: 12,
-                      padding: "16px 20px",
-                    }}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div style={{ color: "#1A1714", fontSize: 14, fontWeight: 500 }}>
-                          {c.type} · {c.size_sqm}
-                        </div>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <div style={{ color: "#1A1714", fontSize: 20, fontWeight: 600 }}>
-                          {c.price}
-                        </div>
-                        <div
-                          className="text-xs mt-1"
-                          style={{
-                            background: qualityBg,
-                            color: qualityColor,
-                            padding: "2px 8px",
-                            borderRadius: 4,
-                            display: "inline-block",
-                            fontWeight: 500,
-                          }}
-                        >
-                          {c.quality}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mt-2 flex items-center justify-between gap-2" style={{ fontSize: 12, color: "#9A8F85" }}>
-                      <span>{c.platform}</span>
-                      <span>{c.distance_km}</span>
-                    </div>
-                    <div className="mt-3">
-                      <div style={{ background: "rgba(154, 143, 133, 0.2)", height: 6, borderRadius: 3, overflow: "hidden" }}>
-                        <div
-                          style={{
-                            background: "#D4622A",
-                            height: "100%",
-                            width: `${Math.max(0, Math.min(100, fillPct))}%`,
-                            borderRadius: 3,
-                            transition: "width 0.3s ease",
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <ComparableCards comparables={MOCK_COMPARABLES} totalCount={41} />
+        <HostsTipps tips={MOCK_TIPS} />
       </div>
 
       {/* Day modal */}
