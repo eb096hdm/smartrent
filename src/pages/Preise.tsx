@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft, Loader2, MapPin, User } from "lucide-react";
+import { ArrowRight, ArrowLeft, Loader2, MapPin, User, Info, Lightbulb } from "lucide-react";
 import { format } from "date-fns";
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import type { Map as LeafletMap } from "leaflet";
@@ -978,7 +978,9 @@ const WeekResults = ({
 
       {/* 7 Day cards */}
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
-        {data.days.map((d, i) => (
+        {data.days.map((d, i) => {
+          const priceLabel = typeof d.price === "number" ? `${d.price} €/Nacht` : d.price;
+          return (
           <button
             type="button"
             key={i}
@@ -1001,7 +1003,7 @@ const WeekResults = ({
                 {d.weekday}
               </span>
               <div className="mt-0.5" style={{ fontSize: 13, color: "#7A7068" }}>{d.label}</div>
-              <p className="mt-2 font-semibold leading-tight" style={{ fontSize: 24, color: "#1A1714" }}>{d.price}</p>
+              <p className="mt-2 font-semibold leading-tight" style={{ fontSize: 24, color: "#1A1714" }}>{priceLabel}</p>
               {d.data_confidence === "low" && (
                 <span
                   className="mt-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide"
@@ -1019,7 +1021,8 @@ const WeekResults = ({
               </p>
             </div>
           </button>
-        ))}
+          );
+        })}
       </div>
 
 
@@ -1031,6 +1034,43 @@ const WeekResults = ({
         recommendedPrice={selectedDay?.price ?? 0}
       />
 
+      {/* Summary section */}
+      {(summary.text || summary.marktposition) && (
+        <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
+          {summary.text && (
+            <p className="text-sm leading-relaxed" style={{ color: "#1A1714" }}>
+              {highlight(summary.text)}
+            </p>
+          )}
+          {summary.marktposition && (
+            <div className="mt-3 flex items-start gap-2 text-sm" style={{ color: "#7A7068" }}>
+              <Info className="mt-0.5 flex-shrink-0" size={14} />
+              <span>{summary.marktposition}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Was Top-Hosts tun */}
+      {summary.host_hinweise && summary.host_hinweise.length > 0 && (
+        <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
+          <h3 className="text-base font-semibold" style={{ color: "#1A1714" }}>Was Top-Hosts tun</h3>
+          <p className="mt-1 text-sm" style={{ color: "#7A7068" }}>Erkenntnisse aus der lokalen Marktanalyse</p>
+          <div className="mt-4 flex flex-col gap-3">
+            {summary.host_hinweise.map((hint, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-3 rounded-lg p-3"
+                style={{ background: "rgba(245, 158, 11, 0.08)", border: "1px solid rgba(245, 158, 11, 0.25)" }}
+              >
+                <Lightbulb className="mt-0.5 flex-shrink-0" size={16} style={{ color: "#D97706" }} />
+                <p className="text-sm" style={{ color: "#1A1714" }}>{hint}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Market section */}
       <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
         <ComparableCards comparables={MOCK_COMPARABLES} totalCount={41} />
@@ -1040,45 +1080,84 @@ const WeekResults = ({
       {/* Day modal */}
       <Dialog open={open !== null} onOpenChange={(o) => !o && setOpenDayIdx(null)}>
         <DialogContent className="max-w-lg" style={{ background: "#FFFFFF", border: "0.5px solid #E8E4DE" }}>
-          {open && (
-            <>
-              <DialogHeader>
-                <DialogTitle style={{ color: "#1A1714" }}>
-                  {open.weekday} · {open.label}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="mt-2">
-                {aktuellerPreis !== "" && Number(aktuellerPreis) > 0 && (
-                  <p className="text-sm line-through" style={{ color: "#9A8F85" }}>{Number(aktuellerPreis)} €/Nacht</p>
+          {open && (() => {
+            const priceLabel = typeof open.price === "number" ? `${open.price} €/Nacht` : open.price;
+            const occText = open.occupancy_text && open.occupancy_text.trim().length > 0
+              ? open.occupancy_text
+              : (open.occupancy != null && String(open.occupancy).length > 0
+                  ? (typeof open.occupancy === "number" ? `${open.occupancy}%` : String(open.occupancy))
+                  : "");
+            const f = open.factors ?? {};
+            const factorRows: { label: string; value: number | string | undefined }[] = [
+              { label: "Tagesfaktor", value: f.tages },
+              { label: "Marktlage", value: f.konkurrenz },
+              { label: "Ausstattung", value: f.komfort },
+              { label: "Extras", value: f.besonderheiten ?? 1.0 },
+            ];
+            const fmtFactor = (v: number | string | undefined) => {
+              if (v == null || v === "") return "—";
+              const n = typeof v === "number" ? v : parseFloat(String(v));
+              return Number.isFinite(n) ? `${n.toFixed(2)}×` : String(v);
+            };
+            return (
+              <>
+                <DialogHeader>
+                  <DialogTitle style={{ color: "#1A1714" }}>
+                    {open.weekday} · {open.label}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="mt-2">
+                  {aktuellerPreis !== "" && Number(aktuellerPreis) > 0 && (
+                    <p className="text-sm line-through" style={{ color: "#9A8F85" }}>{Number(aktuellerPreis)} €/Nacht</p>
+                  )}
+                  <p className="text-3xl font-semibold" style={{ color: "#1A1714" }}>{priceLabel}</p>
+                  {open.change_label && (
+                    <p className="mt-1 text-sm font-medium" style={{ color: "#7A7068" }}>{open.change_label}</p>
+                  )}
+                  {occText && (
+                    <p className="mt-1 text-sm" style={{ color: "#7A7068" }}>Nachfrage: {occText}</p>
+                  )}
+                </div>
+                <p className="mt-3 text-sm leading-relaxed" style={{ color: "#1A1714" }}>{open.detail_text}</p>
+
+                {/* Faktoren */}
+                {open.factors && (
+                  <div className="mt-4 rounded-lg p-3" style={{ border: "0.5px solid #E8E4DE", background: "#FAF8F5" }}>
+                    <p className="text-xs uppercase tracking-wide" style={{ color: "#7A7068", letterSpacing: "0.07em" }}>Faktoren</p>
+                    <div className="mt-2 flex flex-col gap-1.5">
+                      {factorRows.map((row) => (
+                        <div key={row.label} className="flex items-center justify-between text-sm">
+                          <span style={{ color: "#7A7068" }}>{row.label}</span>
+                          <span className="font-medium tabular-nums" style={{ color: "#1A1714" }}>{fmtFactor(row.value)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
-                <p className="text-3xl font-semibold" style={{ color: "#1A1714" }}>{open.price}</p>
-                <p className="mt-1 text-xs" style={{ color: "#7A7068" }}>{open.dot_label} · {open.occupancy}</p>
-              </div>
-              <p className="mt-3 text-sm leading-relaxed" style={{ color: "#1A1714" }}>{open.detail_text}</p>
-              {open.data_confidence === "low" && (
-                <div className="mt-3 rounded-lg p-3" style={{ border: "1px solid rgba(234,179,8,0.35)", background: "rgba(234,179,8,0.08)" }}>
-                  <p className="text-xs uppercase tracking-wide" style={{ color: "#A16207", letterSpacing: "0.07em" }}>Geringe Datenbasis</p>
-                  <p className="mt-1 text-sm" style={{ color: "#1A1714" }}>
-                    Für diese PLZ liegen wenige Vergleichsdaten vor. Die Empfehlung ist mit höherer Unsicherheit behaftet.
-                  </p>
-                </div>
-              )}
-              {open.active_events && open.active_events.length > 0 && (
-                <div className="mt-3 rounded-lg p-3" style={{ border: "1px solid rgba(212,98,42,0.25)", background: "rgba(212,98,42,0.06)" }}>
-                  <p className="text-xs uppercase tracking-wide" style={{ color: "#D4622A", letterSpacing: "0.07em" }}>Aktive Events</p>
-                  <p className="mt-1 text-sm" style={{ color: "#1A1714" }}>{open.active_events.join(", ")}</p>
-                </div>
-              )}
-              {open.change_label && (
-                <p className="mt-4 text-sm font-medium" style={{ color: "#7A7068" }}>{open.change_label}</p>
-              )}
-            </>
-          )}
+
+                {open.data_confidence === "low" && (
+                  <div className="mt-3 rounded-lg p-3" style={{ border: "1px solid rgba(234,179,8,0.35)", background: "rgba(234,179,8,0.08)" }}>
+                    <p className="text-xs uppercase tracking-wide" style={{ color: "#A16207", letterSpacing: "0.07em" }}>Geringe Datenbasis</p>
+                    <p className="mt-1 text-sm" style={{ color: "#1A1714" }}>
+                      Für diese PLZ liegen wenige Vergleichsdaten vor. Die Empfehlung ist mit höherer Unsicherheit behaftet.
+                    </p>
+                  </div>
+                )}
+                {open.active_events && open.active_events.length > 0 && (
+                  <div className="mt-3 rounded-lg p-3" style={{ border: "1px solid rgba(212,98,42,0.25)", background: "rgba(212,98,42,0.06)" }}>
+                    <p className="text-xs uppercase tracking-wide" style={{ color: "#D4622A", letterSpacing: "0.07em" }}>Aktive Events</p>
+                    <p className="mt-1 text-sm" style={{ color: "#1A1714" }}>{open.active_events.join(", ")}</p>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </>
   );
 };
+
 
 const Stat = ({ label, value }: { label: string; value: string }) => (
   <div>

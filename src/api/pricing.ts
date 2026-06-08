@@ -40,7 +40,7 @@ const buildMockResponse = (basePrice: number, startDate: Date): WeekResponse => 
     };
   });
 
-  const avg = Math.round(days.reduce((s, d) => s + parseInt(d.price), 0) / days.length);
+  const avg = Math.round(days.reduce((s, d) => s + parseInt(String(d.price)), 0) / days.length);
 
   return {
     days,

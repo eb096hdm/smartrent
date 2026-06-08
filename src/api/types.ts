@@ -2,24 +2,34 @@ export type DotColor = "green" | "yellow" | "red";
 export type CardColor = "red" | "orange" | "green" | "blue";
 
 export type Factors = {
-  saison?: number | string;
-  event?: number | string;
+  // Neue Keys (aktuelles Webhook-Format)
+  tages?: number | string;
   konkurrenz?: number | string;
   komfort?: number | string;
+  besonderheiten?: number | string;
+  // Legacy-Keys (Rückwärtskompatibilität)
+  saison?: number | string;
+  event?: number | string;
 };
 
 export type DayCard = {
   weekday: string;
   label: string;
-  price: string;
+  /** Preis – neu: number, legacy: string ("90 €/Nacht"). */
+  price: string | number;
+  date?: string;
   dot: DotColor;
   dot_label: string;
   card_color: CardColor;
-  occupancy: string;
+  /** Auslastung in Prozent – neu: number, legacy: string ("78%"). */
+  occupancy: string | number;
+  /** NEU: Lesbarer Auslastungstext, z. B. "ca. 7 von 10 Unterkünften ausgebucht" */
+  occupancy_text?: string;
   card_text: string;
   detail_text: string;
   active_events?: string[];
   change_label?: string;
+  change_pct?: number;
   factors?: Factors;
   data_confidence?: "low" | "medium" | "high";
 };
@@ -37,7 +47,7 @@ export type EventItem = {
   name?: string;
   date?: string;
   description?: string;
-  impact?: string;
+  impact?: string | number;
   [k: string]: unknown;
 };
 
@@ -48,6 +58,10 @@ export type SummaryBlock = {
   text?: string;
   best_day?: string;
   worst_day?: string;
+  /** NEU: 2–3 Markt-Hinweise für den Host */
+  host_hinweise?: string[];
+  /** NEU: Einordnung der Marktposition als Klartext */
+  marktposition?: string;
 };
 
 export type MarketBlock = {
