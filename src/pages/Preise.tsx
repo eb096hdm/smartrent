@@ -1151,6 +1151,16 @@ const WeekResults = ({
                   </div>
                 )}
 
+                {/* Preis-Formel (price_breakdown) */}
+                {open.price_breakdown && (
+                  <div className="mt-3 rounded-lg p-3" style={{ border: "0.5px solid #E8E4DE", background: "#FFFFFF" }}>
+                    <p className="text-xs uppercase tracking-wide" style={{ color: "#7A7068", letterSpacing: "0.07em" }}>So setzt sich der Preis zusammen</p>
+                    <p className="mt-1.5 text-xs font-mono tabular-nums leading-relaxed" style={{ color: "#1A1714" }}>
+                      {open.price_breakdown}
+                    </p>
+                  </div>
+                )}
+
                 {open.data_confidence === "low" && (
                   <div className="mt-3 rounded-lg p-3" style={{ border: "1px solid rgba(234,179,8,0.35)", background: "rgba(234,179,8,0.08)" }}>
                     <p className="text-xs uppercase tracking-wide" style={{ color: "#A16207", letterSpacing: "0.07em" }}>Geringe Datenbasis</p>
