@@ -9,8 +9,8 @@ type FeatureCollection = any;
 import "leaflet/dist/leaflet.css";
 
 import { WeekPicker } from "@/components/WeekPicker";
-import ComparableCards, { type ComparableProperty } from "@/components/ComparableCards";
-import HostsTipps, { type HostTip } from "@/components/HostsTipps";
+import ComparableCards from "@/components/ComparableCards";
+// HostsTipps wird in der Host-Hinweise-Sektion oberhalb verwendet – kein separater Import nötig.
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { fetchPriceRecommendation } from "@/api/pricing";
@@ -74,51 +74,8 @@ const StaticMapBinder = ({ onReady }: { onReady: (m: LeafletMap) => void }) => {
 
 type Step = "plz" | "details" | "loading" | "results" | "error";
 
-const MOCK_COMPARABLES: ComparableProperty[] = [
-  {
-    id: "1",
-    name: "Apt. Stuttgart-Mitte",
-    district: "Mitte",
-    pricePerNight: 75,
-    rating: 4.8,
-  },
-  {
-    id: "2",
-    name: "Studio Vaihingen",
-    district: "Vaihingen",
-    pricePerNight: 62,
-    rating: 4.5,
-    badge: "cheapest",
-  },
-  {
-    id: "3",
-    name: "Ferienwohn. West",
-    district: "Stuttgart West",
-    pricePerNight: 89,
-    rating: 4.9,
-  },
-];
-
-const MOCK_TIPS: HostTip[] = [
-  {
-    id: "1",
-    variant: "price",
-    title: "Basispreis leicht senken",
-    body: "Vergleichbare Objekte in deiner Lage sind im Schnitt 8% günstiger. Eine Anpassung könnte deine Buchungsrate deutlich steigern.",
-  },
-  {
-    id: "2",
-    variant: "content",
-    title: "Ausstattung hervorheben",
-    body: "Objekte mit Balkon-Erwähnung im Titel erzielen bis zu 15% Aufschlag. Betone dieses Merkmal stärker in Titel und Beschreibung.",
-  },
-  {
-    id: "3",
-    variant: "season",
-    title: "August-Hochsaison nutzen",
-    body: "Im August liegt die Nachfrage 40% über dem Jahresdurchschnitt. Erhöhe deinen Preis für KW 31–35 um ca. +20%.",
-  },
-];
+// Vergleichsobjekte werden ausschließlich aus market.competitors abgeleitet –
+// keine hardcodierten Demo-Listings mehr.
 
 const Preise = () => {
   const [geo, setGeo] = useState<FeatureCollection | null>(null);
@@ -725,6 +682,9 @@ const Preise = () => {
                   openDayIdx={openDayIdx}
                   setOpenDayIdx={setOpenDayIdx}
                   aktuellerPreis={aktuellerPreis}
+                  art={art}
+                  zimmer={zimmer}
+                  maxGaeste={maxGaeste}
                 />
 
                 <div className="mt-8 flex justify-center gap-4">
@@ -933,6 +893,9 @@ const WeekResults = ({
   openDayIdx,
   setOpenDayIdx,
   aktuellerPreis,
+  art,
+  zimmer,
+  maxGaeste,
 }: {
   data: WeekResponse;
   plz: string;
@@ -940,11 +903,15 @@ const WeekResults = ({
   openDayIdx: number | null;
   setOpenDayIdx: (i: number | null) => void;
   aktuellerPreis?: number | "";
+  art?: string | null;
+  zimmer?: number | null;
+  maxGaeste?: number | null;
 }) => {
   const [selectedDay, setSelectedDay] = useState<{
     dayName: string;
     date: string;
     price: number;
+    day: DayCard;
   } | null>(null);
 
   const open = openDayIdx !== null ? data.days[openDayIdx] : null;
@@ -986,7 +953,7 @@ const WeekResults = ({
             key={i}
             onClick={() => {
               const priceNum = parseInt(String(d.price).replace(/[^\d]/g, ""), 10);
-              setSelectedDay({ dayName: d.weekday, date: d.label, price: priceNum });
+              setSelectedDay({ dayName: d.weekday, date: d.label, price: priceNum, day: d });
             }}
             className="cursor-pointer text-left rounded-xl overflow-hidden flex bg-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4622A]/40"
             style={{ border: "0.5px solid #E8E4DE" }}
@@ -1031,7 +998,41 @@ const WeekResults = ({
         onClose={() => setSelectedDay(null)}
         dayName={selectedDay?.dayName ?? ""}
         date={selectedDay?.date ?? ""}
-        recommendedPrice={selectedDay?.price ?? 0}
+        recommendedPrice={selectedDay?.price ?? null}
+        previousPrice={typeof aktuellerPreis === "number" ? aktuellerPreis : null}
+        plz={plz}
+        cityName={cityName}
+        art={art ?? null}
+        zimmer={zimmer ?? null}
+        maxGaeste={maxGaeste ?? null}
+        reasonTags={(() => {
+          if (!selectedDay) return [];
+          const d = selectedDay.day;
+          const tags: { label: string; tone: "positive" | "neutral" }[] = [];
+          (d.active_events ?? []).filter(Boolean).forEach((evt) => {
+            tags.push({ label: String(evt), tone: "positive" });
+          });
+          const tagesNum = d.factors?.tages != null ? parseFloat(String(d.factors.tages)) : NaN;
+          if (Number.isFinite(tagesNum) && tagesNum > 1.05) {
+            const pct = Math.round((tagesNum - 1) * 100);
+            tags.push({ label: `${d.weekday} +${pct}%`, tone: "positive" });
+          }
+          const occText = (d.occupancy_text ?? "").toLowerCase();
+          const occNum = typeof d.occupancy === "number"
+            ? d.occupancy
+            : parseInt(String(d.occupancy).replace(/[^\d]/g, ""), 10);
+          if (
+            /hoch|ausgebucht|stark/.test(occText) ||
+            (Number.isFinite(occNum) && occNum >= 80)
+          ) {
+            tags.push({ label: "Hohe Nachfrage", tone: "neutral" });
+          }
+          const compCount = (data.market?.competitors ?? []).length;
+          if (compCount > 0) {
+            tags.push({ label: `${compCount} Mitbewerber`, tone: "neutral" });
+          }
+          return tags;
+        })()}
       />
 
       {/* Summary section */}
@@ -1071,11 +1072,26 @@ const WeekResults = ({
         </div>
       )}
 
-      {/* Market section */}
-      <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
-        <ComparableCards comparables={MOCK_COMPARABLES} totalCount={41} />
-        <HostsTipps tips={MOCK_TIPS} />
-      </div>
+      {/* Market section – Vergleichsobjekte aus market.competitors */}
+      {competitors.length > 0 && (
+        <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
+          <ComparableCards
+            comparables={competitors.slice(0, 6).map((c, i) => {
+              const priceNum = typeof c.price === "number"
+                ? c.price
+                : parseInt(String(c.price).match(/\d+/)?.[0] ?? "0", 10);
+              return {
+                id: String(i),
+                name: `${c.type ?? "Objekt"}${c.size_sqm ? ` · ${c.size_sqm}` : ""}`,
+                district: c.platform ?? "",
+                pricePerNight: priceNum,
+                rating: 0,
+              };
+            })}
+            totalCount={competitors.length}
+          />
+        </div>
+      )}
 
       {/* Day modal */}
       <Dialog open={open !== null} onOpenChange={(o) => !o && setOpenDayIdx(null)}>
