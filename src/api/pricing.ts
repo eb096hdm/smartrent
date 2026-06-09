@@ -1,6 +1,9 @@
 import { addDays, format } from "date-fns";
 import { de } from "date-fns/locale";
-import type { PricingRequest, WeekResponse, DayCard, DotColor, CardColor } from "./types";
+import type { PricingRequest, WeekResponse, DayCard, DotColor, CardColor, DataSourceStatus } from "./types";
+
+export const WEBHOOK_CONNECTION_ERROR = "Verbindung zu Make fehlgeschlagen — bitte prüfe die Webhook-URL in den Einstellungen.";
+export const WEBHOOK_URL_MISSING_ERROR = "Webhook-URL nicht konfiguriert";
 
 // ---------------------------------------------------------------------------
 // Mock fallback – used when neither backend nor webhook is available
@@ -70,63 +73,109 @@ const buildMockResponse = (basePrice: number, startDate: Date): WeekResponse => 
   };
 };
 
+const withDataSource = (data: WeekResponse, dataSource: DataSourceStatus): WeekResponse => ({
+  ...data,
+  _meta: { data_source: dataSource },
+});
+
+const parseWebhookJson = (rawText: string): WeekResponse => {
+  let cleaned = rawText.trim();
+  const fence = cleaned.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+  if (fence) cleaned = fence[1].trim();
+  if (!cleaned.startsWith("{") && !cleaned.startsWith("[")) {
+    const m = cleaned.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+    if (m) cleaned = m[0];
+  }
+
+  const parsed = JSON.parse(cleaned) as unknown;
+  const candidates = Array.isArray(parsed) ? parsed : [parsed];
+
+  for (const candidate of candidates) {
+    if (candidate && typeof candidate === "object" && Array.isArray((candidate as WeekResponse).days)) {
+      return candidate as WeekResponse;
+    }
+  }
+
+  if (parsed && typeof parsed === "object") {
+    const obj = parsed as Record<string, unknown>;
+    for (const key of ["data", "result", "response", "body", "output"]) {
+      const value = obj[key];
+      if (typeof value === "string") return parseWebhookJson(value);
+      if (value && typeof value === "object" && Array.isArray((value as WeekResponse).days)) {
+        return value as WeekResponse;
+      }
+    }
+  }
+
+  throw new Error("Webhook JSON enthält kein days[]-Array.");
+};
+
 // ---------------------------------------------------------------------------
 // Main export
-// Priority: 1) Express backend  2) Make.com direkt  3) Mock-Daten
+// Uses real Make webhook unless VITE_USE_MOCK === "true" is explicitly set.
 // ---------------------------------------------------------------------------
 export async function fetchPriceRecommendation(payload: PricingRequest): Promise<WeekResponse> {
+  const useMock = import.meta.env.VITE_USE_MOCK === "true";
 
-  // 1) Express backend via Vite proxy (funktioniert in lokaler Entwicklung)
-  try {
-    const res = await fetch("/api/price-recommendation", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (res.ok) {
-      const data = await res.json() as WeekResponse;
-      if (data && Array.isArray(data.days) && data.days.length > 0) return data;
-    }
-  } catch {
-    // Backend nicht erreichbar – weiter zur nächsten Option
+  if (useMock) {
+    console.warn("[SmartRent] VITE_USE_MOCK=true – verwende lokale Mock-Daten statt Make-Webhook.");
+    await new Promise((res) => setTimeout(res, 600));
+    return withDataSource(buildMockResponse(payload.aktueller_preis || 90, new Date(payload.woche_start)), "mock");
   }
 
-  // 2) Make.com Webhook direkt aus dem Browser (funktioniert in Lovable)
-  const webhookUrl = (import.meta.env.VITE_WEBHOOK_URL ??
-    import.meta.env.VITE_MAKE_WEBHOOK_URL) as string | undefined;
+  const webhookUrl = (import.meta.env.VITE_WEBHOOK_URL as string | undefined)?.trim();
   const webhookSecret = (import.meta.env.VITE_WEBHOOK_SECRET as string | undefined) ?? "";
-  if (webhookUrl) {
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000);
-      const res = await fetch(webhookUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-SmartRent-Token": webhookSecret,
-        },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-      });
-      clearTimeout(timeout);
-      if (res.ok) {
-        const text = await res.text();
-        let cleaned = text.trim();
-        const fence = cleaned.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
-        if (fence) cleaned = fence[1].trim();
-        if (!cleaned.startsWith("{")) {
-          const m = cleaned.match(/\{[\s\S]*\}/);
-          if (m) cleaned = m[0];
-        }
-        const parsed = JSON.parse(cleaned) as WeekResponse;
-        if (parsed && Array.isArray(parsed.days) && parsed.days.length > 0) return parsed;
-      }
-    } catch {
-      // Webhook fehlgeschlagen – weiter zu Mock-Daten
-    }
+
+  if (!webhookUrl) {
+    console.error("[SmartRent] VITE_WEBHOOK_URL ist nicht konfiguriert. Bitte setze die Webhook-URL in den Lovable Environment Variables/Einstellungen.");
+    throw new Error(WEBHOOK_URL_MISSING_ERROR);
   }
 
-  // 3) Mock-Daten als letzter Fallback
-  await new Promise((res) => setTimeout(res, 600));
-  return buildMockResponse(payload.aktueller_preis || 90, new Date(payload.woche_start));
+  const requestBody = JSON.stringify(payload);
+  const requestHeaders: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (webhookSecret) requestHeaders["X-SmartRent-Token"] = webhookSecret;
+
+  console.log("[SmartRent] Make webhook request", {
+    url: webhookUrl,
+    headers: webhookSecret ? { ...requestHeaders, "X-SmartRent-Token": "[gesetzt]" } : requestHeaders,
+    body: requestBody,
+  });
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    const res = await fetch(webhookUrl, {
+      method: "POST",
+      headers: requestHeaders,
+      body: requestBody,
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    const rawText = await res.text();
+    console.log("[SmartRent] Make webhook raw response", {
+      status: res.status,
+      ok: res.ok,
+      body: rawText,
+    });
+
+    if (!res.ok) {
+      console.error("[SmartRent] Make webhook returned an error response.", rawText);
+      throw new Error(WEBHOOK_CONNECTION_ERROR);
+    }
+
+    const parsed = parseWebhookJson(rawText);
+    if (!parsed || !Array.isArray(parsed.days) || parsed.days.length === 0) {
+      console.error("[SmartRent] Make webhook response is missing a valid days[] array.", rawText);
+      throw new Error(WEBHOOK_CONNECTION_ERROR);
+    }
+
+    return withDataSource(parsed, "live");
+  } catch (error) {
+    console.error("[SmartRent] Make webhook failed. Raw response or request could not be used.", error);
+    if (error instanceof Error && error.message === WEBHOOK_CONNECTION_ERROR) throw error;
+    throw new Error(WEBHOOK_CONNECTION_ERROR);
+  }
 }
