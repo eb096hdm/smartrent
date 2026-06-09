@@ -5,7 +5,6 @@ import type { PricingRequest, WeekResponse, DayCard, DotColor, CardColor, DataSo
 
 export const WEBHOOK_CONNECTION_ERROR = "Verbindung zu Make fehlgeschlagen — bitte prüfe die Webhook-URL in den Einstellungen.";
 export const WEBHOOK_URL_MISSING_ERROR = "Webhook-URL nicht konfiguriert";
-export const WEBHOOK_FALLBACK_NOTICE = "Make hat keine gültige Antwort geliefert — es werden Basisdaten angezeigt.";
 
 // ---------------------------------------------------------------------------
 // Mock fallback – used when neither backend nor webhook is available
