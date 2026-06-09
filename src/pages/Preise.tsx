@@ -10,7 +10,7 @@ import "leaflet/dist/leaflet.css";
 
 import { WeekPicker } from "@/components/WeekPicker";
 import ComparableCards, { type ComparableProperty } from "@/components/ComparableCards";
-import HostsTipps, { type HostTip } from "@/components/HostsTipps";
+// HostsTipps wird in der Host-Hinweise-Sektion oberhalb verwendet – kein separater Import nötig.
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { fetchPriceRecommendation } from "@/api/pricing";
