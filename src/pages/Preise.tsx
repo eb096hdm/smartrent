@@ -17,7 +17,7 @@ import { fetchPriceRecommendation } from "@/api/pricing";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import type { DotColor, CardColor, DayCard, Competitor, EventItem, SummaryBlock, MarketBlock, WeekResponse, PricingRequest, DataSourceStatus } from "@/api/types";
+import type { DotColor, CardColor, DayCard, WeekResponse, PricingRequest, DataSourceStatus } from "@/api/types";
 import { PriceRecommendationHeader } from "@/components/PriceRecommendationHeader";
 import { ListingPreviewModal } from "@/components/ListingPreviewModal";
 import { validateSmartRentInput } from "@/utils/validateInput";
@@ -73,9 +73,6 @@ const StaticMapBinder = ({ onReady }: { onReady: (m: LeafletMap) => void }) => {
 };
 
 type Step = "plz" | "details" | "loading" | "results" | "error";
-
-// Vergleichsobjekte werden ausschließlich aus market.competitors abgeleitet –
-// keine hardcodierten Demo-Listings mehr.
 
 const Preise = () => {
   const [geo, setGeo] = useState<FeatureCollection | null>(null);
@@ -940,8 +937,6 @@ const WeekResults = ({
 
   const open = openDayIdx !== null ? data.days[openDayIdx] : null;
   const summary = data.summary ?? {};
-  const market = data.market ?? {};
-  const competitors = market.competitors ?? [];
   const events = data.events ?? [];
   const dataSource = data._meta?.data_source ?? "live";
   const hasCompleteComparisons = Array.isArray(data.comparisons) && data.comparisons.length === 3;
