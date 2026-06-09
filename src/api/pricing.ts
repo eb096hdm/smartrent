@@ -1,5 +1,6 @@
 import { addDays, format } from "date-fns";
 import { de } from "date-fns/locale";
+import { supabase } from "@/integrations/supabase/client";
 import type { PricingRequest, WeekResponse, DayCard, DotColor, CardColor, DataSourceStatus } from "./types";
 
 export const WEBHOOK_CONNECTION_ERROR = "Verbindung zu Make fehlgeschlagen — bitte prüfe die Webhook-URL in den Einstellungen.";
@@ -123,65 +124,37 @@ export async function fetchPriceRecommendation(payload: PricingRequest): Promise
     return withDataSource(buildMockResponse(payload.aktueller_preis || 90, new Date(payload.woche_start)), "mock");
   }
 
-  const webhookUrl = (import.meta.env.VITE_WEBHOOK_URL as string | undefined)?.trim();
-  const webhookSecret = (import.meta.env.VITE_WEBHOOK_SECRET as string | undefined) ?? "";
-
-  if (!webhookUrl) {
-    console.error("[SmartRent] VITE_WEBHOOK_URL ist nicht konfiguriert. Bitte setze die Webhook-URL in den Lovable Environment Variables/Einstellungen.");
-    throw new Error(WEBHOOK_URL_MISSING_ERROR);
-  }
-
-  const requestBody = JSON.stringify(payload);
-  const requestHeaders: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-  if (webhookSecret) requestHeaders["x-make-apikey"] = webhookSecret;
-
-  console.log("[SmartRent] Make webhook request", {
-    url: webhookUrl,
-    headers: webhookSecret ? { ...requestHeaders, "x-make-apikey": "[gesetzt]" } : requestHeaders,
-    body: requestBody,
-  });
+  console.log("[SmartRent] Price recommendation request", { body: payload });
 
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000);
-    const res = await fetch(webhookUrl, {
-      method: "POST",
-      headers: requestHeaders,
-      body: requestBody,
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-
-    const rawText = await res.text();
-    console.log("[SmartRent] Make webhook raw response", {
-      status: res.status,
-      ok: res.ok,
-      body: rawText,
+    const { data, error } = await supabase.functions.invoke("price-recommendation", {
+      body: payload,
     });
 
-    if (!res.ok) {
-      console.error("[SmartRent] Make webhook returned an error response.", rawText);
+    if (error) {
+      console.error("[SmartRent] Price recommendation function returned an error.", error);
       throw new Error(WEBHOOK_CONNECTION_ERROR);
     }
+
+    const rawText = typeof data === "string" ? data : JSON.stringify(data);
+    console.log("[SmartRent] Price recommendation raw response", { body: rawText });
 
     let parsed: WeekResponse;
     try {
       parsed = parseWebhookJson(rawText);
     } catch (parseError) {
-      console.error("[SmartRent] Make webhook response is not valid JSON or does not contain days[]. Raw response:", rawText, parseError);
+      console.error("[SmartRent] Price recommendation response is not valid JSON or does not contain days[]. Raw response:", rawText, parseError);
       throw new Error(WEBHOOK_CONNECTION_ERROR);
     }
 
     if (!parsed || !Array.isArray(parsed.days) || parsed.days.length === 0) {
-      console.error("[SmartRent] Make webhook response is missing a valid days[] array. Raw response:", rawText);
+      console.error("[SmartRent] Price recommendation response is missing a valid days[] array. Raw response:", rawText);
       throw new Error(WEBHOOK_CONNECTION_ERROR);
     }
 
     return withDataSource(parsed, "live");
   } catch (error) {
-    console.error("[SmartRent] Make webhook failed. Raw response or request could not be used.", error);
+    console.error("[SmartRent] Price recommendation failed. Raw response or request could not be used.", error);
     if (error instanceof Error && error.message === WEBHOOK_CONNECTION_ERROR) throw error;
     throw new Error(WEBHOOK_CONNECTION_ERROR);
   }
