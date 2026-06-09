@@ -135,11 +135,11 @@ export async function fetchPriceRecommendation(payload: PricingRequest): Promise
   const requestHeaders: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  if (webhookSecret) requestHeaders["X-SmartRent-Token"] = webhookSecret;
+  if (webhookSecret) requestHeaders["x-make-apikey"] = webhookSecret;
 
   console.log("[SmartRent] Make webhook request", {
     url: webhookUrl,
-    headers: webhookSecret ? { ...requestHeaders, "X-SmartRent-Token": "[gesetzt]" } : requestHeaders,
+    headers: webhookSecret ? { ...requestHeaders, "x-make-apikey": "[gesetzt]" } : requestHeaders,
     body: requestBody,
   });
 
