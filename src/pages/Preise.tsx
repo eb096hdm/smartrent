@@ -9,7 +9,6 @@ type FeatureCollection = any;
 import "leaflet/dist/leaflet.css";
 
 import { WeekPicker } from "@/components/WeekPicker";
-import ComparableCards from "@/components/ComparableCards";
 import ComparisonsRich from "@/components/ComparisonsRich";
 // HostsTipps wird in der Host-Hinweise-Sektion oberhalb verwendet – kein separater Import nötig.
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -18,7 +17,7 @@ import { fetchPriceRecommendation } from "@/api/pricing";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import type { DotColor, CardColor, DayCard, Competitor, EventItem, SummaryBlock, MarketBlock, WeekResponse, PricingRequest } from "@/api/types";
+import type { DotColor, CardColor, DayCard, WeekResponse, PricingRequest, DataSourceStatus } from "@/api/types";
 import { PriceRecommendationHeader } from "@/components/PriceRecommendationHeader";
 import { ListingPreviewModal } from "@/components/ListingPreviewModal";
 import { validateSmartRentInput } from "@/utils/validateInput";
@@ -75,9 +74,6 @@ const StaticMapBinder = ({ onReady }: { onReady: (m: LeafletMap) => void }) => {
 
 type Step = "plz" | "details" | "loading" | "results" | "error";
 
-// Vergleichsobjekte werden ausschließlich aus market.competitors abgeleitet –
-// keine hardcodierten Demo-Listings mehr.
-
 const Preise = () => {
   const [geo, setGeo] = useState<FeatureCollection | null>(null);
   const [step, setStep] = useState<Step>("plz");
@@ -114,6 +110,7 @@ const Preise = () => {
 
   const [step1Error, setStep1Error] = useState<string | null>(null);
   const [step2Error, setStep2Error] = useState<string | null>(null);
+  const [pricingError, setPricingError] = useState<string | null>(null);
 
   const [results, setResults] = useState<WeekResponse | null>(null);
   const [openDayIdx, setOpenDayIdx] = useState<number | null>(null);
@@ -225,6 +222,7 @@ const Preise = () => {
   const handleFinalSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setStep2Error(null);
+    setPricingError(null);
     if (plattformen.length === 0) return setStep2Error("Bitte wähle mindestens eine Plattform.");
 
     // Honeypot – Bot abfangen (silent success)
@@ -267,7 +265,9 @@ const Preise = () => {
       setOpenDayIdx(null);
       setStep("results");
       setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
-    } catch {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Verbindung zu Make fehlgeschlagen — bitte prüfe die Webhook-URL in den Einstellungen.";
+      setPricingError(message);
       setStep("error");
     }
   };
@@ -633,9 +633,12 @@ const Preise = () => {
 
                           {step2Error && <p role="alert" className="mt-3 text-xs text-red-500">{step2Error}</p>}
                           {step === "error" && (
-                            <p role="alert" className="mt-3 text-xs text-red-500">
-                              Preis konnte nicht berechnet werden. Bitte versuche es erneut.
-                            </p>
+                            <div role="alert" className="mt-3 flex items-center justify-between gap-3 rounded-xl px-3 py-2" style={{ background: "rgba(198,40,40,0.08)", border: "0.5px solid rgba(198,40,40,0.25)" }}>
+                              <p className="text-xs" style={{ color: "#C62828" }}>
+                                {pricingError ?? "Verbindung zu Make fehlgeschlagen — bitte prüfe die Webhook-URL in den Einstellungen."}
+                              </p>
+                              <DataSourceBadge status="error" />
+                            </div>
                           )}
 
                           <div className="mt-6 flex justify-center gap-4">
@@ -887,6 +890,23 @@ const DOT_BG: Record<DotColor, string> = {
   red: "#EF4444",
 };
 
+const DataSourceBadge = ({ status }: { status: DataSourceStatus | "error" }) => {
+  const badge = status === "mock"
+    ? { label: "Mock-Daten", bg: "#F2F0EC", color: "#7A7068", border: "#D8D2CB" }
+    : status === "error"
+      ? { label: "Webhook-Fehler", bg: "rgba(198,40,40,0.08)", color: "#C62828", border: "rgba(198,40,40,0.25)" }
+      : { label: "Live-Daten", bg: "rgba(46,125,50,0.10)", color: "#2E7D32", border: "rgba(46,125,50,0.25)" };
+
+  return (
+    <span
+      className="inline-flex shrink-0 items-center rounded-full px-3 py-1 text-xs font-medium"
+      style={{ background: badge.bg, color: badge.color, border: `0.5px solid ${badge.border}` }}
+    >
+      {badge.label}
+    </span>
+  );
+};
+
 const WeekResults = ({
   data,
   plz,
@@ -917,9 +937,9 @@ const WeekResults = ({
 
   const open = openDayIdx !== null ? data.days[openDayIdx] : null;
   const summary = data.summary ?? {};
-  const market = data.market ?? {};
-  const competitors = market.competitors ?? [];
   const events = data.events ?? [];
+  const dataSource = data._meta?.data_source ?? "live";
+  const hasCompleteComparisons = Array.isArray(data.comparisons) && data.comparisons.length === 3;
 
   const highlight = (text?: string) => {
     if (!text) return null;
@@ -935,11 +955,14 @@ const WeekResults = ({
 
   return (
     <>
-      <PriceRecommendationHeader
-        postalCode={plz}
-        city={cityName || "Berlin Mitte"}
-        country="Deutschland"
-      />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <PriceRecommendationHeader
+          postalCode={plz}
+          city={cityName || "Berlin Mitte"}
+          country="Deutschland"
+        />
+        <DataSourceBadge status={dataSource} />
+      </div>
       <p className="mt-3 text-sm" style={{ color: "#7A7068" }}>
         7 Tage im Detail – klicke auf eine Karte für die Begründung.
       </p>
@@ -1083,30 +1106,17 @@ const WeekResults = ({
         </div>
       )}
 
-      {/* Market section – bevorzugt comparisons[] (Modul 3), Fallback auf market.competitors */}
-      {data.comparisons && data.comparisons.length > 0 ? (
+      {/* Market section – ausschließlich echte comparisons[] aus Modul 3 */}
+      {hasCompleteComparisons ? (
         <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
-          <ComparisonsRich items={data.comparisons} />
+          <ComparisonsRich items={data.comparisons!} />
         </div>
-      ) : competitors.length > 0 ? (
+      ) : (
         <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
-          <ComparableCards
-            comparables={competitors.slice(0, 6).map((c, i) => {
-              const priceNum = typeof c.price === "number"
-                ? c.price
-                : parseInt(String(c.price).match(/\d+/)?.[0] ?? "0", 10);
-              return {
-                id: String(i),
-                name: `${c.type ?? "Objekt"}${c.size_sqm ? ` · ${c.size_sqm}` : ""}`,
-                district: c.platform ?? "",
-                pricePerNight: priceNum,
-                rating: 0,
-              };
-            })}
-            totalCount={competitors.length}
-          />
+          <h3 className="text-base font-semibold" style={{ color: "#1A1714" }}>Vergleichsobjekte</h3>
+          <p className="mt-2 text-sm" style={{ color: "#9A8F85" }}>Vergleichsdaten werden geladen...</p>
         </div>
-      ) : null}
+      )}
 
       {/* Day modal */}
       <Dialog open={open !== null} onOpenChange={(o) => !o && setOpenDayIdx(null)}>

@@ -99,12 +99,17 @@ export type ComparisonItem = {
   name?: string;
 };
 
+export type DataSourceStatus = "live" | "mock";
+
 export type WeekResponse = {
   days: DayCard[];
   summary: SummaryBlock;
   market: MarketBlock;
   events: EventItem[];
   comparisons?: ComparisonItem[];
+  _meta?: {
+    data_source: DataSourceStatus;
+  };
 };
 
 export type PricingRequest = {
