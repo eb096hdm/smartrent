@@ -166,9 +166,16 @@ export async function fetchPriceRecommendation(payload: PricingRequest): Promise
       throw new Error(WEBHOOK_CONNECTION_ERROR);
     }
 
-    const parsed = parseWebhookJson(rawText);
+    let parsed: WeekResponse;
+    try {
+      parsed = parseWebhookJson(rawText);
+    } catch (parseError) {
+      console.error("[SmartRent] Make webhook response is not valid JSON or does not contain days[]. Raw response:", rawText, parseError);
+      throw new Error(WEBHOOK_CONNECTION_ERROR);
+    }
+
     if (!parsed || !Array.isArray(parsed.days) || parsed.days.length === 0) {
-      console.error("[SmartRent] Make webhook response is missing a valid days[] array.", rawText);
+      console.error("[SmartRent] Make webhook response is missing a valid days[] array. Raw response:", rawText);
       throw new Error(WEBHOOK_CONNECTION_ERROR);
     }
 
