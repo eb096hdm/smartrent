@@ -123,43 +123,65 @@ export async function fetchPriceRecommendation(payload: PricingRequest): Promise
     return withDataSource(buildMockResponse(payload.aktueller_preis || 90, new Date(payload.woche_start)), "mock");
   }
 
-  // Call via Lovable Cloud Edge Function so the Make API key stays server-side.
-  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID as string | undefined;
-  const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
-  if (!projectId || !anonKey) {
+  const webhookUrl = (import.meta.env.VITE_WEBHOOK_URL as string | undefined)?.trim();
+  const webhookSecret = (import.meta.env.VITE_WEBHOOK_SECRET as string | undefined) ?? "";
+
+  if (!webhookUrl) {
+    console.error("[SmartRent] VITE_WEBHOOK_URL ist nicht konfiguriert. Bitte setze die Webhook-URL in den Lovable Environment Variables/Einstellungen.");
     throw new Error(WEBHOOK_URL_MISSING_ERROR);
   }
-  const endpoint = `https://${projectId}.supabase.co/functions/v1/make-pricing`;
 
-  console.log("[SmartRent] make-pricing edge call", { endpoint, body: payload });
+  const requestBody = JSON.stringify(payload);
+  const requestHeaders: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (webhookSecret) requestHeaders["X-SmartRent-Token"] = webhookSecret;
+
+  console.log("[SmartRent] Make webhook request", {
+    url: webhookUrl,
+    headers: webhookSecret ? { ...requestHeaders, "X-SmartRent-Token": "[gesetzt]" } : requestHeaders,
+    body: requestBody,
+  });
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 60000);
-    const res = await fetch(endpoint, {
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    const res = await fetch(webhookUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${anonKey}`,
-        "apikey": anonKey,
-      },
-      body: JSON.stringify(payload),
+      headers: requestHeaders,
+      body: requestBody,
       signal: controller.signal,
     });
     clearTimeout(timeout);
 
     const rawText = await res.text();
-    console.log("[SmartRent] make-pricing raw response", { status: res.status, ok: res.ok, body: rawText });
+    console.log("[SmartRent] Make webhook raw response", {
+      status: res.status,
+      ok: res.ok,
+      body: rawText,
+    });
 
-    if (!res.ok) throw new Error(WEBHOOK_CONNECTION_ERROR);
-
-    const parsed = parseWebhookJson(rawText);
-    if (!parsed || !Array.isArray(parsed.days) || parsed.days.length === 0) {
+    if (!res.ok) {
+      console.error("[SmartRent] Make webhook returned an error response.", rawText);
       throw new Error(WEBHOOK_CONNECTION_ERROR);
     }
+
+    let parsed: WeekResponse;
+    try {
+      parsed = parseWebhookJson(rawText);
+    } catch (parseError) {
+      console.error("[SmartRent] Make webhook response is not valid JSON or does not contain days[]. Raw response:", rawText, parseError);
+      throw new Error(WEBHOOK_CONNECTION_ERROR);
+    }
+
+    if (!parsed || !Array.isArray(parsed.days) || parsed.days.length === 0) {
+      console.error("[SmartRent] Make webhook response is missing a valid days[] array. Raw response:", rawText);
+      throw new Error(WEBHOOK_CONNECTION_ERROR);
+    }
+
     return withDataSource(parsed, "live");
   } catch (error) {
-    console.error("[SmartRent] make-pricing failed.", error);
+    console.error("[SmartRent] Make webhook failed. Raw response or request could not be used.", error);
     if (error instanceof Error && error.message === WEBHOOK_CONNECTION_ERROR) throw error;
     throw new Error(WEBHOOK_CONNECTION_ERROR);
   }
