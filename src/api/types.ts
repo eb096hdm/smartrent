@@ -99,7 +99,7 @@ export type ComparisonItem = {
   name?: string;
 };
 
-export type DataSourceStatus = "live" | "mock";
+export type DataSourceStatus = "live" | "mock" | "fallback";
 
 export type WeekResponse = {
   days: DayCard[];
