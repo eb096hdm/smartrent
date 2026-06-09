@@ -682,6 +682,9 @@ const Preise = () => {
                   openDayIdx={openDayIdx}
                   setOpenDayIdx={setOpenDayIdx}
                   aktuellerPreis={aktuellerPreis}
+                  art={art}
+                  zimmer={zimmer}
+                  maxGaeste={maxGaeste}
                 />
 
                 <div className="mt-8 flex justify-center gap-4">
