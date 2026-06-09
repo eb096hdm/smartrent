@@ -10,6 +10,7 @@ import "leaflet/dist/leaflet.css";
 
 import { WeekPicker } from "@/components/WeekPicker";
 import ComparableCards from "@/components/ComparableCards";
+import ComparisonsRich from "@/components/ComparisonsRich";
 // HostsTipps wird in der Host-Hinweise-Sektion oberhalb verwendet – kein separater Import nötig.
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -1082,8 +1083,12 @@ const WeekResults = ({
         </div>
       )}
 
-      {/* Market section – Vergleichsobjekte aus market.competitors */}
-      {competitors.length > 0 && (
+      {/* Market section – bevorzugt comparisons[] (Modul 3), Fallback auf market.competitors */}
+      {data.comparisons && data.comparisons.length > 0 ? (
+        <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
+          <ComparisonsRich items={data.comparisons} />
+        </div>
+      ) : competitors.length > 0 ? (
         <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
           <ComparableCards
             comparables={competitors.slice(0, 6).map((c, i) => {
@@ -1101,7 +1106,7 @@ const WeekResults = ({
             totalCount={competitors.length}
           />
         </div>
-      )}
+      ) : null}
 
       {/* Day modal */}
       <Dialog open={open !== null} onOpenChange={(o) => !o && setOpenDayIdx(null)}>

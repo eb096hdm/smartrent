@@ -76,11 +76,35 @@ export type MarketBlock = {
   competitors?: Competitor[];
 };
 
+export type ComparisonDay = {
+  weekday?: string;
+  label?: string;
+  date?: string;
+  price?: string | number;
+};
+
+export type ComparisonItem = {
+  platform?: string;
+  art?: string;
+  flaeche_qm?: string | number;
+  entfernung_km?: string | number;
+  bewertung?: string | number;
+  basispreis?: string | number;
+  week_avg?: string | number;
+  diff_to_main_avg_pct?: string | number;
+  days?: ComparisonDay[];
+  quelle?: string;
+  faktor_begruendung?: string;
+  echt_verifiziert?: boolean;
+  name?: string;
+};
+
 export type WeekResponse = {
   days: DayCard[];
   summary: SummaryBlock;
   market: MarketBlock;
   events: EventItem[];
+  comparisons?: ComparisonItem[];
 };
 
 export type PricingRequest = {
