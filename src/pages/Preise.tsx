@@ -995,7 +995,41 @@ const WeekResults = ({
         onClose={() => setSelectedDay(null)}
         dayName={selectedDay?.dayName ?? ""}
         date={selectedDay?.date ?? ""}
-        recommendedPrice={selectedDay?.price ?? 0}
+        recommendedPrice={selectedDay?.price ?? null}
+        previousPrice={typeof aktuellerPreis === "number" ? aktuellerPreis : null}
+        plz={plz}
+        cityName={cityName}
+        art={art ?? null}
+        zimmer={zimmer ?? null}
+        maxGaeste={maxGaeste ?? null}
+        reasonTags={(() => {
+          if (!selectedDay) return [];
+          const d = selectedDay.day;
+          const tags: { label: string; tone: "positive" | "neutral" }[] = [];
+          (d.active_events ?? []).filter(Boolean).forEach((evt) => {
+            tags.push({ label: String(evt), tone: "positive" });
+          });
+          const tagesNum = d.factors?.tages != null ? parseFloat(String(d.factors.tages)) : NaN;
+          if (Number.isFinite(tagesNum) && tagesNum > 1.05) {
+            const pct = Math.round((tagesNum - 1) * 100);
+            tags.push({ label: `${d.weekday} +${pct}%`, tone: "positive" });
+          }
+          const occText = (d.occupancy_text ?? "").toLowerCase();
+          const occNum = typeof d.occupancy === "number"
+            ? d.occupancy
+            : parseInt(String(d.occupancy).replace(/[^\d]/g, ""), 10);
+          if (
+            /hoch|ausgebucht|stark/.test(occText) ||
+            (Number.isFinite(occNum) && occNum >= 80)
+          ) {
+            tags.push({ label: "Hohe Nachfrage", tone: "neutral" });
+          }
+          const compCount = (data.market?.competitors ?? []).length;
+          if (compCount > 0) {
+            tags.push({ label: `${compCount} Mitbewerber`, tone: "neutral" });
+          }
+          return tags;
+        })()}
       />
 
       {/* Summary section */}
