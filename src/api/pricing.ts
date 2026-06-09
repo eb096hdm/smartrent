@@ -5,6 +5,7 @@ import type { PricingRequest, WeekResponse, DayCard, DotColor, CardColor, DataSo
 
 export const WEBHOOK_CONNECTION_ERROR = "Verbindung zu Make fehlgeschlagen — bitte prüfe die Webhook-URL in den Einstellungen.";
 export const WEBHOOK_URL_MISSING_ERROR = "Webhook-URL nicht konfiguriert";
+export const WEBHOOK_FALLBACK_NOTICE = "Make hat keine gültige Antwort geliefert — es werden Basisdaten angezeigt.";
 
 // ---------------------------------------------------------------------------
 // Mock fallback – used when neither backend nor webhook is available
@@ -132,8 +133,8 @@ export async function fetchPriceRecommendation(payload: PricingRequest): Promise
     });
 
     if (error) {
-      console.error("[SmartRent] Price recommendation function returned an error.", error);
-      throw new Error(WEBHOOK_CONNECTION_ERROR);
+      console.error("[SmartRent] Price recommendation function returned an error. Verwende Basisdaten.", error);
+      return withDataSource(buildMockResponse(payload.aktueller_preis || 90, new Date(payload.woche_start)), "fallback");
     }
 
     const rawText = typeof data === "string" ? data : JSON.stringify(data);
@@ -143,19 +144,18 @@ export async function fetchPriceRecommendation(payload: PricingRequest): Promise
     try {
       parsed = parseWebhookJson(rawText);
     } catch (parseError) {
-      console.error("[SmartRent] Price recommendation response is not valid JSON or does not contain days[]. Raw response:", rawText, parseError);
-      throw new Error(WEBHOOK_CONNECTION_ERROR);
+      console.error("[SmartRent] Price recommendation response is not valid JSON or does not contain days[]. Verwende Basisdaten. Raw response:", rawText, parseError);
+      return withDataSource(buildMockResponse(payload.aktueller_preis || 90, new Date(payload.woche_start)), "fallback");
     }
 
     if (!parsed || !Array.isArray(parsed.days) || parsed.days.length === 0) {
-      console.error("[SmartRent] Price recommendation response is missing a valid days[] array. Raw response:", rawText);
-      throw new Error(WEBHOOK_CONNECTION_ERROR);
+      console.error("[SmartRent] Price recommendation response is missing a valid days[] array. Verwende Basisdaten. Raw response:", rawText);
+      return withDataSource(buildMockResponse(payload.aktueller_preis || 90, new Date(payload.woche_start)), "fallback");
     }
 
     return withDataSource(parsed, "live");
   } catch (error) {
-    console.error("[SmartRent] Price recommendation failed. Raw response or request could not be used.", error);
-    if (error instanceof Error && error.message === WEBHOOK_CONNECTION_ERROR) throw error;
-    throw new Error(WEBHOOK_CONNECTION_ERROR);
+    console.error("[SmartRent] Price recommendation failed. Verwende Basisdaten.", error);
+    return withDataSource(buildMockResponse(payload.aktueller_preis || 90, new Date(payload.woche_start)), "fallback");
   }
 }
