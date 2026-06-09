@@ -1069,11 +1069,26 @@ const WeekResults = ({
         </div>
       )}
 
-      {/* Market section */}
-      <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
-        <ComparableCards comparables={MOCK_COMPARABLES} totalCount={41} />
-        <HostsTipps tips={MOCK_TIPS} />
-      </div>
+      {/* Market section – Vergleichsobjekte aus market.competitors */}
+      {competitors.length > 0 && (
+        <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
+          <ComparableCards
+            comparables={competitors.slice(0, 6).map((c, i) => {
+              const priceNum = typeof c.price === "number"
+                ? c.price
+                : parseInt(String(c.price).match(/\d+/)?.[0] ?? "0", 10);
+              return {
+                id: String(i),
+                name: `${c.type ?? "Objekt"}${c.size_sqm ? ` · ${c.size_sqm}` : ""}`,
+                district: c.platform ?? "",
+                pricePerNight: priceNum,
+                rating: 0,
+              };
+            })}
+            totalCount={competitors.length}
+          />
+        </div>
+      )}
 
       {/* Day modal */}
       <Dialog open={open !== null} onOpenChange={(o) => !o && setOpenDayIdx(null)}>
