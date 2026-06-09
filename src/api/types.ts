@@ -32,6 +32,8 @@ export type DayCard = {
   change_pct?: number;
   factors?: Factors;
   data_confidence?: "low" | "medium" | "high";
+  /** NEU: lesbare Formel-Zeile, z. B. "98 EUR x 1.35 (Tagesfaktor) x ... = 150 EUR" */
+  price_breakdown?: string;
 };
 
 export type Competitor = {
@@ -62,6 +64,8 @@ export type SummaryBlock = {
   host_hinweise?: string[];
   /** NEU: Einordnung der Marktposition als Klartext */
   marktposition?: string;
+  /** NEU: 2–3 Sätze, die den Wochendurchschnitt erklären */
+  week_rationale?: string;
 };
 
 export type MarketBlock = {

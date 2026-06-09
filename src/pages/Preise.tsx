@@ -1036,12 +1036,22 @@ const WeekResults = ({
       />
 
       {/* Summary section */}
-      {(summary.text || summary.marktposition) && (
+      {(summary.text || summary.marktposition || summary.week_rationale) && (
         <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
           {summary.text && (
             <p className="text-sm leading-relaxed" style={{ color: "#1A1714" }}>
               {highlight(summary.text)}
             </p>
+          )}
+          {summary.week_rationale && (
+            <div className="mt-4 rounded-lg p-3" style={{ background: "#FAF8F5", border: "0.5px solid #E8E4DE" }}>
+              <p className="text-xs uppercase tracking-wide" style={{ color: "#7A7068", letterSpacing: "0.07em" }}>
+                Warum dieser Wochendurchschnitt?
+              </p>
+              <p className="mt-1.5 text-sm leading-relaxed" style={{ color: "#1A1714" }}>
+                {summary.week_rationale}
+              </p>
+            </div>
           )}
           {summary.marktposition && (
             <div className="mt-3 flex items-start gap-2 text-sm" style={{ color: "#7A7068" }}>
@@ -1148,6 +1158,16 @@ const WeekResults = ({
                         </div>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {/* Preis-Formel (price_breakdown) */}
+                {open.price_breakdown && (
+                  <div className="mt-3 rounded-lg p-3" style={{ border: "0.5px solid #E8E4DE", background: "#FFFFFF" }}>
+                    <p className="text-xs uppercase tracking-wide" style={{ color: "#7A7068", letterSpacing: "0.07em" }}>So setzt sich der Preis zusammen</p>
+                    <p className="mt-1.5 text-xs font-mono tabular-nums leading-relaxed" style={{ color: "#1A1714" }}>
+                      {open.price_breakdown}
+                    </p>
                   </div>
                 )}
 
