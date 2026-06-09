@@ -74,51 +74,8 @@ const StaticMapBinder = ({ onReady }: { onReady: (m: LeafletMap) => void }) => {
 
 type Step = "plz" | "details" | "loading" | "results" | "error";
 
-const MOCK_COMPARABLES: ComparableProperty[] = [
-  {
-    id: "1",
-    name: "Apt. Stuttgart-Mitte",
-    district: "Mitte",
-    pricePerNight: 75,
-    rating: 4.8,
-  },
-  {
-    id: "2",
-    name: "Studio Vaihingen",
-    district: "Vaihingen",
-    pricePerNight: 62,
-    rating: 4.5,
-    badge: "cheapest",
-  },
-  {
-    id: "3",
-    name: "Ferienwohn. West",
-    district: "Stuttgart West",
-    pricePerNight: 89,
-    rating: 4.9,
-  },
-];
-
-const MOCK_TIPS: HostTip[] = [
-  {
-    id: "1",
-    variant: "price",
-    title: "Basispreis leicht senken",
-    body: "Vergleichbare Objekte in deiner Lage sind im Schnitt 8% günstiger. Eine Anpassung könnte deine Buchungsrate deutlich steigern.",
-  },
-  {
-    id: "2",
-    variant: "content",
-    title: "Ausstattung hervorheben",
-    body: "Objekte mit Balkon-Erwähnung im Titel erzielen bis zu 15% Aufschlag. Betone dieses Merkmal stärker in Titel und Beschreibung.",
-  },
-  {
-    id: "3",
-    variant: "season",
-    title: "August-Hochsaison nutzen",
-    body: "Im August liegt die Nachfrage 40% über dem Jahresdurchschnitt. Erhöhe deinen Preis für KW 31–35 um ca. +20%.",
-  },
-];
+// Vergleichsobjekte werden ausschließlich aus market.competitors abgeleitet –
+// keine hardcodierten Demo-Listings mehr.
 
 const Preise = () => {
   const [geo, setGeo] = useState<FeatureCollection | null>(null);
