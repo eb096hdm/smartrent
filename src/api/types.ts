@@ -64,6 +64,8 @@ export type SummaryBlock = {
   host_hinweise?: string[];
   /** NEU: Einordnung der Marktposition als Klartext */
   marktposition?: string;
+  /** NEU: 2–3 Sätze, die den Wochendurchschnitt erklären */
+  week_rationale?: string;
 };
 
 export type MarketBlock = {
