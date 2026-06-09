@@ -9,7 +9,7 @@ type FeatureCollection = any;
 import "leaflet/dist/leaflet.css";
 
 import { WeekPicker } from "@/components/WeekPicker";
-import ComparableCards, { type ComparableProperty } from "@/components/ComparableCards";
+import ComparableCards from "@/components/ComparableCards";
 // HostsTipps wird in der Host-Hinweise-Sektion oberhalb verwendet – kein separater Import nötig.
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
