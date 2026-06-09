@@ -1043,6 +1043,16 @@ const WeekResults = ({
               {highlight(summary.text)}
             </p>
           )}
+          {summary.week_rationale && (
+            <div className="mt-4 rounded-lg p-3" style={{ background: "#FAF8F5", border: "0.5px solid #E8E4DE" }}>
+              <p className="text-xs uppercase tracking-wide" style={{ color: "#7A7068", letterSpacing: "0.07em" }}>
+                Warum dieser Wochendurchschnitt?
+              </p>
+              <p className="mt-1.5 text-sm leading-relaxed" style={{ color: "#1A1714" }}>
+                {summary.week_rationale}
+              </p>
+            </div>
+          )}
           {summary.marktposition && (
             <div className="mt-3 flex items-start gap-2 text-sm" style={{ color: "#7A7068" }}>
               <Info className="mt-0.5 flex-shrink-0" size={14} />
