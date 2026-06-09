@@ -32,6 +32,8 @@ export type DayCard = {
   change_pct?: number;
   factors?: Factors;
   data_confidence?: "low" | "medium" | "high";
+  /** NEU: lesbare Formel-Zeile, z. B. "98 EUR x 1.35 (Tagesfaktor) x ... = 150 EUR" */
+  price_breakdown?: string;
 };
 
 export type Competitor = {
