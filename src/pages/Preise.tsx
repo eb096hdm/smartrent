@@ -893,6 +893,8 @@ const DOT_BG: Record<DotColor, string> = {
 const DataSourceBadge = ({ status }: { status: DataSourceStatus | "error" }) => {
   const badge = status === "mock"
     ? { label: "Mock-Daten", bg: "#F2F0EC", color: "#7A7068", border: "#D8D2CB" }
+    : status === "fallback"
+      ? { label: "Basisdaten", bg: "rgba(180,83,9,0.10)", color: "#92400E", border: "rgba(180,83,9,0.25)" }
     : status === "error"
       ? { label: "Webhook-Fehler", bg: "rgba(198,40,40,0.08)", color: "#C62828", border: "rgba(198,40,40,0.25)" }
       : { label: "Live-Daten", bg: "rgba(46,125,50,0.10)", color: "#2E7D32", border: "rgba(46,125,50,0.25)" };
