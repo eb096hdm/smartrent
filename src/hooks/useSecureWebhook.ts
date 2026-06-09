@@ -73,7 +73,7 @@ export function useSecureWebhook() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-SmartRent-Token": (import.meta.env.VITE_WEBHOOK_SECRET as string) ?? "",
+          "x-make-apikey": (import.meta.env.VITE_WEBHOOK_SECRET as string) ?? "",
         },
         body: payloadStr,
         signal: abortRef.current.signal,
