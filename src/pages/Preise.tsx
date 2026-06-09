@@ -890,6 +890,9 @@ const WeekResults = ({
   openDayIdx,
   setOpenDayIdx,
   aktuellerPreis,
+  art,
+  zimmer,
+  maxGaeste,
 }: {
   data: WeekResponse;
   plz: string;
@@ -897,11 +900,15 @@ const WeekResults = ({
   openDayIdx: number | null;
   setOpenDayIdx: (i: number | null) => void;
   aktuellerPreis?: number | "";
+  art?: string | null;
+  zimmer?: number | null;
+  maxGaeste?: number | null;
 }) => {
   const [selectedDay, setSelectedDay] = useState<{
     dayName: string;
     date: string;
     price: number;
+    day: DayCard;
   } | null>(null);
 
   const open = openDayIdx !== null ? data.days[openDayIdx] : null;
