@@ -950,7 +950,7 @@ const WeekResults = ({
             key={i}
             onClick={() => {
               const priceNum = parseInt(String(d.price).replace(/[^\d]/g, ""), 10);
-              setSelectedDay({ dayName: d.weekday, date: d.label, price: priceNum });
+              setSelectedDay({ dayName: d.weekday, date: d.label, price: priceNum, day: d });
             }}
             className="cursor-pointer text-left rounded-xl overflow-hidden flex bg-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4622A]/40"
             style={{ border: "0.5px solid #E8E4DE" }}
