@@ -52,7 +52,9 @@ Deno.serve(async (req) => {
     });
   }
 
-  const apiKey = Deno.env.get("MAKE_WEBHOOK_API_KEY") ?? Deno.env.get("VITE_WEBHOOK_SECRET");
+  const apiKey = (Deno.env.get("MAKE_WEBHOOK_API_KEY") ?? Deno.env.get("VITE_WEBHOOK_SECRET") ?? "")
+    .trim()
+    .replace(/[\r\n]/g, "");
   if (!apiKey) {
     console.error("MAKE_WEBHOOK_API_KEY is not configured.");
     return new Response(JSON.stringify({ error: "Webhook API key missing" }), {
