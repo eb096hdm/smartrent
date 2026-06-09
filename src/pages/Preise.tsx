@@ -1036,7 +1036,7 @@ const WeekResults = ({
       />
 
       {/* Summary section */}
-      {(summary.text || summary.marktposition) && (
+      {(summary.text || summary.marktposition || summary.week_rationale) && (
         <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
           {summary.text && (
             <p className="text-sm leading-relaxed" style={{ color: "#1A1714" }}>
