@@ -1,11 +1,8 @@
-import { Home, MapPin, Star } from "lucide-react";
+import { ChevronRight, Home, MapPin, Star } from "lucide-react";
+import { useState } from "react";
+import ComparableCardModal, { type ComparableDetail } from "./ComparableCardModal";
 
-export interface ComparableProperty {
-  id: string;
-  name: string;
-  district: string;
-  pricePerNight: number;
-  rating: number;
+export interface ComparableProperty extends ComparableDetail {
   badge?: "cheapest" | "priciest";
   imageUrl?: string;
 }
@@ -19,6 +16,8 @@ export default function ComparableCards({
   comparables,
   totalCount,
 }: ComparableCardsProps) {
+  const [selectedCard, setSelectedCard] = useState<ComparableDetail | null>(null);
+
   return (
     <div>
       {/* Header row */}
@@ -36,11 +35,12 @@ export default function ComparableCards({
         {comparables.map((prop) => (
           <div
             key={prop.id}
-            className={`rounded-xl border overflow-hidden bg-white ${
+            className={`group relative rounded-xl border overflow-hidden bg-white cursor-pointer hover:shadow-md hover:shadow-stone-200 hover:scale-[1.01] transition-all duration-150 ${
               prop.badge === "cheapest"
                 ? "border-green-300"
                 : "border-stone-200"
             }`}
+            onClick={() => setSelectedCard(prop)}
           >
             {/* Image area */}
             <div className="h-[88px] bg-stone-100 flex items-center justify-center relative">
@@ -87,6 +87,11 @@ export default function ComparableCards({
                 </div>
               </div>
             </div>
+
+            {/* Hover chevron */}
+            <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
+            </div>
           </div>
         ))}
       </div>
@@ -97,6 +102,14 @@ export default function ComparableCards({
           Alle {totalCount} Objekte anzeigen →
         </span>
       </p>
+
+      {/* Detail modal */}
+      {selectedCard && (
+        <ComparableCardModal
+          comparable={selectedCard}
+          onClose={() => setSelectedCard(null)}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { CalendarDays, Lightbulb, PenLine, TrendingDown } from "lucide-react";
+import { CalendarDays, Info, Lightbulb, PenLine, TrendingDown } from "lucide-react";
 
 export type TipVariant = "price" | "content" | "season";
 
@@ -11,6 +11,7 @@ export interface HostTip {
 
 interface HostsTippsProps {
   tips: HostTip[];
+  comparableCount?: number;
 }
 
 const variantStyles: Record<
@@ -31,7 +32,7 @@ const variantStyles: Record<
   },
 };
 
-export default function HostsTipps({ tips }: HostsTippsProps) {
+export default function HostsTipps({ tips, comparableCount = 41 }: HostsTippsProps) {
   return (
     <>
       {/* Divider */}
@@ -72,6 +73,14 @@ export default function HostsTipps({ tips }: HostsTippsProps) {
             </div>
           );
         })}
+      </div>
+
+      {/* Attribution */}
+      <div className="flex items-center gap-1 mt-3">
+        <Info className="w-3 h-3 text-stone-400 flex-shrink-0" />
+        <span className="text-xs text-stone-400 font-['DM_Sans']">
+          Basiert auf {comparableCount} analysierten Objekten
+        </span>
       </div>
     </>
   );
