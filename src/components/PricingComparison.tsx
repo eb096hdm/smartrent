@@ -51,17 +51,12 @@ export const PricingComparison = ({ features = DEFAULT_FEATURES }: Props) => (
                 {/* Starter column header */}
                 <th className="w-1/3 pb-4 text-center align-bottom">
                   <div className="flex flex-col items-center mx-2">
-                    {/* spacer matching the height of the "Empfehlung" badge + mb-2 above Pro card */}
                     <div className="mb-2 h-[22px]" aria-hidden="true" />
-                  <div className="w-full rounded-2xl border border-border bg-card px-4 py-5">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                      Starter
-                    </p>
-                    <p className="text-3xl font-semibold tracking-tight text-foreground">
-                      0 €
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">/Monat</p>
-                  </div>
+                    <div className="w-full rounded-2xl border border-border bg-card px-4 py-5">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Starter</p>
+                      <p className="text-3xl font-semibold tracking-tight text-foreground">0 €</p>
+                      <p className="text-xs text-muted-foreground mt-1">/Monat</p>
+                    </div>
                   </div>
                 </th>
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft, Loader2, MapPin, User, Info, Lightbulb } from "lucide-react";
+import { ArrowRight, ArrowLeft, Loader2, MapPin, User, Info } from "lucide-react";
 import { format } from "date-fns";
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import type { Map as LeafletMap } from "leaflet";
@@ -10,7 +10,8 @@ import "leaflet/dist/leaflet.css";
 
 import { WeekPicker } from "@/components/WeekPicker";
 import ComparisonsRich from "@/components/ComparisonsRich";
-// HostsTipps wird in der Host-Hinweise-Sektion oberhalb verwendet – kein separater Import nötig.
+import HostsTipps from "@/components/HostsTipps";
+import type { HostTip } from "@/components/HostsTipps";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { fetchPriceRecommendation } from "@/api/pricing";
@@ -1093,18 +1094,20 @@ const WeekResults = ({
         <div className="mt-6 rounded-2xl bg-white p-6" style={{ border: "0.5px solid #E8E4DE" }}>
           <h3 className="text-base font-semibold" style={{ color: "#1A1714" }}>Was Top-Hosts tun</h3>
           <p className="mt-1 text-sm" style={{ color: "#7A7068" }}>Erkenntnisse aus der lokalen Marktanalyse</p>
-          <div className="mt-4 flex flex-col gap-3">
-            {summary.host_hinweise.map((hint, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-3 rounded-lg p-3"
-                style={{ background: "rgba(245, 158, 11, 0.08)", border: "1px solid rgba(245, 158, 11, 0.25)" }}
-              >
-                <Lightbulb className="mt-0.5 flex-shrink-0" size={16} style={{ color: "#D97706" }} />
-                <p className="text-sm" style={{ color: "#1A1714" }}>{hint}</p>
-              </div>
-            ))}
-          </div>
+          <HostsTipps
+            tips={summary.host_hinweise.map((hint, i): HostTip => {
+              const lower = hint.toLowerCase();
+              const variant =
+                /preis|€|euro|rabatt|erhöh|senk/.test(lower) ? "price" :
+                /saison|monat|sommer|winter|herbst|frühling|jahreszeit/.test(lower) ? "season" :
+                "content";
+              const dotIdx = hint.indexOf(". ");
+              const title = dotIdx > 0 && dotIdx < 60 ? hint.slice(0, dotIdx) : hint.slice(0, 48);
+              const body = dotIdx > 0 && dotIdx < 60 ? hint.slice(dotIdx + 2) : hint.slice(48);
+              return { id: String(i), variant, title, body: body || title };
+            })}
+            comparableCount={data.market?.competitors?.length ?? 41}
+          />
         </div>
       )}
 
